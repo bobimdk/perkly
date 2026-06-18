@@ -59,6 +59,39 @@ export type Database = {
           },
         ]
       }
+      badges: {
+        Row: {
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          key: string
+          name: string
+          requirement: string | null
+          tier: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          icon: string
+          id?: string
+          key: string
+          name: string
+          requirement?: string | null
+          tier?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          key?: string
+          name?: string
+          requirement?: string | null
+          tier?: string
+        }
+        Relationships: []
+      }
       benefit_requests: {
         Row: {
           auto_approved: boolean
@@ -118,6 +151,98 @@ export type Database = {
             columns: ["package_id"]
             isOneToOne: false
             referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      box_openings: {
+        Row: {
+          box_id: string
+          created_at: string
+          id: string
+          points_awarded: number
+          rarity: string | null
+          reward_id: string | null
+          reward_label: string
+          user_id: string
+        }
+        Insert: {
+          box_id: string
+          created_at?: string
+          id?: string
+          points_awarded?: number
+          rarity?: string | null
+          reward_id?: string | null
+          reward_label: string
+          user_id: string
+        }
+        Update: {
+          box_id?: string
+          created_at?: string
+          id?: string
+          points_awarded?: number
+          rarity?: string | null
+          reward_id?: string | null
+          reward_label?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "box_openings_box_id_fkey"
+            columns: ["box_id"]
+            isOneToOne: false
+            referencedRelation: "mystery_boxes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "box_openings_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "box_rewards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      box_rewards: {
+        Row: {
+          box_id: string
+          created_at: string
+          description: string | null
+          icon: string
+          id: string
+          label: string
+          points_value: number
+          rarity: string
+          weight: number
+        }
+        Insert: {
+          box_id: string
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          label: string
+          points_value?: number
+          rarity?: string
+          weight?: number
+        }
+        Update: {
+          box_id?: string
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          label?: string
+          points_value?: number
+          rarity?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "box_rewards_box_id_fkey"
+            columns: ["box_id"]
+            isOneToOne: false
+            referencedRelation: "mystery_boxes"
             referencedColumns: ["id"]
           },
         ]
@@ -328,6 +453,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      mystery_boxes: {
+        Row: {
+          cost_points: number
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          is_active: boolean
+          key: string
+          name: string
+          tier: string
+        }
+        Insert: {
+          cost_points: number
+          created_at?: string
+          description: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          key: string
+          name: string
+          tier?: string
+        }
+        Update: {
+          cost_points?: number
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          key?: string
+          name?: string
+          tier?: string
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -601,6 +762,33 @@ export type Database = {
           },
         ]
       }
+      points_ledger: {
+        Row: {
+          created_at: string
+          delta: number
+          id: string
+          metadata: Json | null
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delta: number
+          id?: string
+          metadata?: Json | null
+          reason: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delta?: number
+          id?: string
+          metadata?: Json | null
+          reason?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -706,6 +894,86 @@ export type Database = {
           tagline?: string | null
           updated_at?: string
           website?: string | null
+        }
+        Relationships: []
+      }
+      quest_progress: {
+        Row: {
+          claimed_at: string | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          period_key: string
+          progress: number
+          quest_id: string
+          user_id: string
+        }
+        Insert: {
+          claimed_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          period_key: string
+          progress?: number
+          quest_id: string
+          user_id: string
+        }
+        Update: {
+          claimed_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          period_key?: string
+          progress?: number
+          quest_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_progress_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quests: {
+        Row: {
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          is_active: boolean
+          key: string
+          kind: string
+          reward_points: number
+          target: number
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          key: string
+          kind?: string
+          reward_points?: number
+          target?: number
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          key?: string
+          kind?: string
+          reward_points?: number
+          target?: number
+          title?: string
         }
         Relationships: []
       }
@@ -825,6 +1093,35 @@ export type Database = {
           },
         ]
       }
+      user_badges: {
+        Row: {
+          badge_id: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -843,6 +1140,45 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_stats: {
+        Row: {
+          available_points: number
+          created_at: string
+          current_streak: number
+          last_activity_date: string | null
+          level: number
+          longest_streak: number
+          total_points: number
+          updated_at: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          available_points?: number
+          created_at?: string
+          current_streak?: number
+          last_activity_date?: string | null
+          level?: number
+          longest_streak?: number
+          total_points?: number
+          updated_at?: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          available_points?: number
+          created_at?: string
+          current_streak?: number
+          last_activity_date?: string | null
+          level?: number
+          longest_streak?: number
+          total_points?: number
+          updated_at?: string
+          user_id?: string
+          xp?: number
         }
         Relationships: []
       }
@@ -875,6 +1211,32 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      award_points: {
+        Args: {
+          _delta: number
+          _metadata?: Json
+          _reason: string
+          _user_id: string
+        }
+        Returns: {
+          available_points: number
+          created_at: string
+          current_streak: number
+          last_activity_date: string | null
+          level: number
+          longest_streak: number
+          total_points: number
+          updated_at: string
+          user_id: string
+          xp: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "user_stats"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -885,6 +1247,26 @@ export type Database = {
       is_company_owner: {
         Args: { _company_id: string; _user_id: string }
         Returns: boolean
+      }
+      level_for_xp: { Args: { _xp: number }; Returns: number }
+      open_mystery_box: {
+        Args: { _box_id: string }
+        Returns: {
+          box_id: string
+          created_at: string
+          id: string
+          points_awarded: number
+          rarity: string | null
+          reward_id: string | null
+          reward_label: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "box_openings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       reject_benefit_request: {
         Args: { _reason: string; _request_id: string }
