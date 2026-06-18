@@ -70,11 +70,14 @@ function EmployeePage() {
       await submitPackage(draftQuery.data.id, note);
       toast.success("Package submitted!");
       setNote("");
+      if (user) progressQuest(user.id, "weekly_submit").catch(() => {});
       qc.invalidateQueries({ queryKey: ["draft-package", user?.id] });
       qc.invalidateQueries({ queryKey: ["draft-items"] });
       qc.invalidateQueries({ queryKey: ["my-budget"] });
       qc.invalidateQueries({ queryKey: ["my-transactions"] });
       qc.invalidateQueries({ queryKey: ["my-notifications"] });
+      qc.invalidateQueries({ queryKey: ["stats", user?.id] });
+      qc.invalidateQueries({ queryKey: ["quest-progress", user?.id] });
     } catch (e) {
       const msg = (e as Error).message;
       toast.error(msg === "no_company" ? "Ask your employer to add you to their team first." : msg);
