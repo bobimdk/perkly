@@ -13,7 +13,7 @@ import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/marketplace/")({
+export const Route = createFileRoute("/marketplace")({
   head: () => ({
     meta: [
       { title: "Marketplace · Perkly" },
