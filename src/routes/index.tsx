@@ -71,8 +71,9 @@ function Hero({ t }: { t: (k: string) => string }) {
       </div>
       <div className="relative mx-auto grid max-w-7xl gap-12 px-4 py-20 sm:px-6 md:py-28 lg:grid-cols-2 lg:py-32">
         <div className="reveal">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-primary">
-            <Globe className="h-3 w-3" /> Albania first · Global ready
+          <div className="inline-flex items-center gap-3 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            <span className="h-px w-8 bg-foreground/40" />
+            Albania first · Global ready
           </div>
           <h1 className="mt-6 font-display text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
             {t("hero.title.a")}{" "}
