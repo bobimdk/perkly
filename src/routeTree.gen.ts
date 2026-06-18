@@ -14,6 +14,7 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedEmployerRouteImport } from './routes/_authenticated/employer'
 import { Route as AuthenticatedEmployeeRouteImport } from './routes/_authenticated/employee'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -40,6 +41,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedEmployerRoute = AuthenticatedEmployerRouteImport.update({
+  id: '/employer',
+  path: '/employer',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedEmployeeRoute = AuthenticatedEmployeeRouteImport.update({
   id: '/employee',
   path: '/employee',
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/employee': typeof AuthenticatedEmployeeRoute
+  '/employer': typeof AuthenticatedEmployerRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/employee': typeof AuthenticatedEmployeeRoute
+  '/employer': typeof AuthenticatedEmployerRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/employee': typeof AuthenticatedEmployeeRoute
+  '/_authenticated/employer': typeof AuthenticatedEmployerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -77,8 +86,15 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/reset-password'
     | '/employee'
+    | '/employer'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/forgot-password' | '/reset-password' | '/employee'
+  to:
+    | '/'
+    | '/auth'
+    | '/forgot-password'
+    | '/reset-password'
+    | '/employee'
+    | '/employer'
   id:
     | '__root__'
     | '/'
@@ -87,6 +103,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/reset-password'
     | '/_authenticated/employee'
+    | '/_authenticated/employer'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -134,6 +151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/employer': {
+      id: '/_authenticated/employer'
+      path: '/employer'
+      fullPath: '/employer'
+      preLoaderRoute: typeof AuthenticatedEmployerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/employee': {
       id: '/_authenticated/employee'
       path: '/employee'
@@ -146,10 +170,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedEmployeeRoute: typeof AuthenticatedEmployeeRoute
+  AuthenticatedEmployerRoute: typeof AuthenticatedEmployerRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEmployeeRoute: AuthenticatedEmployeeRoute,
+  AuthenticatedEmployerRoute: AuthenticatedEmployerRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
