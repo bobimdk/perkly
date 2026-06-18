@@ -6,6 +6,7 @@ import { MarketingNav, MarketingFooter } from "@/components/marketing/marketing-
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchOfferBySlug, fetchOfferImages, fetchReviewsForOffer, toggleFavorite, fetchUserFavoriteIds } from "@/lib/marketplace";
+import { addOfferToDraft } from "@/lib/perkly";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
