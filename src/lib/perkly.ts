@@ -42,9 +42,16 @@ export type BenefitRequest = {
 export type Transaction = {
   id: string; request_id: string; user_id: string; company_id: string; provider_id: string;
   offer_id: string | null; amount_all: number; status: string; reference: string | null; created_at: string;
+  redeemed_at?: string | null; redeemed_by?: string | null;
   providers?: { name: string; logo_url: string | null } | null;
   offers?: { title: string; slug: string } | null;
 };
+
+export async function redeemTransaction(reference: string) {
+  const { data, error } = await supabase.rpc("redeem_transaction", { _reference: reference });
+  if (error) throw error;
+  return data as Transaction;
+}
 
 export type Notification = {
   id: string; user_id: string; kind: string; title: string; body: string | null;
