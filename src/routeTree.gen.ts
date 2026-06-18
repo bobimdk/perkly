@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as MapRouteImport } from './routes/map'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DropsRouteImport } from './routes/drops'
@@ -18,6 +17,7 @@ import { Route as CirclesRouteImport } from './routes/circles'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MarketplaceIndexRouteImport } from './routes/marketplace.index'
 import { Route as DropsIndexRouteImport } from './routes/drops.index'
 import { Route as CirclesIndexRouteImport } from './routes/circles.index'
 import { Route as MarketplaceSlugRouteImport } from './routes/marketplace.$slug'
@@ -32,11 +32,6 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MarketplaceRoute = MarketplaceRouteImport.update({
-  id: '/marketplace',
-  path: '/marketplace',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MapRoute = MapRouteImport.update({
@@ -73,6 +68,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarketplaceIndexRoute = MarketplaceIndexRouteImport.update({
+  id: '/marketplace/',
+  path: '/marketplace/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DropsIndexRoute = DropsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -84,9 +84,9 @@ const CirclesIndexRoute = CirclesIndexRouteImport.update({
   getParentRoute: () => CirclesRoute,
 } as any)
 const MarketplaceSlugRoute = MarketplaceSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => MarketplaceRoute,
+  id: '/marketplace/$slug',
+  path: '/marketplace/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const DropsSlugRoute = DropsSlugRouteImport.update({
   id: '/$slug',
@@ -131,7 +131,6 @@ export interface FileRoutesByFullPath {
   '/drops': typeof DropsRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/map': typeof MapRoute
-  '/marketplace': typeof MarketplaceRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/employee': typeof AuthenticatedEmployeeRoute
@@ -143,13 +142,13 @@ export interface FileRoutesByFullPath {
   '/marketplace/$slug': typeof MarketplaceSlugRoute
   '/circles/': typeof CirclesIndexRoute
   '/drops/': typeof DropsIndexRoute
+  '/marketplace/': typeof MarketplaceIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/map': typeof MapRoute
-  '/marketplace': typeof MarketplaceRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/employee': typeof AuthenticatedEmployeeRoute
@@ -161,6 +160,7 @@ export interface FileRoutesByTo {
   '/marketplace/$slug': typeof MarketplaceSlugRoute
   '/circles': typeof CirclesIndexRoute
   '/drops': typeof DropsIndexRoute
+  '/marketplace': typeof MarketplaceIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -171,7 +171,6 @@ export interface FileRoutesById {
   '/drops': typeof DropsRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/map': typeof MapRoute
-  '/marketplace': typeof MarketplaceRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/employee': typeof AuthenticatedEmployeeRoute
@@ -183,6 +182,7 @@ export interface FileRoutesById {
   '/marketplace/$slug': typeof MarketplaceSlugRoute
   '/circles/': typeof CirclesIndexRoute
   '/drops/': typeof DropsIndexRoute
+  '/marketplace/': typeof MarketplaceIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -193,7 +193,6 @@ export interface FileRouteTypes {
     | '/drops'
     | '/forgot-password'
     | '/map'
-    | '/marketplace'
     | '/reset-password'
     | '/admin'
     | '/employee'
@@ -205,13 +204,13 @@ export interface FileRouteTypes {
     | '/marketplace/$slug'
     | '/circles/'
     | '/drops/'
+    | '/marketplace/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/forgot-password'
     | '/map'
-    | '/marketplace'
     | '/reset-password'
     | '/admin'
     | '/employee'
@@ -223,6 +222,7 @@ export interface FileRouteTypes {
     | '/marketplace/$slug'
     | '/circles'
     | '/drops'
+    | '/marketplace'
   id:
     | '__root__'
     | '/'
@@ -232,7 +232,6 @@ export interface FileRouteTypes {
     | '/drops'
     | '/forgot-password'
     | '/map'
-    | '/marketplace'
     | '/reset-password'
     | '/_authenticated/admin'
     | '/_authenticated/employee'
@@ -244,6 +243,7 @@ export interface FileRouteTypes {
     | '/marketplace/$slug'
     | '/circles/'
     | '/drops/'
+    | '/marketplace/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -254,9 +254,10 @@ export interface RootRouteChildren {
   DropsRoute: typeof DropsRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   MapRoute: typeof MapRoute
-  MarketplaceRoute: typeof MarketplaceRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
   ApiConciergeRoute: typeof ApiConciergeRoute
+  MarketplaceSlugRoute: typeof MarketplaceSlugRoute
+  MarketplaceIndexRoute: typeof MarketplaceIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -266,13 +267,6 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/marketplace': {
-      id: '/marketplace'
-      path: '/marketplace'
-      fullPath: '/marketplace'
-      preLoaderRoute: typeof MarketplaceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/map': {
@@ -324,6 +318,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/marketplace/': {
+      id: '/marketplace/'
+      path: '/marketplace'
+      fullPath: '/marketplace/'
+      preLoaderRoute: typeof MarketplaceIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/drops/': {
       id: '/drops/'
       path: '/'
@@ -340,10 +341,10 @@ declare module '@tanstack/react-router' {
     }
     '/marketplace/$slug': {
       id: '/marketplace/$slug'
-      path: '/$slug'
+      path: '/marketplace/$slug'
       fullPath: '/marketplace/$slug'
       preLoaderRoute: typeof MarketplaceSlugRouteImport
-      parentRoute: typeof MarketplaceRoute
+      parentRoute: typeof rootRouteImport
     }
     '/drops/$slug': {
       id: '/drops/$slug'
@@ -439,18 +440,6 @@ const DropsRouteChildren: DropsRouteChildren = {
 
 const DropsRouteWithChildren = DropsRoute._addFileChildren(DropsRouteChildren)
 
-interface MarketplaceRouteChildren {
-  MarketplaceSlugRoute: typeof MarketplaceSlugRoute
-}
-
-const MarketplaceRouteChildren: MarketplaceRouteChildren = {
-  MarketplaceSlugRoute: MarketplaceSlugRoute,
-}
-
-const MarketplaceRouteWithChildren = MarketplaceRoute._addFileChildren(
-  MarketplaceRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -459,9 +448,10 @@ const rootRouteChildren: RootRouteChildren = {
   DropsRoute: DropsRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
   MapRoute: MapRoute,
-  MarketplaceRoute: MarketplaceRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
   ApiConciergeRoute: ApiConciergeRoute,
+  MarketplaceSlugRoute: MarketplaceSlugRoute,
+  MarketplaceIndexRoute: MarketplaceIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
