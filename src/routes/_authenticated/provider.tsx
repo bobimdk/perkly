@@ -99,6 +99,7 @@ function ProviderPage() {
           </div>
         </div>
       )}
+      <ConciergeOrb />
     </DashboardShell>
   );
 }
