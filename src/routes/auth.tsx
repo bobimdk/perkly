@@ -142,7 +142,7 @@ function SignUpForm() {
     e.preventDefault();
     setSubmitting(true);
     const redirectUrl = `${window.location.origin}/auth`;
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -155,11 +155,27 @@ function SignUpForm() {
         },
       },
     });
-    setSubmitting(false);
     if (error) {
+      setSubmitting(false);
       toast.error(error.message);
       return;
     }
+    // If email confirmation is required, signUp returns no session.
+    // Try signing in immediately so the user lands inside the app.
+    if (!data.session) {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (signInError) {
+        setSubmitting(false);
+        toast.message("Check your email to confirm your account.", {
+          description: "We sent you a confirmation link.",
+        });
+        return;
+      }
+    }
+    setSubmitting(false);
     toast.success("Account created! You're in.");
   };
 
