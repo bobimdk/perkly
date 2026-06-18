@@ -25,13 +25,16 @@ export function MarketingNav() {
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
-          <a href="#how" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+          <Link to="/marketplace" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+            Marketplace
+          </Link>
+          <a href="/#how" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
             {t("nav.how")}
           </a>
-          <a href="#features" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+          <a href="/#features" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
             {t("nav.features")}
           </a>
-          <a href="#providers" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+          <a href="/#providers" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
             {t("nav.providers")}
           </a>
         </nav>

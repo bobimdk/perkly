@@ -14,6 +14,223 @@ export type Database = {
   }
   public: {
     Tables: {
+      categories: {
+        Row: {
+          created_at: string
+          description_en: string | null
+          description_sq: string | null
+          icon: string | null
+          id: string
+          is_active: boolean
+          name_en: string
+          name_sq: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description_en?: string | null
+          description_sq?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name_en: string
+          name_sq: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description_en?: string | null
+          description_sq?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name_en?: string
+          name_sq?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      favorites: {
+        Row: {
+          created_at: string
+          id: string
+          offer_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          offer_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          offer_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offer_images: {
+        Row: {
+          alt: string | null
+          created_at: string
+          id: string
+          offer_id: string
+          sort_order: number
+          url: string
+        }
+        Insert: {
+          alt?: string | null
+          created_at?: string
+          id?: string
+          offer_id: string
+          sort_order?: number
+          url: string
+        }
+        Update: {
+          alt?: string | null
+          created_at?: string
+          id?: string
+          offer_id?: string
+          sort_order?: number
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offer_images_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offers: {
+        Row: {
+          available_from: string | null
+          available_to: string | null
+          capacity: number | null
+          category_id: string | null
+          city: string | null
+          cover_url: string | null
+          created_at: string
+          description: string | null
+          discount_percent: number | null
+          favorites_count: number
+          id: string
+          is_featured: boolean
+          is_limited_time: boolean
+          is_trending: boolean
+          original_price_all: number | null
+          price_all: number
+          price_eur: number
+          provider_id: string
+          published_at: string | null
+          rating_avg: number
+          rating_count: number
+          rejected_reason: string | null
+          remaining: number | null
+          slug: string
+          status: Database["public"]["Enums"]["offer_status"]
+          subtitle: string | null
+          title: string
+          updated_at: string
+          views_count: number
+        }
+        Insert: {
+          available_from?: string | null
+          available_to?: string | null
+          capacity?: number | null
+          category_id?: string | null
+          city?: string | null
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          discount_percent?: number | null
+          favorites_count?: number
+          id?: string
+          is_featured?: boolean
+          is_limited_time?: boolean
+          is_trending?: boolean
+          original_price_all?: number | null
+          price_all?: number
+          price_eur?: number
+          provider_id: string
+          published_at?: string | null
+          rating_avg?: number
+          rating_count?: number
+          rejected_reason?: string | null
+          remaining?: number | null
+          slug: string
+          status?: Database["public"]["Enums"]["offer_status"]
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+          views_count?: number
+        }
+        Update: {
+          available_from?: string | null
+          available_to?: string | null
+          capacity?: number | null
+          category_id?: string | null
+          city?: string | null
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          discount_percent?: number | null
+          favorites_count?: number
+          id?: string
+          is_featured?: boolean
+          is_limited_time?: boolean
+          is_trending?: boolean
+          original_price_all?: number | null
+          price_all?: number
+          price_eur?: number
+          provider_id?: string
+          published_at?: string | null
+          rating_avg?: number
+          rating_count?: number
+          rejected_reason?: string | null
+          remaining?: number | null
+          slug?: string
+          status?: Database["public"]["Enums"]["offer_status"]
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+          views_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offers_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offers_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -53,6 +270,113 @@ export type Database = {
         }
         Relationships: []
       }
+      providers: {
+        Row: {
+          address: string | null
+          city: string | null
+          cover_url: string | null
+          created_at: string
+          description: string | null
+          email: string | null
+          id: string
+          lat: number | null
+          lng: number | null
+          logo_url: string | null
+          name: string
+          owner_id: string | null
+          phone: string | null
+          rating_avg: number
+          rating_count: number
+          slug: string
+          status: Database["public"]["Enums"]["provider_status"]
+          tagline: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          logo_url?: string | null
+          name: string
+          owner_id?: string | null
+          phone?: string | null
+          rating_avg?: number
+          rating_count?: number
+          slug: string
+          status?: Database["public"]["Enums"]["provider_status"]
+          tagline?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          logo_url?: string | null
+          name?: string
+          owner_id?: string | null
+          phone?: string | null
+          rating_avg?: number
+          rating_count?: number
+          slug?: string
+          status?: Database["public"]["Enums"]["provider_status"]
+          tagline?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          offer_id: string
+          rating: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          offer_id: string
+          rating: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          offer_id?: string
+          rating?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -89,6 +413,8 @@ export type Database = {
     }
     Enums: {
       app_role: "employee" | "employer" | "provider" | "admin"
+      offer_status: "draft" | "pending" | "published" | "archived" | "rejected"
+      provider_status: "pending" | "active" | "suspended"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -217,6 +543,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["employee", "employer", "provider", "admin"],
+      offer_status: ["draft", "pending", "published", "archived", "rejected"],
+      provider_status: ["pending", "active", "suspended"],
     },
   },
 } as const
