@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Building2, Users, Plus, Check, X, Loader2, Trash2, Sparkles, Wallet } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { ConciergeOrb } from "@/components/concierge/concierge-orb";
+import { EmployerAIInsights } from "@/components/insights/employer-insights";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
