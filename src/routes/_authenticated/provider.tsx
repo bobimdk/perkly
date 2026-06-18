@@ -202,6 +202,7 @@ function ProviderDetail({ provider }: { provider: ProviderRow }) {
           <TabsTrigger value="published">Published</TabsTrigger>
           <TabsTrigger value="pending">Pending</TabsTrigger>
           <TabsTrigger value="draft">Drafts</TabsTrigger>
+          <TabsTrigger value="payouts">Payouts</TabsTrigger>
         </TabsList>
         {(["all","published","pending","draft"] as const).map((t) => (
           <TabsContent key={t} value={t} className="mt-4">
@@ -212,6 +213,9 @@ function ProviderDetail({ provider }: { provider: ProviderRow }) {
             />
           </TabsContent>
         ))}
+        <TabsContent value="payouts" className="mt-4">
+          <PayoutsList providerId={provider.id} />
+        </TabsContent>
       </Tabs>
     </div>
   );
