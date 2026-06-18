@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Building2, Users, Plus, Check, X, Loader2, Trash2, Hourglass, Wallet } from "lucide-react";
+import { Building2, Users, Plus, Check, X, Loader2, Trash2, Hourglass, Wallet, ChevronDown, Package as PackageIcon } from "lucide-react";
+
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { ConciergeOrb } from "@/components/concierge/concierge-orb";
 import { EmployerAIInsights } from "@/components/insights/employer-insights";
