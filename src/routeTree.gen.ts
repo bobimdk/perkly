@@ -11,11 +11,18 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
+import { Route as MapRouteImport } from './routes/map'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as DropsRouteImport } from './routes/drops'
+import { Route as CirclesRouteImport } from './routes/circles'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DropsIndexRouteImport } from './routes/drops.index'
+import { Route as CirclesIndexRouteImport } from './routes/circles.index'
 import { Route as MarketplaceSlugRouteImport } from './routes/marketplace.$slug'
+import { Route as DropsSlugRouteImport } from './routes/drops.$slug'
+import { Route as CirclesSlugRouteImport } from './routes/circles.$slug'
 import { Route as ApiConciergeRouteImport } from './routes/api/concierge'
 import { Route as AuthenticatedProviderRouteImport } from './routes/_authenticated/provider'
 import { Route as AuthenticatedEmployerRouteImport } from './routes/_authenticated/employer'
@@ -32,9 +39,24 @@ const MarketplaceRoute = MarketplaceRouteImport.update({
   path: '/marketplace',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MapRoute = MapRouteImport.update({
+  id: '/map',
+  path: '/map',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DropsRoute = DropsRouteImport.update({
+  id: '/drops',
+  path: '/drops',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CirclesRoute = CirclesRouteImport.update({
+  id: '/circles',
+  path: '/circles',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -51,10 +73,30 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DropsIndexRoute = DropsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DropsRoute,
+} as any)
+const CirclesIndexRoute = CirclesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CirclesRoute,
+} as any)
 const MarketplaceSlugRoute = MarketplaceSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => MarketplaceRoute,
+} as any)
+const DropsSlugRoute = DropsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => DropsRoute,
+} as any)
+const CirclesSlugRoute = CirclesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => CirclesRoute,
 } as any)
 const ApiConciergeRoute = ApiConciergeRouteImport.update({
   id: '/api/concierge',
@@ -85,7 +127,10 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/circles': typeof CirclesRouteWithChildren
+  '/drops': typeof DropsRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
+  '/map': typeof MapRoute
   '/marketplace': typeof MarketplaceRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -93,12 +138,17 @@ export interface FileRoutesByFullPath {
   '/employer': typeof AuthenticatedEmployerRoute
   '/provider': typeof AuthenticatedProviderRoute
   '/api/concierge': typeof ApiConciergeRoute
+  '/circles/$slug': typeof CirclesSlugRoute
+  '/drops/$slug': typeof DropsSlugRoute
   '/marketplace/$slug': typeof MarketplaceSlugRoute
+  '/circles/': typeof CirclesIndexRoute
+  '/drops/': typeof DropsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/map': typeof MapRoute
   '/marketplace': typeof MarketplaceRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -106,14 +156,21 @@ export interface FileRoutesByTo {
   '/employer': typeof AuthenticatedEmployerRoute
   '/provider': typeof AuthenticatedProviderRoute
   '/api/concierge': typeof ApiConciergeRoute
+  '/circles/$slug': typeof CirclesSlugRoute
+  '/drops/$slug': typeof DropsSlugRoute
   '/marketplace/$slug': typeof MarketplaceSlugRoute
+  '/circles': typeof CirclesIndexRoute
+  '/drops': typeof DropsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/circles': typeof CirclesRouteWithChildren
+  '/drops': typeof DropsRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
+  '/map': typeof MapRoute
   '/marketplace': typeof MarketplaceRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
@@ -121,14 +178,21 @@ export interface FileRoutesById {
   '/_authenticated/employer': typeof AuthenticatedEmployerRoute
   '/_authenticated/provider': typeof AuthenticatedProviderRoute
   '/api/concierge': typeof ApiConciergeRoute
+  '/circles/$slug': typeof CirclesSlugRoute
+  '/drops/$slug': typeof DropsSlugRoute
   '/marketplace/$slug': typeof MarketplaceSlugRoute
+  '/circles/': typeof CirclesIndexRoute
+  '/drops/': typeof DropsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/auth'
+    | '/circles'
+    | '/drops'
     | '/forgot-password'
+    | '/map'
     | '/marketplace'
     | '/reset-password'
     | '/admin'
@@ -136,12 +200,17 @@ export interface FileRouteTypes {
     | '/employer'
     | '/provider'
     | '/api/concierge'
+    | '/circles/$slug'
+    | '/drops/$slug'
     | '/marketplace/$slug'
+    | '/circles/'
+    | '/drops/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/forgot-password'
+    | '/map'
     | '/marketplace'
     | '/reset-password'
     | '/admin'
@@ -149,13 +218,20 @@ export interface FileRouteTypes {
     | '/employer'
     | '/provider'
     | '/api/concierge'
+    | '/circles/$slug'
+    | '/drops/$slug'
     | '/marketplace/$slug'
+    | '/circles'
+    | '/drops'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/circles'
+    | '/drops'
     | '/forgot-password'
+    | '/map'
     | '/marketplace'
     | '/reset-password'
     | '/_authenticated/admin'
@@ -163,14 +239,21 @@ export interface FileRouteTypes {
     | '/_authenticated/employer'
     | '/_authenticated/provider'
     | '/api/concierge'
+    | '/circles/$slug'
+    | '/drops/$slug'
     | '/marketplace/$slug'
+    | '/circles/'
+    | '/drops/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  CirclesRoute: typeof CirclesRouteWithChildren
+  DropsRoute: typeof DropsRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
+  MapRoute: typeof MapRoute
   MarketplaceRoute: typeof MarketplaceRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
   ApiConciergeRoute: typeof ApiConciergeRoute
@@ -192,11 +275,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketplaceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/map': {
+      id: '/map'
+      path: '/map'
+      fullPath: '/map'
+      preLoaderRoute: typeof MapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/forgot-password': {
       id: '/forgot-password'
       path: '/forgot-password'
       fullPath: '/forgot-password'
       preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/drops': {
+      id: '/drops'
+      path: '/drops'
+      fullPath: '/drops'
+      preLoaderRoute: typeof DropsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/circles': {
+      id: '/circles'
+      path: '/circles'
+      fullPath: '/circles'
+      preLoaderRoute: typeof CirclesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -220,12 +324,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/drops/': {
+      id: '/drops/'
+      path: '/'
+      fullPath: '/drops/'
+      preLoaderRoute: typeof DropsIndexRouteImport
+      parentRoute: typeof DropsRoute
+    }
+    '/circles/': {
+      id: '/circles/'
+      path: '/'
+      fullPath: '/circles/'
+      preLoaderRoute: typeof CirclesIndexRouteImport
+      parentRoute: typeof CirclesRoute
+    }
     '/marketplace/$slug': {
       id: '/marketplace/$slug'
       path: '/$slug'
       fullPath: '/marketplace/$slug'
       preLoaderRoute: typeof MarketplaceSlugRouteImport
       parentRoute: typeof MarketplaceRoute
+    }
+    '/drops/$slug': {
+      id: '/drops/$slug'
+      path: '/$slug'
+      fullPath: '/drops/$slug'
+      preLoaderRoute: typeof DropsSlugRouteImport
+      parentRoute: typeof DropsRoute
+    }
+    '/circles/$slug': {
+      id: '/circles/$slug'
+      path: '/$slug'
+      fullPath: '/circles/$slug'
+      preLoaderRoute: typeof CirclesSlugRouteImport
+      parentRoute: typeof CirclesRoute
     }
     '/api/concierge': {
       id: '/api/concierge'
@@ -282,6 +414,31 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface CirclesRouteChildren {
+  CirclesSlugRoute: typeof CirclesSlugRoute
+  CirclesIndexRoute: typeof CirclesIndexRoute
+}
+
+const CirclesRouteChildren: CirclesRouteChildren = {
+  CirclesSlugRoute: CirclesSlugRoute,
+  CirclesIndexRoute: CirclesIndexRoute,
+}
+
+const CirclesRouteWithChildren =
+  CirclesRoute._addFileChildren(CirclesRouteChildren)
+
+interface DropsRouteChildren {
+  DropsSlugRoute: typeof DropsSlugRoute
+  DropsIndexRoute: typeof DropsIndexRoute
+}
+
+const DropsRouteChildren: DropsRouteChildren = {
+  DropsSlugRoute: DropsSlugRoute,
+  DropsIndexRoute: DropsIndexRoute,
+}
+
+const DropsRouteWithChildren = DropsRoute._addFileChildren(DropsRouteChildren)
+
 interface MarketplaceRouteChildren {
   MarketplaceSlugRoute: typeof MarketplaceSlugRoute
 }
@@ -298,7 +455,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  CirclesRoute: CirclesRouteWithChildren,
+  DropsRoute: DropsRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
+  MapRoute: MapRoute,
   MarketplaceRoute: MarketplaceRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
   ApiConciergeRoute: ApiConciergeRoute,

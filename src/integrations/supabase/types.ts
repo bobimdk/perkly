@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_broadcasts: {
+        Row: {
+          audience: string
+          body: string
+          created_at: string
+          id: string
+          recipient_count: number
+          sent_by: string | null
+          title: string
+        }
+        Insert: {
+          audience?: string
+          body: string
+          created_at?: string
+          id?: string
+          recipient_count?: number
+          sent_by?: string | null
+          title: string
+        }
+        Update: {
+          audience?: string
+          body?: string
+          created_at?: string
+          id?: string
+          recipient_count?: number
+          sent_by?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       auto_approval_rules: {
         Row: {
           category_id: string | null
@@ -289,6 +319,123 @@ export type Database = {
         }
         Relationships: []
       }
+      circle_members: {
+        Row: {
+          circle_id: string
+          id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          circle_id: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          circle_id?: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "circle_members_circle_id_fkey"
+            columns: ["circle_id"]
+            isOneToOne: false
+            referencedRelation: "circles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      circle_messages: {
+        Row: {
+          body: string
+          circle_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          circle_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          circle_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "circle_messages_circle_id_fkey"
+            columns: ["circle_id"]
+            isOneToOne: false
+            referencedRelation: "circles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      circles: {
+        Row: {
+          category_id: string | null
+          cover_color: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_public: boolean
+          member_count: number
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          cover_color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_public?: boolean
+          member_count?: number
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          cover_color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_public?: boolean
+          member_count?: number
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "circles_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           city: string | null
@@ -453,6 +600,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      fx_rates: {
+        Row: {
+          base: string
+          fetched_at: string
+          quote: string
+          rate: number
+        }
+        Insert: {
+          base: string
+          fetched_at?: string
+          quote: string
+          rate: number
+        }
+        Update: {
+          base?: string
+          fetched_at?: string
+          quote?: string
+          rate?: number
+        }
+        Relationships: []
+      }
+      gifts: {
+        Row: {
+          amount_all: number
+          created_at: string
+          from_user: string
+          id: string
+          message: string | null
+          status: string
+          to_user: string
+        }
+        Insert: {
+          amount_all: number
+          created_at?: string
+          from_user: string
+          id?: string
+          message?: string | null
+          status?: string
+          to_user: string
+        }
+        Update: {
+          amount_all?: number
+          created_at?: string
+          from_user?: string
+          id?: string
+          message?: string | null
+          status?: string
+          to_user?: string
+        }
+        Relationships: []
       }
       mystery_boxes: {
         Row: {
@@ -762,6 +960,41 @@ export type Database = {
           },
         ]
       }
+      perk_checkins: {
+        Row: {
+          created_at: string
+          id: string
+          lat: number
+          lng: number
+          provider_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lat: number
+          lng: number
+          provider_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lat?: number
+          lng?: number
+          provider_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "perk_checkins_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       points_ledger: {
         Row: {
           created_at: string
@@ -800,6 +1033,8 @@ export type Database = {
           language: string
           last_name: string | null
           phone: string | null
+          suspended: boolean
+          suspended_reason: string | null
           updated_at: string
         }
         Insert: {
@@ -812,6 +1047,8 @@ export type Database = {
           language?: string
           last_name?: string | null
           phone?: string | null
+          suspended?: boolean
+          suspended_reason?: string | null
           updated_at?: string
         }
         Update: {
@@ -824,6 +1061,8 @@ export type Database = {
           language?: string
           last_name?: string | null
           phone?: string | null
+          suspended?: boolean
+          suspended_reason?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1008,6 +1247,118 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "reviews_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seasonal_drops: {
+        Row: {
+          cover_image: string | null
+          created_at: string
+          ends_at: string
+          featured_offer_ids: string[]
+          id: string
+          is_active: boolean
+          slug: string
+          starts_at: string
+          subtitle: string | null
+          theme_color: string | null
+          title: string
+        }
+        Insert: {
+          cover_image?: string | null
+          created_at?: string
+          ends_at?: string
+          featured_offer_ids?: string[]
+          id?: string
+          is_active?: boolean
+          slug: string
+          starts_at?: string
+          subtitle?: string | null
+          theme_color?: string | null
+          title: string
+        }
+        Update: {
+          cover_image?: string | null
+          created_at?: string
+          ends_at?: string
+          featured_offer_ids?: string[]
+          id?: string
+          is_active?: boolean
+          slug?: string
+          starts_at?: string
+          subtitle?: string | null
+          theme_color?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      team_deal_joiners: {
+        Row: {
+          id: string
+          joined_at: string
+          team_deal_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          team_deal_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          team_deal_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_deal_joiners_team_deal_id_fkey"
+            columns: ["team_deal_id"]
+            isOneToOne: false
+            referencedRelation: "team_deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_deals: {
+        Row: {
+          created_at: string
+          discount_percent: number
+          ends_at: string
+          id: string
+          joined_count: number
+          offer_id: string
+          threshold: number
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          discount_percent?: number
+          ends_at?: string
+          id?: string
+          joined_count?: number
+          offer_id: string
+          threshold?: number
+          title: string
+        }
+        Update: {
+          created_at?: string
+          discount_percent?: number
+          ends_at?: string
+          id?: string
+          joined_count?: number
+          offer_id?: string
+          threshold?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_deals_offer_id_fkey"
             columns: ["offer_id"]
             isOneToOne: false
             referencedRelation: "offers"
@@ -1291,6 +1642,14 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      send_broadcast: {
+        Args: { p_audience: string; p_body: string; p_title: string }
+        Returns: number
+      }
+      send_gift: {
+        Args: { p_amount: number; p_message: string; p_to: string }
+        Returns: string
       }
       submit_benefit_request: {
         Args: { _note: string; _package_id: string }

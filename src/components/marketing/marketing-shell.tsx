@@ -24,18 +24,21 @@ export function MarketingNav() {
           <span className="font-display text-xl font-bold tracking-tight">Perkly</span>
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav className="hidden items-center gap-6 md:flex">
           <Link to="/marketplace" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
             Marketplace
           </Link>
+          <Link to="/circles" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+            Circles
+          </Link>
+          <Link to="/drops" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+            Drops
+          </Link>
+          <Link to="/map" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+            Near me
+          </Link>
           <a href="/#how" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
             {t("nav.how")}
-          </a>
-          <a href="/#features" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-            {t("nav.features")}
-          </a>
-          <a href="/#providers" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-            {t("nav.providers")}
           </a>
         </nav>
 
