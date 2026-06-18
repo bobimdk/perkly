@@ -204,6 +204,7 @@ function ProviderDetail({ provider }: { provider: ProviderRow }) {
           <TabsTrigger value="published">Published</TabsTrigger>
           <TabsTrigger value="pending">Pending</TabsTrigger>
           <TabsTrigger value="draft">Drafts</TabsTrigger>
+          <TabsTrigger value="redeem">Redeem code</TabsTrigger>
           <TabsTrigger value="payouts">Payouts</TabsTrigger>
         </TabsList>
         {(["all","published","pending","draft"] as const).map((t) => (
@@ -215,6 +216,9 @@ function ProviderDetail({ provider }: { provider: ProviderRow }) {
             />
           </TabsContent>
         ))}
+        <TabsContent value="redeem" className="mt-4">
+          <RedeemPanel providerId={provider.id} />
+        </TabsContent>
         <TabsContent value="payouts" className="mt-4">
           <PayoutsList providerId={provider.id} />
         </TabsContent>
