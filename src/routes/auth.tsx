@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Sparkles, ArrowLeft, Briefcase, User, Store, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
+import { signUpConfirmed } from "@/lib/signup.functions";
 
 const searchSchema = z.object({
   mode: z.enum(["signin", "signup"]).optional(),
@@ -141,42 +142,22 @@ function SignUpForm() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    const redirectUrl = `${window.location.origin}/auth`;
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-          phone,
-          role,
-        },
-      },
-    });
-    if (error) {
-      setSubmitting(false);
-      toast.error(error.message);
-      return;
-    }
-    // If email confirmation is required, signUp returns no session.
-    // Try signing in immediately so the user lands inside the app.
-    if (!data.session) {
+    try {
+      await signUpConfirmed({
+        data: { email, password, firstName, lastName, phone, role },
+      });
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      if (signInError) {
-        setSubmitting(false);
-        toast.message("Check your email to confirm your account.", {
-          description: "We sent you a confirmation link.",
-        });
-        return;
-      }
+      if (signInError) throw signInError;
+      toast.success("Account created! You're in.");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Sign up failed";
+      toast.error(msg);
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitting(false);
-    toast.success("Account created! You're in.");
   };
 
   return (
