@@ -14,6 +14,114 @@ export type Database = {
   }
   public: {
     Tables: {
+      auto_approval_rules: {
+        Row: {
+          category_id: string | null
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          max_amount_all: number
+          name: string
+        }
+        Insert: {
+          category_id?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_amount_all: number
+          name: string
+        }
+        Update: {
+          category_id?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_amount_all?: number
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auto_approval_rules_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auto_approval_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      benefit_requests: {
+        Row: {
+          auto_approved: boolean
+          company_id: string
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          note: string | null
+          package_id: string | null
+          reject_reason: string | null
+          status: Database["public"]["Enums"]["benefit_request_status"]
+          total_all: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_approved?: boolean
+          company_id: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          note?: string | null
+          package_id?: string | null
+          reject_reason?: string | null
+          status?: Database["public"]["Enums"]["benefit_request_status"]
+          total_all: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_approved?: boolean
+          company_id?: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          note?: string | null
+          package_id?: string | null
+          reject_reason?: string | null
+          status?: Database["public"]["Enums"]["benefit_request_status"]
+          total_all?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "benefit_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "benefit_requests_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           created_at: string
@@ -56,6 +164,142 @@ export type Database = {
         }
         Relationships: []
       }
+      companies: {
+        Row: {
+          city: string | null
+          created_at: string
+          currency: string
+          id: string
+          industry: string | null
+          logo_url: string | null
+          monthly_default_budget_all: number
+          name: string
+          owner_id: string
+          size_label: string | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          industry?: string | null
+          logo_url?: string | null
+          monthly_default_budget_all?: number
+          name: string
+          owner_id: string
+          size_label?: string | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          industry?: string | null
+          logo_url?: string | null
+          monthly_default_budget_all?: number
+          name?: string
+          owner_id?: string
+          size_label?: string | null
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      company_employees: {
+        Row: {
+          company_id: string
+          created_at: string
+          department: string | null
+          full_name: string | null
+          id: string
+          invite_email: string | null
+          monthly_budget_all: number | null
+          status: Database["public"]["Enums"]["employee_status"]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          department?: string | null
+          full_name?: string | null
+          id?: string
+          invite_email?: string | null
+          monthly_budget_all?: number | null
+          status?: Database["public"]["Enums"]["employee_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          department?: string | null
+          full_name?: string | null
+          id?: string
+          invite_email?: string | null
+          monthly_budget_all?: number | null
+          status?: Database["public"]["Enums"]["employee_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_employees_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_budgets: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          period_end: string
+          period_start: string
+          total_all: number
+          updated_at: string
+          used_all: number
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          period_end: string
+          period_start: string
+          total_all?: number
+          updated_at?: string
+          used_all?: number
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          period_end?: string
+          period_start?: string
+          total_all?: number
+          updated_at?: string
+          used_all?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_budgets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       favorites: {
         Row: {
           created_at: string
@@ -84,6 +328,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          href: string | null
+          id: string
+          is_read: boolean
+          kind: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          href?: string | null
+          id?: string
+          is_read?: boolean
+          kind: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          href?: string | null
+          id?: string
+          is_read?: boolean
+          kind?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       offer_images: {
         Row: {
@@ -227,6 +504,99 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      package_items: {
+        Row: {
+          created_at: string
+          id: string
+          offer_id: string
+          package_id: string
+          provider_id: string
+          quantity: number
+          unit_price_all: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          offer_id: string
+          package_id: string
+          provider_id: string
+          quantity?: number
+          unit_price_all: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          offer_id?: string
+          package_id?: string
+          provider_id?: string
+          quantity?: number
+          unit_price_all?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "package_items_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_items_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_items_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      packages: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          id: string
+          name: string
+          status: Database["public"]["Enums"]["package_status"]
+          total_all: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          status?: Database["public"]["Enums"]["package_status"]
+          total_all?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          status?: Database["public"]["Enums"]["package_status"]
+          total_all?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "packages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -377,6 +747,84 @@ export type Database = {
           },
         ]
       }
+      transactions: {
+        Row: {
+          amount_all: number
+          company_id: string
+          created_at: string
+          id: string
+          offer_id: string | null
+          package_id: string | null
+          provider_id: string
+          reference: string | null
+          request_id: string
+          status: Database["public"]["Enums"]["transaction_status"]
+          user_id: string
+        }
+        Insert: {
+          amount_all: number
+          company_id: string
+          created_at?: string
+          id?: string
+          offer_id?: string | null
+          package_id?: string | null
+          provider_id: string
+          reference?: string | null
+          request_id: string
+          status?: Database["public"]["Enums"]["transaction_status"]
+          user_id: string
+        }
+        Update: {
+          amount_all?: number
+          company_id?: string
+          created_at?: string
+          id?: string
+          offer_id?: string | null
+          package_id?: string | null
+          provider_id?: string
+          reference?: string | null
+          request_id?: string
+          status?: Database["public"]["Enums"]["transaction_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "benefit_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -403,6 +851,30 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_benefit_request: {
+        Args: { _request_id: string }
+        Returns: {
+          auto_approved: boolean
+          company_id: string
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          note: string | null
+          package_id: string | null
+          reject_reason: string | null
+          status: Database["public"]["Enums"]["benefit_request_status"]
+          total_all: number
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "benefit_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -410,11 +882,78 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_company_owner: {
+        Args: { _company_id: string; _user_id: string }
+        Returns: boolean
+      }
+      reject_benefit_request: {
+        Args: { _reason: string; _request_id: string }
+        Returns: {
+          auto_approved: boolean
+          company_id: string
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          note: string | null
+          package_id: string | null
+          reject_reason: string | null
+          status: Database["public"]["Enums"]["benefit_request_status"]
+          total_all: number
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "benefit_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      submit_benefit_request: {
+        Args: { _note: string; _package_id: string }
+        Returns: {
+          auto_approved: boolean
+          company_id: string
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          note: string | null
+          package_id: string | null
+          reject_reason: string | null
+          status: Database["public"]["Enums"]["benefit_request_status"]
+          total_all: number
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "benefit_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       app_role: "employee" | "employer" | "provider" | "admin"
+      benefit_request_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "cancelled"
+        | "fulfilled"
+      employee_status: "pending" | "active" | "removed"
       offer_status: "draft" | "pending" | "published" | "archived" | "rejected"
+      package_status:
+        | "draft"
+        | "submitted"
+        | "approved"
+        | "rejected"
+        | "fulfilled"
+        | "cancelled"
       provider_status: "pending" | "active" | "suspended"
+      transaction_status: "pending" | "succeeded" | "refunded" | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -543,8 +1082,25 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["employee", "employer", "provider", "admin"],
+      benefit_request_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "cancelled",
+        "fulfilled",
+      ],
+      employee_status: ["pending", "active", "removed"],
       offer_status: ["draft", "pending", "published", "archived", "rejected"],
+      package_status: [
+        "draft",
+        "submitted",
+        "approved",
+        "rejected",
+        "fulfilled",
+        "cancelled",
+      ],
       provider_status: ["pending", "active", "suspended"],
+      transaction_status: ["pending", "succeeded", "refunded", "failed"],
     },
   },
 } as const
