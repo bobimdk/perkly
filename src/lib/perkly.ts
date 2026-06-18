@@ -85,26 +85,36 @@ export async function fetchEmployees(companyId: string): Promise<CompanyEmployee
   return (data ?? []) as CompanyEmployee[];
 }
 
+async function attachProfiles(rows: BenefitRequest[]): Promise<BenefitRequest[]> {
+  const userIds = Array.from(new Set(rows.map((r) => r.user_id)));
+  if (!userIds.length) return rows;
+  const { data: profs } = await supabase
+    .from("profiles").select("id,first_name,last_name,email").in("id", userIds);
+  const map = new Map((profs ?? []).map((p: any) => [p.id, p]));
+  return rows.map((r) => ({ ...r, profiles: map.get(r.user_id) ?? null }));
+}
+
 export async function fetchPendingRequests(companyId: string): Promise<BenefitRequest[]> {
   const { data, error } = await supabase
     .from("benefit_requests")
-    .select("*, profiles:user_id(first_name,last_name,email), packages(id,name)")
+    .select("*, packages(id,name)")
     .eq("company_id", companyId)
     .eq("status", "pending")
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return (data ?? []) as unknown as BenefitRequest[];
+  return attachProfiles((data ?? []) as unknown as BenefitRequest[]);
 }
 
 export async function fetchRequestsForCompany(companyId: string): Promise<BenefitRequest[]> {
   const { data, error } = await supabase
     .from("benefit_requests")
-    .select("*, profiles:user_id(first_name,last_name,email), packages(id,name)")
+    .select("*, packages(id,name)")
     .eq("company_id", companyId)
     .order("created_at", { ascending: false }).limit(100);
   if (error) throw error;
-  return (data ?? []) as unknown as BenefitRequest[];
+  return attachProfiles((data ?? []) as unknown as BenefitRequest[]);
 }
+
 
 export async function fetchAutoApprovalRules(companyId: string): Promise<AutoApprovalRule[]> {
   const { data, error } = await supabase.from("auto_approval_rules").select("*").eq("company_id", companyId).order("created_at", { ascending: false });
