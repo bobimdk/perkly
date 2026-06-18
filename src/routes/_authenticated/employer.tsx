@@ -47,8 +47,14 @@ function EmployerPage() {
       ) : !companyQuery.data ? (
         <CreateCompany onCreated={() => qc.invalidateQueries({ queryKey: ["my-company", user?.id] })} />
       ) : (
-        <CompanyHome company={companyQuery.data} />
+        <>
+          <CompanyHome company={companyQuery.data} />
+          <div className="mt-8">
+            <EmployerAIInsights companyId={companyQuery.data.id} />
+          </div>
+        </>
       )}
+      <ConciergeOrb />
     </DashboardShell>
   );
 }
