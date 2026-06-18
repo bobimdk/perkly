@@ -155,9 +155,15 @@ function CompanyHome({ company }: { company: Company }) {
             company={company}
             loading={employeesQuery.isLoading}
             employees={employeesQuery.data ?? []}
-            onChanged={() => qc.invalidateQueries({ queryKey: ["employees", company.id] })}
+            requests={allRequestsQuery.data ?? []}
+            onChanged={() => {
+              qc.invalidateQueries({ queryKey: ["employees", company.id] });
+              qc.invalidateQueries({ queryKey: ["pending-requests", company.id] });
+              qc.invalidateQueries({ queryKey: ["all-requests", company.id] });
+            }}
           />
         </TabsContent>
+
 
         <TabsContent value="rules" className="mt-6">
           <AutoRules
