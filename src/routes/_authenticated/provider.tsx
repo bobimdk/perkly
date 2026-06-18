@@ -428,3 +428,44 @@ function NewOfferDialog({ providerId, onCreated }: { providerId: string; onCreat
     </Dialog>
   );
 }
+
+function PayoutsList({ providerId }: { providerId: string }) {
+  const { formatPrice } = useI18n();
+  const txQuery = useQuery({
+    queryKey: ["provider-tx", providerId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("transactions")
+        .select("*, offers(title,slug)")
+        .eq("provider_id", providerId)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  if (txQuery.isLoading) return <Skeleton className="h-40 rounded-2xl" />;
+  const list = txQuery.data ?? [];
+  const total = list.reduce((s, t) => s + Number(t.amount_all), 0);
+  if (list.length === 0) {
+    return <p className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">No payouts yet. They will appear here when employees redeem your offers.</p>;
+  }
+  return (
+    <div className="space-y-3">
+      <div className="rounded-2xl border border-border bg-card p-4">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Total earned</p>
+        <p className="mt-1 font-display text-3xl font-bold text-primary">{formatPrice(total)}</p>
+      </div>
+      <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
+        {list.map((t: { id: string; amount_all: number; reference: string | null; created_at: string; offers?: { title: string } | null }) => (
+          <li key={t.id} className="flex items-center gap-4 p-3 text-sm">
+            <span className="font-mono text-xs text-muted-foreground">{new Date(t.created_at).toLocaleDateString()}</span>
+            <span className="min-w-0 flex-1 truncate">{t.offers?.title ?? "Offer"}</span>
+            <span className="font-mono text-xs text-muted-foreground">{t.reference}</span>
+            <span className="font-display font-semibold text-success">+{formatPrice(Number(t.amount_all))}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
