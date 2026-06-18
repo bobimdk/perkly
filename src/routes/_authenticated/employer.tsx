@@ -19,9 +19,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   fetchMyCompany, fetchEmployees, fetchPendingRequests, fetchRequestsForCompany, fetchAutoApprovalRules,
-  approveRequest, rejectRequest, ensureMonthlyBudget,
-  type Company, type CompanyEmployee, type BenefitRequest,
+  approveRequest, rejectRequest, ensureMonthlyBudget, fetchPackageItems,
+  type Company, type CompanyEmployee, type BenefitRequest, type PackageItem,
 } from "@/lib/perkly";
+
 
 export const Route = createFileRoute("/_authenticated/employer")({
   head: () => ({ meta: [{ title: "Employer · Perkly" }] }),
