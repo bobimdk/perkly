@@ -50,7 +50,11 @@ export type CheckIn = {
   lat: number;
   lng: number;
   created_at: string;
+  provider_name?: string | null;
+  provider_logo?: string | null;
+  category_slug?: string | null;
 };
+
 
 export async function listCircles() {
   const { data, error } = await supabase
