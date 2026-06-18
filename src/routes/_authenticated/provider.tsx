@@ -429,9 +429,10 @@ function NewOfferDialog({ providerId, onCreated }: { providerId: string; onCreat
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => submit("draft")} disabled={submitting}>Save draft</Button>
-          <Button onClick={() => submit("pending")} disabled={submitting}>
-            {submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null} Submit for review
+          <Button onClick={() => submit("published")} disabled={submitting}>
+            {submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null} Publish now
           </Button>
+
         </DialogFooter>
       </DialogContent>
     </Dialog>
