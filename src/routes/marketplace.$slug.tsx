@@ -185,6 +185,7 @@ function OfferDetailPage() {
                   try {
                     await addOfferToDraft(user.id, { id: offer.id, provider_id: offer.provider_id, price_all: Number(offer.price_all) });
                     toast.success("Added to your package");
+                    import("@/lib/gamification").then((m) => m.progressQuest(user.id, "daily_add_item").catch(() => {}));
                   } catch (e) { toast.error((e as Error).message); }
                 }}
               >
