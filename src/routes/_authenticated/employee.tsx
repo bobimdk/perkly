@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Wallet, Bell, Sparkles, Send, Trash2, Loader2, Building2, ShoppingBag, Clock, CheckCircle2, XCircle, Plus, Minus } from "lucide-react";
+import { Wallet, Bell, Send, Trash2, Loader2, Building2, ShoppingBag, Clock, CheckCircle2, XCircle, Plus, Minus } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -242,7 +242,7 @@ function EmployeePage() {
                       <div className="flex items-center gap-2">
                         {n.kind === "request_approved" ? <CheckCircle2 className="h-4 w-4 text-success" />
                           : n.kind === "request_rejected" ? <XCircle className="h-4 w-4 text-destructive" />
-                          : <Sparkles className="h-4 w-4 text-primary" />}
+                          : <Bell className="h-4 w-4 text-primary" />}
                         <p className="font-display text-sm font-semibold">{n.title}</p>
                       </div>
                       {n.body ? <p className="mt-1 text-xs text-muted-foreground">{n.body}</p> : null}

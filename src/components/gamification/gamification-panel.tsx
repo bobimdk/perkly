@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { Sparkles, Flame, Trophy, Gift, Star, Loader2, Lock } from "lucide-react";
+import { Flame, Trophy, Gift, Star, Loader2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";

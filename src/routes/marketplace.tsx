@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, SlidersHorizontal, Sparkles, Flame, Clock, Star } from "lucide-react";
+import { Search, SlidersHorizontal, Zap, Flame, Clock, Star } from "lucide-react";
 import { MarketingNav, MarketingFooter } from "@/components/marketing/marketing-shell";
 import { OfferCard } from "@/components/marketplace/offer-card";
 import { Input } from "@/components/ui/input";
@@ -111,7 +111,7 @@ function MarketplacePage() {
         <Tabs value={tab} onValueChange={(v) => setTab(v as OfferFilter["tab"])}>
           <TabsList className="h-11 rounded-xl bg-muted/60 p-1">
             <TabsTrigger value="trending" className="rounded-lg px-4"><Flame className="mr-1.5 h-3.5 w-3.5" /> Trending</TabsTrigger>
-            <TabsTrigger value="new" className="rounded-lg px-4"><Sparkles className="mr-1.5 h-3.5 w-3.5" /> New</TabsTrigger>
+            <TabsTrigger value="new" className="rounded-lg px-4"><Zap className="mr-1.5 h-3.5 w-3.5" /> New</TabsTrigger>
             <TabsTrigger value="recommended" className="rounded-lg px-4"><Star className="mr-1.5 h-3.5 w-3.5" /> Recommended</TabsTrigger>
             <TabsTrigger value="limited" className="rounded-lg px-4"><Clock className="mr-1.5 h-3.5 w-3.5" /> Limited</TabsTrigger>
           </TabsList>
