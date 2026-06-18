@@ -16,6 +16,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MarketplaceSlugRouteImport } from './routes/marketplace.$slug'
+import { Route as ApiConciergeRouteImport } from './routes/api/concierge'
 import { Route as AuthenticatedProviderRouteImport } from './routes/_authenticated/provider'
 import { Route as AuthenticatedEmployerRouteImport } from './routes/_authenticated/employer'
 import { Route as AuthenticatedEmployeeRouteImport } from './routes/_authenticated/employee'
@@ -55,6 +56,11 @@ const MarketplaceSlugRoute = MarketplaceSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => MarketplaceRoute,
 } as any)
+const ApiConciergeRoute = ApiConciergeRouteImport.update({
+  id: '/api/concierge',
+  path: '/api/concierge',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedProviderRoute = AuthenticatedProviderRouteImport.update({
   id: '/provider',
   path: '/provider',
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/employee': typeof AuthenticatedEmployeeRoute
   '/employer': typeof AuthenticatedEmployerRoute
   '/provider': typeof AuthenticatedProviderRoute
+  '/api/concierge': typeof ApiConciergeRoute
   '/marketplace/$slug': typeof MarketplaceSlugRoute
 }
 export interface FileRoutesByTo {
@@ -98,6 +105,7 @@ export interface FileRoutesByTo {
   '/employee': typeof AuthenticatedEmployeeRoute
   '/employer': typeof AuthenticatedEmployerRoute
   '/provider': typeof AuthenticatedProviderRoute
+  '/api/concierge': typeof ApiConciergeRoute
   '/marketplace/$slug': typeof MarketplaceSlugRoute
 }
 export interface FileRoutesById {
@@ -112,6 +120,7 @@ export interface FileRoutesById {
   '/_authenticated/employee': typeof AuthenticatedEmployeeRoute
   '/_authenticated/employer': typeof AuthenticatedEmployerRoute
   '/_authenticated/provider': typeof AuthenticatedProviderRoute
+  '/api/concierge': typeof ApiConciergeRoute
   '/marketplace/$slug': typeof MarketplaceSlugRoute
 }
 export interface FileRouteTypes {
@@ -126,6 +135,7 @@ export interface FileRouteTypes {
     | '/employee'
     | '/employer'
     | '/provider'
+    | '/api/concierge'
     | '/marketplace/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/employee'
     | '/employer'
     | '/provider'
+    | '/api/concierge'
     | '/marketplace/$slug'
   id:
     | '__root__'
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/_authenticated/employee'
     | '/_authenticated/employer'
     | '/_authenticated/provider'
+    | '/api/concierge'
     | '/marketplace/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -161,6 +173,7 @@ export interface RootRouteChildren {
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   MarketplaceRoute: typeof MarketplaceRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ApiConciergeRoute: typeof ApiConciergeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -213,6 +226,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/marketplace/$slug'
       preLoaderRoute: typeof MarketplaceSlugRouteImport
       parentRoute: typeof MarketplaceRoute
+    }
+    '/api/concierge': {
+      id: '/api/concierge'
+      path: '/api/concierge'
+      fullPath: '/api/concierge'
+      preLoaderRoute: typeof ApiConciergeRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/provider': {
       id: '/_authenticated/provider'
@@ -281,6 +301,7 @@ const rootRouteChildren: RootRouteChildren = {
   ForgotPasswordRoute: ForgotPasswordRoute,
   MarketplaceRoute: MarketplaceRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
+  ApiConciergeRoute: ApiConciergeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
