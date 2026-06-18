@@ -6,6 +6,7 @@ import { MarketingNav, MarketingFooter } from "@/components/marketing/marketing-
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchOfferBySlug, fetchOfferImages, fetchReviewsForOffer, toggleFavorite, fetchUserFavoriteIds } from "@/lib/marketplace";
+import { addOfferToDraft } from "@/lib/perkly";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
@@ -176,7 +177,17 @@ function OfferDetailPage() {
                 ) : null}
               </div>
 
-              <Button size="lg" className="mt-6 w-full rounded-xl shadow-sm">
+              <Button
+                size="lg"
+                className="mt-6 w-full rounded-xl shadow-sm"
+                onClick={async () => {
+                  if (!user) return toast.info("Sign in to build your package");
+                  try {
+                    await addOfferToDraft(user.id, { id: offer.id, provider_id: offer.provider_id, price_all: Number(offer.price_all) });
+                    toast.success("Added to your package");
+                  } catch (e) { toast.error((e as Error).message); }
+                }}
+              >
                 <ShoppingBag className="mr-2 h-4 w-4" /> Add to my package
               </Button>
               <Button
