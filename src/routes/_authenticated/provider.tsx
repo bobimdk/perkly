@@ -130,14 +130,15 @@ function CreateProviderInline({ onCreated }: { onCreated: () => void }) {
     setSaving(true);
     const slug = `${slugify(name)}-${Math.random().toString(36).slice(2, 6)}`;
     const { error } = await supabase.from("providers").insert({
-      owner_id: user.id, name: name.trim(), tagline, city, slug, status: "pending",
+      owner_id: user.id, name: name.trim(), tagline, city, slug, status: "active",
     });
     setSaving(false);
     if (error) return toast.error(error.message);
-    toast.success("Business submitted — awaiting admin review");
+    toast.success("Business published to the marketplace 🎉");
     setName(""); setTagline("");
     onCreated();
   };
+
 
   return (
     <div className="space-y-3">
