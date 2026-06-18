@@ -415,7 +415,7 @@ function EmployeeRequestCard({ request, onChanged }: { request: BenefitRequest; 
   );
 }
 
-}
+
 
 function AutoRules({ company, rules, onChanged }: { company: Company; rules: ReturnType<typeof Object>; onChanged: () => void }) {
   const [name, setName] = useState("");
