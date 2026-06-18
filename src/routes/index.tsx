@@ -11,9 +11,13 @@ import {
   Laptop,
   Stethoscope,
   Music,
-  Sparkles,
-  Bot,
-  Wand2,
+  Gift,
+  Globe,
+  Compass,
+  MessageCircle,
+  Package,
+
+
   BarChart3,
   ArrowRight,
   Star,
@@ -68,7 +72,7 @@ function Hero({ t }: { t: (k: string) => string }) {
       <div className="relative mx-auto grid max-w-7xl gap-12 px-4 py-20 sm:px-6 md:py-28 lg:grid-cols-2 lg:py-32">
         <div className="reveal">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-primary">
-            <Sparkles className="h-3 w-3" /> Albania first · Global ready
+            <Globe className="h-3 w-3" /> Albania first · Global ready
           </div>
           <h1 className="mt-6 font-display text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
             {t("hero.title.a")}{" "}
@@ -117,7 +121,7 @@ function HeroCard() {
           </p>
         </div>
         <div className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-primary to-primary-glow text-primary-foreground">
-          <Sparkles className="h-5 w-5" />
+          <Gift className="h-5 w-5" />
         </div>
       </div>
       <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-muted">
@@ -247,9 +251,9 @@ function Categories({ t }: { t: (k: string) => string }) {
 
 function AIFeatures({ t }: { t: (k: string) => string }) {
   const items = [
-    { icon: Bot, t: t("ai.concierge"), d: "Chat in plain Albanian or English. The AI finds, bundles and submits benefits for you." },
-    { icon: Sparkles, t: t("ai.recs"), d: "Personalized picks based on your role, budget and what colleagues love." },
-    { icon: Wand2, t: t("ai.bundle"), d: "Tell it a goal — 'a month of wellness' — get a full multi-vendor package within budget." },
+    { icon: MessageCircle, t: t("ai.concierge"), d: "Chat in plain Albanian or English. The AI finds, bundles and submits benefits for you." },
+    { icon: Compass, t: t("ai.recs"), d: "Personalized picks based on your role, budget and what colleagues love." },
+    { icon: Package, t: t("ai.bundle"), d: "Tell it a goal — 'a month of wellness' — get a full multi-vendor package within budget." },
     { icon: BarChart3, t: t("ai.insights"), d: "Employer dashboards surface engagement gaps and money about to expire." },
   ];
   return (
