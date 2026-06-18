@@ -26,9 +26,17 @@ export const Route = createFileRoute("/_authenticated/employee")({
 });
 
 function EmployeePage() {
-  const { user } = useAuth();
+  const { user, roles } = useAuth();
   const qc = useQueryClient();
   const { formatPrice } = useI18n();
+
+  // If this account is actually a provider / employer / admin, send them to the right dashboard
+  // instead of showing the "you're not linked to a company" screen.
+  if (roles.includes("provider")) return <Navigate to="/provider" replace />;
+  if (roles.includes("employer")) return <Navigate to="/employer" replace />;
+  if (roles.includes("admin")) return <Navigate to="/admin" replace />;
+
+
 
   const companyQuery = useQuery({
     queryKey: ["my-employer", user?.id],
