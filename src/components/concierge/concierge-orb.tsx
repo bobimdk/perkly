@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import ReactMarkdown from "react-markdown";
-import { Sparkles, X, Send, Loader2 } from "lucide-react";
+import { MessageCircle, X, Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/lib/auth-context";
@@ -62,7 +62,7 @@ export function ConciergeOrb() {
         >
           <span className="absolute inset-0 animate-ping rounded-full bg-primary/30" />
           <span className="absolute inset-2 rounded-full bg-gradient-to-br from-primary/60 to-primary-glow/40 blur-md" />
-          <Sparkles className="relative h-7 w-7" />
+          <MessageCircle className="relative h-7 w-7" />
         </button>
       )}
 
@@ -71,7 +71,7 @@ export function ConciergeOrb() {
           <header className="flex items-center justify-between border-b border-border bg-gradient-to-r from-primary/10 to-primary-glow/10 px-4 py-3">
             <div className="flex items-center gap-2">
               <span className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-primary to-primary-glow text-primary-foreground">
-                <Sparkles className="h-4 w-4" />
+                <MessageCircle className="h-4 w-4" />
               </span>
               <div>
                 <p className="font-display text-sm font-bold">Perkly Concierge</p>

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Sparkles, ArrowLeft, Briefcase, User, Store, ShieldCheck } from "lucide-react";
+import { Gift, ArrowLeft, Briefcase, User, Store, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { signUpConfirmed } from "@/lib/signup.functions";
 
@@ -60,7 +60,7 @@ function AuthPage() {
 
         <div className="my-8 text-center">
           <span className="mx-auto mb-4 inline-grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-primary to-primary-glow text-primary-foreground shadow-lg">
-            <Sparkles className="h-6 w-6" />
+            <Gift className="h-6 w-6" />
           </span>
           <h1 className="font-display text-3xl font-bold">Welcome to Perkly</h1>
           <p className="mt-2 text-sm text-muted-foreground">
