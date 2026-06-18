@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Sparkles, ArrowLeft, Briefcase, User, Store, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
+import { signUpConfirmed } from "@/lib/signup.functions";
 
 const searchSchema = z.object({
   mode: z.enum(["signin", "signup"]).optional(),
