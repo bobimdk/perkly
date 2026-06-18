@@ -248,8 +248,14 @@ function EmployeePage() {
               )}
             </div>
           </aside>
+
+          {/* Gamification full width */}
+          <div className="lg:col-span-2">
+            {user ? <GamificationPanel userId={user.id} /> : null}
+          </div>
         </div>
       )}
+      <ConciergeOrb />
     </DashboardShell>
   );
 }
