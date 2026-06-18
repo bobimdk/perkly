@@ -50,7 +50,11 @@ export type CheckIn = {
   lat: number;
   lng: number;
   created_at: string;
+  provider_name?: string | null;
+  provider_logo?: string | null;
+  category_slug?: string | null;
 };
+
 
 export async function listCircles() {
   const { data, error } = await supabase
@@ -135,15 +139,25 @@ export async function joinTeamDeal(dealId: string, userId: string) {
   if (error && !error.message.includes("duplicate")) throw error;
 }
 
-export async function fetchCheckIns(limit = 500) {
+export async function fetchCheckIns(limit = 500): Promise<CheckIn[]> {
   const { data, error } = await supabase
     .from("perk_checkins")
-    .select("*")
+    .select("id, provider_id, lat, lng, created_at, providers(name, logo_url, offers(categories(slug)))")
     .order("created_at", { ascending: false })
     .limit(limit);
   if (error) throw error;
-  return data as CheckIn[];
+  return (data ?? []).map((row: any) => ({
+    id: row.id,
+    provider_id: row.provider_id,
+    lat: Number(row.lat),
+    lng: Number(row.lng),
+    created_at: row.created_at,
+    provider_name: row.providers?.name ?? null,
+    provider_logo: row.providers?.logo_url ?? null,
+    category_slug: row.providers?.offers?.[0]?.categories?.slug ?? null,
+  }));
 }
+
 
 export async function recordCheckIn(providerId: string, lat: number, lng: number, userId?: string) {
   await supabase.from("perk_checkins").insert({ provider_id: providerId, lat, lng, user_id: userId ?? null });

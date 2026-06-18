@@ -108,8 +108,11 @@ export function useAuth() {
   return ctx;
 }
 
-export function defaultRouteForRole(role: AppRole | undefined): string {
-  switch (role) {
+export function defaultRouteForRole(role: AppRole | undefined, allRoles: AppRole[] = []): string {
+  // When a user has multiple roles, prefer the more specific one over plain employee.
+  const priority: AppRole[] = ["admin", "provider", "employer", "employee"];
+  const best = priority.find((r) => allRoles.includes(r)) ?? role;
+  switch (best) {
     case "employer":
       return "/employer";
     case "provider":
@@ -121,3 +124,4 @@ export function defaultRouteForRole(role: AppRole | undefined): string {
       return "/employee";
   }
 }
+

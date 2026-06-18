@@ -130,14 +130,15 @@ function CreateProviderInline({ onCreated }: { onCreated: () => void }) {
     setSaving(true);
     const slug = `${slugify(name)}-${Math.random().toString(36).slice(2, 6)}`;
     const { error } = await supabase.from("providers").insert({
-      owner_id: user.id, name: name.trim(), tagline, city, slug, status: "pending",
+      owner_id: user.id, name: name.trim(), tagline, city, slug, status: "active",
     });
     setSaving(false);
     if (error) return toast.error(error.message);
-    toast.success("Business submitted — awaiting admin review");
+    toast.success("Business published to the marketplace 🎉");
     setName(""); setTagline("");
     onCreated();
   };
+
 
   return (
     <div className="space-y-3">
@@ -316,7 +317,7 @@ function NewOfferDialog({ providerId, onCreated }: { providerId: string; onCreat
     toast.success("Image uploaded");
   };
 
-  const submit = async (status: "draft" | "pending") => {
+  const submit = async (status: "draft" | "published") => {
     if (!title.trim() || !categoryId || priceAll <= 0) return toast.error("Title, category and price are required");
     setSubmitting(true);
     const slug = `${slugify(title)}-${Math.random().toString(36).slice(2, 6)}`;
@@ -337,11 +338,12 @@ function NewOfferDialog({ providerId, onCreated }: { providerId: string; onCreat
     });
     setSubmitting(false);
     if (error) return toast.error(error.message);
-    toast.success(status === "draft" ? "Saved as draft" : "Submitted for review");
+    toast.success(status === "draft" ? "Saved as draft" : "Published to marketplace 🎉");
     setOpen(false);
     setTitle(""); setSubtitle(""); setDescription(""); setPriceAll(0); setPriceEur(0); setOriginalPrice(""); setCapacity(""); setCoverUrl(""); setIsLimited(false);
     onCreated();
   };
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -427,9 +429,10 @@ function NewOfferDialog({ providerId, onCreated }: { providerId: string; onCreat
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => submit("draft")} disabled={submitting}>Save draft</Button>
-          <Button onClick={() => submit("pending")} disabled={submitting}>
-            {submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null} Submit for review
+          <Button onClick={() => submit("published")} disabled={submitting}>
+            {submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null} Publish now
           </Button>
+
         </DialogFooter>
       </DialogContent>
     </Dialog>

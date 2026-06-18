@@ -41,7 +41,7 @@ function AuthPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      const target = search.redirect ?? defaultRouteForRole(roles[0]);
+      const target = search.redirect ?? defaultRouteForRole(roles[0], roles);
       navigate({ to: target, replace: true });
     }
   }, [user, loading, roles, navigate, search.redirect]);
