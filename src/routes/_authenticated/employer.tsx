@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Building2, Users, Plus, Check, X, Loader2, Trash2, Hourglass, Wallet } from "lucide-react";
+import { Building2, Users, Plus, Check, X, Loader2, Trash2, Hourglass, Wallet, ChevronDown, Package as PackageIcon } from "lucide-react";
+
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { ConciergeOrb } from "@/components/concierge/concierge-orb";
 import { EmployerAIInsights } from "@/components/insights/employer-insights";
@@ -18,9 +19,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   fetchMyCompany, fetchEmployees, fetchPendingRequests, fetchRequestsForCompany, fetchAutoApprovalRules,
-  approveRequest, rejectRequest, ensureMonthlyBudget,
-  type Company, type CompanyEmployee, type BenefitRequest,
+  approveRequest, rejectRequest, ensureMonthlyBudget, fetchPackageItems,
+  type Company, type CompanyEmployee, type BenefitRequest, type PackageItem,
 } from "@/lib/perkly";
+
 
 export const Route = createFileRoute("/_authenticated/employer")({
   head: () => ({ meta: [{ title: "Employer · Perkly" }] }),
@@ -153,9 +155,15 @@ function CompanyHome({ company }: { company: Company }) {
             company={company}
             loading={employeesQuery.isLoading}
             employees={employeesQuery.data ?? []}
-            onChanged={() => qc.invalidateQueries({ queryKey: ["employees", company.id] })}
+            requests={allRequestsQuery.data ?? []}
+            onChanged={() => {
+              qc.invalidateQueries({ queryKey: ["employees", company.id] });
+              qc.invalidateQueries({ queryKey: ["pending-requests", company.id] });
+              qc.invalidateQueries({ queryKey: ["all-requests", company.id] });
+            }}
           />
         </TabsContent>
+
 
         <TabsContent value="rules" className="mt-6">
           <AutoRules
@@ -224,16 +232,16 @@ function ApprovalCenter({ loading, requests, onChanged }: { loading: boolean; re
   );
 }
 
-function EmployeesTable({ company, loading, employees, onChanged }: { company: Company; loading: boolean; employees: CompanyEmployee[]; onChanged: () => void }) {
+function EmployeesTable({ company, loading, employees, requests, onChanged }: { company: Company; loading: boolean; employees: CompanyEmployee[]; requests: BenefitRequest[]; onChanged: () => void }) {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [department, setDepartment] = useState("");
   const [adding, setAdding] = useState(false);
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   const add = async () => {
     if (!email.trim()) return;
     setAdding(true);
-    // Try to find an existing user by email via profiles
     const { data: profile } = await supabase.from("profiles").select("id").eq("email", email.trim()).maybeSingle();
     const payload = {
       company_id: company.id,
@@ -270,30 +278,144 @@ function EmployeesTable({ company, loading, employees, onChanged }: { company: C
         <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center text-sm text-muted-foreground">No employees yet — add the first one above.</div>
       ) : (
         <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
-          {employees.map((e) => (
-            <li key={e.id} className="flex items-center gap-4 p-3">
-              <div className="grid h-9 w-9 place-items-center rounded-full bg-muted text-xs font-bold">
-                {(e.full_name?.[0] ?? e.invite_email?.[0] ?? "?").toUpperCase()}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-medium">{e.full_name ?? e.invite_email}</p>
-                <p className="truncate text-xs text-muted-foreground">{e.invite_email} {e.department ? `· ${e.department}` : ""}</p>
-              </div>
-              <span className={`rounded-full px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest ${
-                e.status === "active" ? "bg-success/15 text-success" : e.status === "pending" ? "bg-warning/15 text-warning-foreground" : "bg-muted text-muted-foreground"
-              }`}>{e.status}</span>
-              <Button size="icon" variant="ghost" onClick={async () => {
-                if (!confirm("Remove this employee?")) return;
-                await supabase.from("company_employees").delete().eq("id", e.id);
-                onChanged();
-              }}><Trash2 className="h-4 w-4" /></Button>
-            </li>
-          ))}
+          {employees.map((e) => {
+            const empRequests = requests.filter((r) => r.user_id === e.user_id);
+            const pendingCount = empRequests.filter((r) => r.status === "pending").length;
+            const isOpen = expanded === e.id;
+            return (
+              <li key={e.id} className="flex flex-col">
+                <button
+                  type="button"
+                  onClick={() => setExpanded(isOpen ? null : e.id)}
+                  className="flex items-center gap-4 p-3 text-left hover:bg-muted/40 transition"
+                >
+                  <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                  <div className="grid h-9 w-9 place-items-center rounded-full bg-muted text-xs font-bold">
+                    {(e.full_name?.[0] ?? e.invite_email?.[0] ?? "?").toUpperCase()}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium">{e.full_name ?? e.invite_email}</p>
+                    <p className="truncate text-xs text-muted-foreground">{e.invite_email} {e.department ? `· ${e.department}` : ""}</p>
+                  </div>
+                  {pendingCount > 0 && (
+                    <span className="rounded-full bg-warning/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-warning-foreground">
+                      {pendingCount} pending
+                    </span>
+                  )}
+                  <span className={`rounded-full px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest ${
+                    e.status === "active" ? "bg-success/15 text-success" : e.status === "pending" ? "bg-warning/15 text-warning-foreground" : "bg-muted text-muted-foreground"
+                  }`}>{e.status}</span>
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={async (ev) => {
+                      ev.stopPropagation();
+                      if (!confirm("Remove this employee?")) return;
+                      await supabase.from("company_employees").delete().eq("id", e.id);
+                      onChanged();
+                    }}
+                    className="grid h-8 w-8 place-items-center rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </span>
+                </button>
+                {isOpen && (
+                  <div className="border-t border-dashed border-border bg-muted/20 p-4">
+                    {empRequests.length === 0 ? (
+                      <p className="text-sm text-muted-foreground text-center py-4">This employee hasn't submitted any packages yet.</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {empRequests.map((r) => (
+                          <EmployeeRequestCard key={r.id} request={r} onChanged={onChanged} />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
   );
 }
+
+function EmployeeRequestCard({ request, onChanged }: { request: BenefitRequest; onChanged: () => void }) {
+  const { formatPrice } = useI18n();
+  const [busy, setBusy] = useState(false);
+  const itemsQuery = useQuery({
+    queryKey: ["package-items", request.package_id],
+    queryFn: () => request.package_id ? fetchPackageItems(request.package_id) : Promise.resolve([] as PackageItem[]),
+    enabled: !!request.package_id,
+  });
+  const items = itemsQuery.data ?? [];
+  const statusColor =
+    request.status === "fulfilled" || request.status === "approved" ? "bg-success/15 text-success"
+    : request.status === "pending" ? "bg-warning/15 text-warning-foreground"
+    : "bg-destructive/15 text-destructive";
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="grid h-9 w-9 place-items-center rounded-lg bg-primary/10 text-primary">
+          <PackageIcon className="h-4 w-4" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="font-display font-semibold">{request.packages?.name ?? "Package"}</p>
+          <p className="text-xs text-muted-foreground">
+            Submitted {new Date(request.created_at).toLocaleDateString()}
+            {request.note ? ` · "${request.note}"` : ""}
+          </p>
+        </div>
+        <p className="font-display text-lg font-bold text-primary">{formatPrice(Number(request.total_all))}</p>
+        <span className={`rounded-full px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest ${statusColor}`}>
+          {request.status}
+        </span>
+      </div>
+
+      {items.length > 0 && (
+        <ul className="mt-3 divide-y divide-border/60 rounded-lg border border-border/60 bg-muted/30">
+          {items.map((it) => (
+            <li key={it.id} className="flex items-center gap-3 p-2.5 text-sm">
+              {it.offers?.cover_url ? (
+                <img src={it.offers.cover_url} alt="" className="h-10 w-10 rounded-md object-cover" />
+              ) : (
+                <div className="h-10 w-10 rounded-md bg-muted" />
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-medium">{it.offers?.title ?? "Offer"}</p>
+                <p className="truncate text-xs text-muted-foreground">{it.providers?.name} {it.offers?.city ? `· ${it.offers.city}` : ""}</p>
+              </div>
+              <span className="font-mono text-xs text-muted-foreground">×{it.quantity}</span>
+              <span className="font-display font-semibold">{formatPrice(Number(it.unit_price_all) * it.quantity)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {request.status === "pending" && (
+        <div className="mt-3 flex justify-end gap-2">
+          <Button size="sm" variant="outline" disabled={busy} onClick={async () => {
+            const reason = prompt("Reason for rejection?") ?? "Not approved.";
+            setBusy(true);
+            try { await rejectRequest(request.id, reason); toast.success("Rejected"); onChanged(); }
+            catch (e) { toast.error((e as Error).message); }
+            finally { setBusy(false); }
+          }}><X className="mr-1 h-4 w-4" /> Reject</Button>
+          <Button size="sm" disabled={busy} onClick={async () => {
+            setBusy(true);
+            try { await approveRequest(request.id); toast.success("Approved — employee balance updated"); onChanged(); }
+            catch (e) { toast.error((e as Error).message); }
+            finally { setBusy(false); }
+          }}><Check className="mr-1 h-4 w-4" /> Approve & pay out</Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 
 function AutoRules({ company, rules, onChanged }: { company: Company; rules: ReturnType<typeof Object>; onChanged: () => void }) {
   const [name, setName] = useState("");
