@@ -126,6 +126,10 @@ function EmployeePage() {
                 </div>
                 <Button asChild variant="outline" size="sm"><Link to="/marketplace">Add benefits</Link></Button>
               </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <GiftDialog />
+                <Button asChild variant="outline" size="sm"><Link to="/circles">Join a circle</Link></Button>
+                <Button asChild variant="outline" size="sm"><Link to="/drops">Seasonal drops</Link></Button>
 
               {items.length === 0 ? (
                 <div className="mt-6 rounded-2xl border border-dashed border-border bg-muted/30 p-10 text-center">
