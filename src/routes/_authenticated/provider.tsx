@@ -15,6 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/lib/auth-context";
 import { fetchCategories, fetchMyProviders, fetchProviderOffers, type ProviderRow, type OfferRow } from "@/lib/marketplace";
+import { redeemTransaction } from "@/lib/perkly";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n";
