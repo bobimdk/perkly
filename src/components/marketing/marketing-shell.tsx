@@ -19,7 +19,7 @@ export function MarketingNav() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link to="/" className="flex items-center gap-2">
           <span className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-primary to-primary-glow text-primary-foreground shadow-sm">
-            <Sparkles className="h-5 w-5" />
+            <Gift className="h-5 w-5" />
           </span>
           <span className="font-display text-xl font-bold tracking-tight">Perkly</span>
         </Link>
@@ -84,7 +84,7 @@ export function MarketingFooter() {
         <div>
           <div className="flex items-center gap-2">
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-primary-glow text-primary-foreground">
-              <Sparkles className="h-4 w-4" />
+              <Gift className="h-4 w-4" />
             </span>
             <span className="font-display text-lg font-bold">Perkly</span>
           </div>

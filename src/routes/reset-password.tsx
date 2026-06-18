@@ -35,7 +35,7 @@ function ResetPassword() {
         </Link>
         <div className="my-8 text-center">
           <span className="mx-auto mb-4 inline-grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-primary to-primary-glow text-primary-foreground shadow-lg">
-            <Sparkles className="h-6 w-6" />
+            <Gift className="h-6 w-6" />
           </span>
           <h1 className="font-display text-3xl font-bold">Choose a new password</h1>
         </div>

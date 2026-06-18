@@ -33,7 +33,7 @@ export function DashboardShell({
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           <Link to="/" className="flex items-center gap-2">
             <span className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-primary to-primary-glow text-primary-foreground">
-              <Sparkles className="h-5 w-5" />
+              <Gift className="h-5 w-5" />
             </span>
             <span className="font-display text-lg font-bold">Perkly</span>
             <span className="ml-2 hidden rounded-full bg-muted px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground sm:inline">
