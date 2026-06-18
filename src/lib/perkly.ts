@@ -179,7 +179,7 @@ export async function updateItemQuantity(itemId: string, qty: number) {
 }
 
 export async function submitPackage(packageId: string, note: string | null) {
-  const { data, error } = await supabase.rpc("submit_benefit_request", { _package_id: packageId, _note: note });
+  const { data, error } = await supabase.rpc("submit_benefit_request", { _package_id: packageId, _note: note ?? "" });
   if (error) throw error;
   return data;
 }
