@@ -317,7 +317,7 @@ function NewOfferDialog({ providerId, onCreated }: { providerId: string; onCreat
     toast.success("Image uploaded");
   };
 
-  const submit = async (status: "draft" | "pending") => {
+  const submit = async (status: "draft" | "published") => {
     if (!title.trim() || !categoryId || priceAll <= 0) return toast.error("Title, category and price are required");
     setSubmitting(true);
     const slug = `${slugify(title)}-${Math.random().toString(36).slice(2, 6)}`;
@@ -338,11 +338,12 @@ function NewOfferDialog({ providerId, onCreated }: { providerId: string; onCreat
     });
     setSubmitting(false);
     if (error) return toast.error(error.message);
-    toast.success(status === "draft" ? "Saved as draft" : "Submitted for review");
+    toast.success(status === "draft" ? "Saved as draft" : "Published to marketplace 🎉");
     setOpen(false);
     setTitle(""); setSubtitle(""); setDescription(""); setPriceAll(0); setPriceEur(0); setOriginalPrice(""); setCapacity(""); setCoverUrl(""); setIsLimited(false);
     onCreated();
   };
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
