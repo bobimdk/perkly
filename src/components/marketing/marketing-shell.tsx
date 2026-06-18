@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useI18n, type Lang, type Currency } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
-import { Sparkles, ChevronDown } from "lucide-react";
+import { Gift, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
