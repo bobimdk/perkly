@@ -1375,6 +1375,8 @@ export type Database = {
           offer_id: string | null
           package_id: string | null
           provider_id: string
+          redeemed_at: string | null
+          redeemed_by: string | null
           reference: string | null
           request_id: string
           status: Database["public"]["Enums"]["transaction_status"]
@@ -1388,6 +1390,8 @@ export type Database = {
           offer_id?: string | null
           package_id?: string | null
           provider_id: string
+          redeemed_at?: string | null
+          redeemed_by?: string | null
           reference?: string | null
           request_id: string
           status?: Database["public"]["Enums"]["transaction_status"]
@@ -1401,6 +1405,8 @@ export type Database = {
           offer_id?: string | null
           package_id?: string | null
           provider_id?: string
+          redeemed_at?: string | null
+          redeemed_by?: string | null
           reference?: string | null
           request_id?: string
           status?: Database["public"]["Enums"]["transaction_status"]
@@ -1615,6 +1621,30 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "box_openings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      redeem_transaction: {
+        Args: { _reference: string }
+        Returns: {
+          amount_all: number
+          company_id: string
+          created_at: string
+          id: string
+          offer_id: string | null
+          package_id: string | null
+          provider_id: string
+          redeemed_at: string | null
+          redeemed_by: string | null
+          reference: string | null
+          request_id: string
+          status: Database["public"]["Enums"]["transaction_status"]
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "transactions"
           isOneToOne: true
           isSetofReturn: false
         }

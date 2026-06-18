@@ -18,6 +18,7 @@ import { ConciergeOrb } from "@/components/concierge/concierge-orb";
 import { GamificationPanel } from "@/components/gamification/gamification-panel";
 import { progressQuest } from "@/lib/gamification";
 import { GiftDialog } from "@/components/employee/gift-dialog";
+import { ActivityCard } from "@/components/employee/activity-card";
 
 export const Route = createFileRoute("/_authenticated/employee")({
   head: () => ({ meta: [{ title: "My benefits · Perkly" }] }),
@@ -191,26 +192,20 @@ function EmployeePage() {
               )}
             </section>
 
-            {/* Transactions */}
+            {/* Your activities — redeemable QR cards */}
             <section className="rounded-3xl border border-border bg-card p-6">
-              <h2 className="font-display text-xl font-bold">Transaction history</h2>
-              {txQuery.isLoading ? <Skeleton className="mt-4 h-32 rounded-xl" /> : (txQuery.data ?? []).length === 0 ? (
-                <p className="mt-4 text-sm text-muted-foreground">Your fulfilled benefits will appear here.</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Your activities</p>
+                  <h2 className="font-display text-xl font-bold">Approved benefits — show & scan at the venue</h2>
+                </div>
+              </div>
+              {txQuery.isLoading ? <Skeleton className="mt-4 h-40 rounded-xl" /> : (txQuery.data ?? []).length === 0 ? (
+                <p className="mt-4 text-sm text-muted-foreground">Once your employer approves a package, your venue passes appear here with a QR code.</p>
               ) : (
-                <ul className="mt-4 divide-y divide-border">
-                  {txQuery.data!.map((t) => (
-                    <li key={t.id} className="flex items-center gap-4 py-3">
-                      <div className="grid h-10 w-10 place-items-center rounded-full bg-success/15 text-success">
-                        <CheckCircle2 className="h-5 w-5" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-medium">{t.offers?.title ?? "Benefit"}</p>
-                        <p className="text-xs text-muted-foreground">{t.providers?.name} · {new Date(t.created_at).toLocaleDateString()} · {t.reference}</p>
-                      </div>
-                      <span className="font-display font-semibold">{formatPrice(Number(t.amount_all))}</span>
-                    </li>
-                  ))}
-                </ul>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  {txQuery.data!.map((t) => <ActivityCard key={t.id} tx={t} />)}
+                </div>
               )}
             </section>
           </div>

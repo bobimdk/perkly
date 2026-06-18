@@ -15,6 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/lib/auth-context";
 import { fetchCategories, fetchMyProviders, fetchProviderOffers, type ProviderRow, type OfferRow } from "@/lib/marketplace";
+import { redeemTransaction } from "@/lib/perkly";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n";
@@ -204,6 +205,7 @@ function ProviderDetail({ provider }: { provider: ProviderRow }) {
           <TabsTrigger value="published">Published</TabsTrigger>
           <TabsTrigger value="pending">Pending</TabsTrigger>
           <TabsTrigger value="draft">Drafts</TabsTrigger>
+          <TabsTrigger value="redeem">Redeem code</TabsTrigger>
           <TabsTrigger value="payouts">Payouts</TabsTrigger>
         </TabsList>
         {(["all","published","pending","draft"] as const).map((t) => (
@@ -215,6 +217,9 @@ function ProviderDetail({ provider }: { provider: ProviderRow }) {
             />
           </TabsContent>
         ))}
+        <TabsContent value="redeem" className="mt-4">
+          <RedeemPanel providerId={provider.id} />
+        </TabsContent>
         <TabsContent value="payouts" className="mt-4">
           <PayoutsList providerId={provider.id} />
         </TabsContent>
@@ -468,6 +473,102 @@ function PayoutsList({ providerId }: { providerId: string }) {
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+function RedeemPanel({ providerId }: { providerId: string }) {
+  const qc = useQueryClient();
+  const { formatPrice } = useI18n();
+  const [code, setCode] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [last, setLast] = useState<{ ok: boolean; msg: string; amount?: number; title?: string } | null>(null);
+
+  const recentQuery = useQuery({
+    queryKey: ["recent-redemptions", providerId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("transactions")
+        .select("id,reference,amount_all,redeemed_at,created_at, offers(title)")
+        .eq("provider_id", providerId)
+        .not("redeemed_at", "is", null)
+        .order("redeemed_at", { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const redeem = async (ref: string) => {
+    const trimmed = ref.trim().toUpperCase();
+    if (!trimmed) return;
+    setBusy(true);
+    setLast(null);
+    try {
+      const tx = await redeemTransaction(trimmed);
+      setLast({ ok: true, msg: `Redeemed ${trimmed}`, amount: Number(tx.amount_all) });
+      toast.success("Code redeemed");
+      setCode("");
+      qc.invalidateQueries({ queryKey: ["recent-redemptions", providerId] });
+    } catch (e) {
+      const m = (e as Error).message;
+      const friendly = m.includes("already_redeemed") ? "This code was already used."
+        : m.includes("code_not_found") ? "Code not found. Double-check the digits."
+        : m.includes("forbidden") ? "This code isn't for your business."
+        : m;
+      setLast({ ok: false, msg: friendly });
+      toast.error(friendly);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl border border-border bg-card p-5">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Scan or enter code</p>
+        <h3 className="mt-1 font-display text-lg font-bold">Redeem a customer's benefit</h3>
+        <p className="mt-1 text-sm text-muted-foreground">Ask the customer to show the QR pass from their Perkly app, then enter the code below to mark it used.</p>
+        <form
+          className="mt-4 flex flex-col gap-2 sm:flex-row"
+          onSubmit={(e) => { e.preventDefault(); redeem(code); }}
+        >
+          <Input
+            value={code}
+            onChange={(e) => setCode(e.target.value.toUpperCase())}
+            placeholder="e.g. PKLY-1A2B3C4D"
+            className="font-mono uppercase tracking-wider"
+          />
+          <Button type="submit" disabled={busy || !code.trim()}>
+            {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null} Redeem
+          </Button>
+        </form>
+        {last ? (
+          <div className={`mt-4 rounded-xl border p-3 text-sm ${last.ok ? "border-success/40 bg-success/10 text-success" : "border-destructive/40 bg-destructive/10 text-destructive"}`}>
+            {last.msg}{last.amount ? ` · ${formatPrice(last.amount)}` : ""}
+          </div>
+        ) : null}
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card p-5">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Recent redemptions</p>
+        {recentQuery.isLoading ? <Skeleton className="mt-3 h-24 rounded-lg" /> : (recentQuery.data ?? []).length === 0 ? (
+          <p className="mt-3 text-sm text-muted-foreground">No codes redeemed yet.</p>
+        ) : (
+          <ul className="mt-3 divide-y divide-border">
+            {recentQuery.data!.map((r) => (
+              <li key={r.id} className="flex items-center gap-3 py-2 text-sm">
+                <span className="font-mono text-xs">{r.reference}</span>
+                <span className="min-w-0 flex-1 truncate text-muted-foreground">{(r as { offers?: { title?: string } | null }).offers?.title ?? "Offer"}</span>
+                <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  {new Date(r.redeemed_at!).toLocaleString()}
+                </span>
+                <span className="font-display font-semibold text-success">{formatPrice(Number(r.amount_all))}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }
