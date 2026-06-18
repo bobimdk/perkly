@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Sparkles, ArrowLeft, Briefcase, User, Store, ShieldCheck } from "lucide-react";
+import { Gift, ArrowLeft, Briefcase, User, Store, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { signUpConfirmed } from "@/lib/signup.functions";
 
