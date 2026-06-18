@@ -14,6 +14,9 @@ import {
   submitPackage, updateItemQuantity,
 } from "@/lib/perkly";
 import { toast } from "sonner";
+import { ConciergeOrb } from "@/components/concierge/concierge-orb";
+import { GamificationPanel } from "@/components/gamification/gamification-panel";
+import { progressQuest } from "@/lib/gamification";
 
 export const Route = createFileRoute("/_authenticated/employee")({
   head: () => ({ meta: [{ title: "My benefits · Perkly" }] }),
