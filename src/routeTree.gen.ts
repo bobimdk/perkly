@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -25,11 +24,6 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MarketplaceRoute = MarketplaceRouteImport.update({
-  id: '/marketplace',
-  path: '/marketplace',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -52,14 +46,14 @@ const IndexRoute = IndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketplaceIndexRoute = MarketplaceIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => MarketplaceRoute,
+  id: '/marketplace/',
+  path: '/marketplace/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const MarketplaceSlugRoute = MarketplaceSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => MarketplaceRoute,
+  id: '/marketplace/$slug',
+  path: '/marketplace/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedProviderRoute = AuthenticatedProviderRouteImport.update({
   id: '/provider',
@@ -86,7 +80,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/forgot-password': typeof ForgotPasswordRoute
-  '/marketplace': typeof MarketplaceRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/employee': typeof AuthenticatedEmployeeRoute
@@ -113,7 +106,6 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/forgot-password': typeof ForgotPasswordRoute
-  '/marketplace': typeof MarketplaceRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/employee': typeof AuthenticatedEmployeeRoute
@@ -128,7 +120,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/forgot-password'
-    | '/marketplace'
     | '/reset-password'
     | '/admin'
     | '/employee'
@@ -154,7 +145,6 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/forgot-password'
-    | '/marketplace'
     | '/reset-password'
     | '/_authenticated/admin'
     | '/_authenticated/employee'
@@ -169,8 +159,9 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
-  MarketplaceRoute: typeof MarketplaceRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
+  MarketplaceSlugRoute: typeof MarketplaceSlugRoute
+  MarketplaceIndexRoute: typeof MarketplaceIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -180,13 +171,6 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/marketplace': {
-      id: '/marketplace'
-      path: '/marketplace'
-      fullPath: '/marketplace'
-      preLoaderRoute: typeof MarketplaceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -219,17 +203,17 @@ declare module '@tanstack/react-router' {
     }
     '/marketplace/': {
       id: '/marketplace/'
-      path: '/'
+      path: '/marketplace'
       fullPath: '/marketplace/'
       preLoaderRoute: typeof MarketplaceIndexRouteImport
-      parentRoute: typeof MarketplaceRoute
+      parentRoute: typeof rootRouteImport
     }
     '/marketplace/$slug': {
       id: '/marketplace/$slug'
-      path: '/$slug'
+      path: '/marketplace/$slug'
       fullPath: '/marketplace/$slug'
       preLoaderRoute: typeof MarketplaceSlugRouteImport
-      parentRoute: typeof MarketplaceRoute
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/provider': {
       id: '/_authenticated/provider'
@@ -279,27 +263,14 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
-interface MarketplaceRouteChildren {
-  MarketplaceSlugRoute: typeof MarketplaceSlugRoute
-  MarketplaceIndexRoute: typeof MarketplaceIndexRoute
-}
-
-const MarketplaceRouteChildren: MarketplaceRouteChildren = {
-  MarketplaceSlugRoute: MarketplaceSlugRoute,
-  MarketplaceIndexRoute: MarketplaceIndexRoute,
-}
-
-const MarketplaceRouteWithChildren = MarketplaceRoute._addFileChildren(
-  MarketplaceRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
-  MarketplaceRoute: MarketplaceRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
+  MarketplaceSlugRoute: MarketplaceSlugRoute,
+  MarketplaceIndexRoute: MarketplaceIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
