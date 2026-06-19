@@ -222,6 +222,7 @@ function MapPage() {
       }).addTo(map);
       mapRef.current = map;
       layerRef.current = L.layerGroup().addTo(map);
+      setMapReady(true);
     })();
     return () => {
       cancelled = true;
