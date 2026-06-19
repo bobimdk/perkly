@@ -378,14 +378,15 @@ function MapPage() {
           <div className="flex items-center gap-2">
             <Navigation className="h-4 w-4 text-primary" />
             <p className="font-display font-semibold">
-              {userPos ? "Nearest to you" : "Featured businesses"}
+              {userPos ? "Nearest to you" : "Nearest to Piramida e Tiranës"}
             </p>
           </div>
           {!userPos ? (
             <p className="mt-2 text-xs text-muted-foreground">
-              Share your location to sort by distance from where you are.
+              Showing distances from Piramida e Tiranës. Share your location for exact distances.
             </p>
           ) : null}
+
           <ul className="mt-3 max-h-[520px] space-y-2 overflow-y-auto pr-1">
             {(nearest ?? []).map((p) => (
               <li key={p.id}>
