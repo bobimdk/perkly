@@ -248,19 +248,22 @@ function MapPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Render user marker
+  // Render user / Pyramid marker
   useEffect(() => {
-    if (!mapRef.current || !userPos) return;
+    if (!mapRef.current) return;
     (async () => {
       const L = (await import("leaflet")).default;
+      const pos = userPos ?? PIRAMIDA;
+      const label = userPos ? t("map.youAreHere") : t("map.pyramid");
       if (userMarkerRef.current) {
-        userMarkerRef.current.setLatLng([userPos.lat, userPos.lng]);
+        userMarkerRef.current.setLatLng([pos.lat, pos.lng]).setPopupContent(`<strong>${label}</strong>`);
       } else {
-        userMarkerRef.current = L.marker([userPos.lat, userPos.lng], { icon: buildUserIcon(L) })
+        userMarkerRef.current = L.marker([pos.lat, pos.lng], { icon: buildUserIcon(L) })
           .addTo(mapRef.current)
-          .bindPopup("<strong>You are here</strong>");
+          .bindPopup(`<strong>${label}</strong>`);
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userPos]);
 
   // Render provider + checkin markers
