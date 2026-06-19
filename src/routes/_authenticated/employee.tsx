@@ -97,7 +97,7 @@ function EmployeePage() {
   };
 
   return (
-    <DashboardShell title="My benefits">
+    <DashboardShell title={t("emp.title")}>
       {companyQuery.isLoading || draftQuery.isLoading ? (
         <Skeleton className="h-64 rounded-2xl" />
       ) : !companyQuery.data ? (
