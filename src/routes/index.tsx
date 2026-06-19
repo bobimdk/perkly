@@ -267,7 +267,7 @@ function AIFeatures({ t }: { t: (k: string) => string }) {
     <section className="py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="reveal mx-auto max-w-2xl text-center">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-primary">Intelligence</p>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-primary">{t("ai.kicker")}</p>
           <h2 className="mt-3 font-display text-4xl font-bold sm:text-5xl">{t("ai.title")}</h2>
         </div>
         <div className="mt-14 grid gap-6 md:grid-cols-2">
