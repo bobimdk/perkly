@@ -23,7 +23,6 @@ export function DashboardShell({
 }) {
   const { profile, roles, signOut } = useAuth();
   const { t } = useI18n();
-  const { lang, currency, setLang, setCurrency } = useI18n();
   const navigate = useNavigate();
 
   const initials =
@@ -44,6 +43,11 @@ export function DashboardShell({
           </Link>
 
           <div className="flex items-center gap-2">
+            <div className="hidden items-center gap-1.5 sm:flex">
+              <LanguageSwitch />
+              <CurrencySwitch />
+            </div>
+
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-4 w-4" />
             </Button>
@@ -62,39 +66,25 @@ export function DashboardShell({
                   <p className="text-xs text-muted-foreground">{profile?.email}</p>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Language
-                </DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => setLang("en")}>
-                  English {lang === "en" && "✓"}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setLang("sq")}>
-                  Shqip {lang === "sq" && "✓"}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Currency
-                </DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => setCurrency("ALL")}>
-                  ALL (Lek) {currency === "ALL" && "✓"}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setCurrency("EUR")}>
-                  EUR (€) {currency === "EUR" && "✓"}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
+                <div className="flex items-center justify-between gap-2 px-2 py-1.5 sm:hidden">
+                  <LanguageSwitch />
+                  <CurrencySwitch />
+                </div>
+                <DropdownMenuSeparator className="sm:hidden" />
                 <DropdownMenuItem
                   onClick={async () => {
                     await signOut();
                     navigate({ to: "/auth", replace: true });
                   }}
                 >
-                  <LogOut className="mr-2 h-4 w-4" /> Sign out
+                  <LogOut className="mr-2 h-4 w-4" /> {t("nav.signOut")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
       </header>
+
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
         <h1 className="font-display text-3xl font-bold sm:text-4xl">{title}</h1>
