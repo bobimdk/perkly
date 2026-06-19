@@ -298,7 +298,7 @@ function MapPage() {
             ${p.featured?.title ? `<div style="font-size:11px;color:#6b7280;margin-top:2px">${escapeHtml(p.featured.title)}</div>` : ""}
             <div style="margin-top:6px;display:flex;align-items:center;gap:6px;font-size:11px;color:#f59e0b;font-weight:600">
               <span>${fmtDistance(km)}</span>
-              <span style="color:#9ca3af;font-weight:400">from ${originLabel}</span>
+              <span style="color:#9ca3af;font-weight:400">${t("map.from")} ${originLabel}</span>
             </div>
             ${p.address ? `<div style="margin-top:4px;font-size:11px;color:#6b7280">${escapeHtml(p.address)}</div>` : ""}
             ${desc ? `<div style="margin-top:8px;font-size:12px;color:#374151;line-height:1.35">${escapeHtml(desc)}</div>` : ""}
