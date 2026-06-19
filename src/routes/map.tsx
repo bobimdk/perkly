@@ -391,7 +391,7 @@ function MapPage() {
                   className="flex w-full items-center gap-3 rounded-xl border border-border bg-background p-2 text-left transition-colors hover:bg-muted"
                 >
                   <img
-                    src={imageForProvider(p)}
+                    src={imageForOffer(p)}
                     alt=""
                     className="h-10 w-10 flex-shrink-0 rounded-full border border-border object-cover"
                     onError={(e) => ((e.target as HTMLImageElement).src = DEFAULT_BUSINESS_IMAGE)}
