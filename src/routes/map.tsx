@@ -271,7 +271,7 @@ function MapPage() {
   useEffect(() => {
     if (!mapRef.current || !layerRef.current) return;
     const origin = userPos ?? PIRAMIDA;
-    const originLabel = userPos ? "your location" : "Piramida e Tiranës";
+    const originLabel = userPos ? t("map.yourLocation") : t("map.pyramid");
     (async () => {
       const L = (await import("leaflet")).default;
       layerRef.current.clearLayers();
