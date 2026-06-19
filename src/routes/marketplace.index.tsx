@@ -110,10 +110,10 @@ function MarketplacePage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <Tabs value={tab} onValueChange={(v) => setTab(v as OfferFilter["tab"])}>
           <TabsList className="h-11 rounded-xl bg-muted/60 p-1">
-            <TabsTrigger value="trending" className="rounded-lg px-4"><Flame className="mr-1.5 h-3.5 w-3.5" /> Trending</TabsTrigger>
-            <TabsTrigger value="new" className="rounded-lg px-4"><Zap className="mr-1.5 h-3.5 w-3.5" /> New</TabsTrigger>
-            <TabsTrigger value="recommended" className="rounded-lg px-4"><Star className="mr-1.5 h-3.5 w-3.5" /> Recommended</TabsTrigger>
-            <TabsTrigger value="limited" className="rounded-lg px-4"><Clock className="mr-1.5 h-3.5 w-3.5" /> Limited</TabsTrigger>
+            <TabsTrigger value="trending" className="rounded-lg px-4"><Flame className="mr-1.5 h-3.5 w-3.5" /> {t("mkt.tab.trending")}</TabsTrigger>
+            <TabsTrigger value="new" className="rounded-lg px-4"><Zap className="mr-1.5 h-3.5 w-3.5" /> {t("mkt.tab.new")}</TabsTrigger>
+            <TabsTrigger value="recommended" className="rounded-lg px-4"><Star className="mr-1.5 h-3.5 w-3.5" /> {t("mkt.tab.recommended")}</TabsTrigger>
+            <TabsTrigger value="limited" className="rounded-lg px-4"><Clock className="mr-1.5 h-3.5 w-3.5" /> {t("mkt.tab.limited")}</TabsTrigger>
           </TabsList>
         </Tabs>
 
