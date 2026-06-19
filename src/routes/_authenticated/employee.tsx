@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { Wallet, Bell, Send, Trash2, Loader2, Building2, ShoppingBag, Clock, CheckCircle2, XCircle, Plus, Minus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Wallet, Bell, Send, Trash2, Loader2, Building2, ShoppingBag, Clock, CheckCircle2, XCircle, Plus, Minus, Mail, Heart } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +13,8 @@ import {
   fetchMyTransactions, fetchNotifications, markNotificationRead,
   submitPackage, updateItemQuantity,
 } from "@/lib/perkly";
+import { toggleFavorite } from "@/lib/marketplace";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ConciergeOrb } from "@/components/concierge/concierge-orb";
 import { GamificationPanel } from "@/components/gamification/gamification-panel";
