@@ -343,6 +343,7 @@ function Testimonials({ t }: { t: (k: string) => string }) {
 }
 
 function CTA() {
+  const { t } = useI18n();
   return (
     <section className="py-24 sm:py-32">
       <div className="mx-auto max-w-5xl px-4 sm:px-6">
@@ -350,17 +351,17 @@ function CTA() {
           <div className="absolute inset-0 opacity-20 [background-image:radial-gradient(circle_at_20%_30%,white_0,transparent_30%),radial-gradient(circle_at_80%_70%,white_0,transparent_30%)]" />
           <div className="relative">
             <h2 className="font-display text-4xl font-bold sm:text-5xl">
-              Ready to build perks people love?
+              {t("cta.title")}
             </h2>
             <p className="mt-4 max-w-2xl text-lg opacity-90">
-              Join the platform reshaping employee benefits across Albania — and soon all of Europe.
+              {t("cta.sub")}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg" variant="secondary" className="h-12 px-6 text-base">
-                <Link to="/auth">Create your free account</Link>
+                <Link to="/auth">{t("cta.primary")}</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-12 border-white/30 bg-transparent px-6 text-base text-primary-foreground hover:bg-white/10 hover:text-primary-foreground">
-                <a href="#how">See how it works</a>
+                <a href="#how">{t("cta.secondary")}</a>
               </Button>
             </div>
           </div>
@@ -369,3 +370,4 @@ function CTA() {
     </section>
   );
 }
+
