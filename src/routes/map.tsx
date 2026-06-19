@@ -264,8 +264,7 @@ function MapPage() {
           .bindPopup(`<strong>${label}</strong>`);
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userPos]);
+  }, [userPos, t]);
 
   // Render provider + checkin markers
   useEffect(() => {
@@ -311,7 +310,7 @@ function MapPage() {
         const icon = buildIcon(L, imageFor(c));
         L.marker([c.lat, c.lng], { icon })
           .addTo(layerRef.current)
-          .bindPopup(`<strong>${escapeHtml(c.provider_name ?? "Perk check-in")}</strong>`);
+          .bindPopup(`<strong>${escapeHtml(c.provider_name ?? t("map.checkIn"))}</strong>`);
       }
     })();
   }, [providers.data, checkins.data, userPos]);
