@@ -159,12 +159,13 @@ function HeroCard() {
 
 
 function TrustStrip() {
+  const { t } = useI18n();
   const names = ["Vodafone AL", "One Albania", "BKT", "Raiffeisen", "Albtelecom", "ProCredit"];
   return (
     <section className="border-y border-border/60 bg-background py-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <p className="text-center font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          Trusted by forward-thinking teams
+          {t("trust.title")}
         </p>
         <div className="mt-5 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 opacity-70">
           {names.map((n) => (
@@ -177,6 +178,7 @@ function TrustStrip() {
     </section>
   );
 }
+
 
 function HowItWorks({ t }: { t: (k: string) => string }) {
   const steps = [
