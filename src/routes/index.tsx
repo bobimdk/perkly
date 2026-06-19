@@ -111,12 +111,13 @@ function Hero({ t }: { t: (k: string) => string }) {
 }
 
 function HeroCard() {
+  const { t } = useI18n();
   return (
     <div className="card-tilt card-tilt-hover relative mx-auto w-full max-w-md rounded-3xl border border-border bg-card p-6 shadow-2xl shadow-primary/10">
       <div className="flex items-center justify-between">
         <div>
           <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Monthly budget
+            {t("hero.card.monthly")}
           </p>
           <p className="mt-1 font-display text-3xl font-bold">
             12,400 <span className="text-base text-muted-foreground">ALL</span>
@@ -130,8 +131,8 @@ function HeroCard() {
         <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-primary to-primary-glow" />
       </div>
       <div className="mt-2 flex justify-between font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-        <span>Used 8,200</span>
-        <span>Left 4,200</span>
+        <span>{t("hero.card.used")} 8,200</span>
+        <span>{t("hero.card.left")} 4,200</span>
       </div>
 
       <div className="mt-6 space-y-3">
@@ -146,7 +147,7 @@ function HeroCard() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">{row.name}</p>
-              <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Active</p>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{t("hero.card.active")}</p>
             </div>
             <span className="font-mono text-xs font-semibold">{row.price}</span>
           </div>
@@ -155,6 +156,7 @@ function HeroCard() {
     </div>
   );
 }
+
 
 function TrustStrip() {
   const names = ["Vodafone AL", "One Albania", "BKT", "Raiffeisen", "Albtelecom", "ProCredit"];
