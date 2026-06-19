@@ -528,6 +528,50 @@ export type Database = {
           },
         ]
       }
+      company_invites: {
+        Row: {
+          company_id: string
+          created_at: string
+          decided_at: string | null
+          email: string
+          employee_id: string | null
+          employer_id: string
+          id: string
+          message: string | null
+          status: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          decided_at?: string | null
+          email: string
+          employee_id?: string | null
+          employer_id: string
+          id?: string
+          message?: string | null
+          status?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          decided_at?: string | null
+          email?: string
+          employee_id?: string | null
+          employer_id?: string
+          id?: string
+          message?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_invites_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_budgets: {
         Row: {
           company_id: string
@@ -1544,6 +1588,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_company_invite: {
+        Args: { _invite_id: string }
+        Returns: {
+          company_id: string
+          created_at: string
+          decided_at: string | null
+          email: string
+          employee_id: string | null
+          employer_id: string
+          id: string
+          message: string | null
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "company_invites"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       approve_benefit_request: {
         Args: { _request_id: string }
         Returns: {
@@ -1669,6 +1733,26 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "benefit_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      reject_company_invite: {
+        Args: { _invite_id: string }
+        Returns: {
+          company_id: string
+          created_at: string
+          decided_at: string | null
+          email: string
+          employee_id: string | null
+          employer_id: string
+          id: string
+          message: string | null
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "company_invites"
           isOneToOne: true
           isSetofReturn: false
         }
