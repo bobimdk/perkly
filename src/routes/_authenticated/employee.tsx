@@ -272,13 +272,13 @@ function EmployeePage() {
   );
 }
 
-function NoEmployer() {
+function NoEmployer({ t }: { t: (k: string) => string }) {
   return (
     <div className="mx-auto max-w-xl rounded-3xl border border-dashed border-border bg-card p-10 text-center">
       <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary"><Building2 className="h-7 w-7" /></div>
-      <h2 className="mt-4 font-display text-2xl font-bold">You're not linked to a company yet</h2>
-      <p className="mt-1 text-sm text-muted-foreground">Ask your employer to add you using the email on your profile, and your monthly budget will activate immediately.</p>
-      <Button asChild className="mt-6"><Link to="/marketplace">Browse the marketplace meanwhile</Link></Button>
+      <h2 className="mt-4 font-display text-2xl font-bold">{t("emp.noCompany.title")}</h2>
+      <p className="mt-1 text-sm text-muted-foreground">{t("emp.noCompany.sub")}</p>
+      <Button asChild className="mt-6"><Link to="/marketplace">{t("emp.browseMeanwhile")}</Link></Button>
     </div>
   );
 }
