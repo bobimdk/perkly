@@ -190,7 +190,7 @@ function HowItWorks({ t }: { t: (k: string) => string }) {
     <section id="how" className="py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="reveal mx-auto max-w-2xl text-center">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-primary">Workflow</p>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-primary">{t("how.kicker")}</p>
           <h2 className="mt-3 font-display text-4xl font-bold sm:text-5xl">{t("how.title")}</h2>
           <p className="mt-4 text-lg text-muted-foreground">{t("how.sub")}</p>
         </div>
