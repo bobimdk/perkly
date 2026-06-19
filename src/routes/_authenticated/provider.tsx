@@ -293,8 +293,8 @@ function NewOfferDialog({ providerId, onCreated }: { providerId: string; onCreat
   const [subtitle, setSubtitle] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState<string>("");
-  const [priceAll, setPriceAll] = useState<number>(0);
-  const [priceEur, setPriceEur] = useState<number>(0);
+  const [priceAll, setPriceAll] = useState<string>("");
+  const [priceEur, setPriceEur] = useState<string>("");
   const [originalPrice, setOriginalPrice] = useState<number | "">("");
   const [capacity, setCapacity] = useState<number | "">("");
   const [city, setCity] = useState("Tiranë");
@@ -318,16 +318,18 @@ function NewOfferDialog({ providerId, onCreated }: { providerId: string; onCreat
   };
 
   const submit = async (status: "draft" | "published") => {
-    if (!title.trim() || !categoryId || priceAll <= 0) return toast.error("Title, category and price are required");
+    const priceAllNum = Number(priceAll);
+    const priceEurNum = Number(priceEur);
+    if (!title.trim() || !categoryId || !priceAll || priceAllNum <= 0) return toast.error("Title, category and price are required");
     setSubmitting(true);
     const slug = `${slugify(title)}-${Math.random().toString(36).slice(2, 6)}`;
-    const discount = originalPrice && Number(originalPrice) > priceAll
-      ? Math.round((1 - priceAll / Number(originalPrice)) * 100) : null;
+    const discount = originalPrice && Number(originalPrice) > priceAllNum
+      ? Math.round((1 - priceAllNum / Number(originalPrice)) * 100) : null;
     const { error } = await supabase.from("offers").insert({
       provider_id: providerId,
       category_id: categoryId,
       slug, title, subtitle: subtitle || null, description: description || null,
-      price_all: priceAll, price_eur: priceEur || priceAll / 100,
+      price_all: priceAllNum, price_eur: priceEurNum || priceAllNum / 100,
       original_price_all: originalPrice ? Number(originalPrice) : null,
       discount_percent: discount,
       capacity: capacity ? Number(capacity) : null,
@@ -340,7 +342,7 @@ function NewOfferDialog({ providerId, onCreated }: { providerId: string; onCreat
     if (error) return toast.error(error.message);
     toast.success(status === "draft" ? "Saved as draft" : "Published to marketplace 🎉");
     setOpen(false);
-    setTitle(""); setSubtitle(""); setDescription(""); setPriceAll(0); setPriceEur(0); setOriginalPrice(""); setCapacity(""); setCoverUrl(""); setIsLimited(false);
+    setTitle(""); setSubtitle(""); setDescription(""); setPriceAll(""); setPriceEur(""); setOriginalPrice(""); setCapacity(""); setCoverUrl(""); setIsLimited(false);
     onCreated();
   };
 
@@ -407,11 +409,11 @@ function NewOfferDialog({ providerId, onCreated }: { providerId: string; onCreat
             </div>
             <div className="space-y-1.5">
               <Label>Price (ALL) *</Label>
-              <Input type="number" min={0} value={priceAll} onChange={(e) => setPriceAll(Number(e.target.value))} />
+              <Input type="number" inputMode="numeric" min={0} placeholder="0" value={priceAll} onChange={(e) => setPriceAll(e.target.value)} />
             </div>
             <div className="space-y-1.5">
               <Label>Price (EUR)</Label>
-              <Input type="number" min={0} step="0.01" value={priceEur} onChange={(e) => setPriceEur(Number(e.target.value))} />
+              <Input type="number" inputMode="decimal" min={0} step="0.01" placeholder="0.00" value={priceEur} onChange={(e) => setPriceEur(e.target.value)} />
             </div>
             <div className="space-y-1.5">
               <Label>Original price (ALL)</Label>

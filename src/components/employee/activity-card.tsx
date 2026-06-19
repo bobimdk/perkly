@@ -14,7 +14,8 @@ export type ActivityTx = {
 };
 
 export function ActivityCard({ tx }: { tx: ActivityTx }) {
-  const { formatPrice } = useI18n();
+  const { formatPrice, t, lang } = useI18n();
+  const locale = lang === "sq" ? "sq-AL" : "en-IE";
   const [qr, setQr] = useState<string | null>(null);
   const redeemed = !!tx.redeemed_at;
 
@@ -41,24 +42,24 @@ export function ActivityCard({ tx }: { tx: ActivityTx }) {
                 </div>
               )}
               <div className="min-w-0">
-                <p className="truncate font-display text-base font-semibold leading-tight">{tx.offers?.title ?? "Benefit"}</p>
+                <p className="truncate font-display text-base font-semibold leading-tight">{tx.offers?.title ?? (lang === "sq" ? "Përfitim" : "Benefit")}</p>
                 <p className="truncate text-xs text-muted-foreground">{tx.providers?.name}</p>
               </div>
             </div>
 
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Value</p>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{lang === "sq" ? "Vlera" : "Value"}</p>
               <p className="font-display text-2xl font-bold">{formatPrice(Number(tx.amount_all))}</p>
             </div>
 
             <div>
               {redeemed ? (
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-success/15 px-2.5 py-1 text-xs font-medium text-success">
-                  <CheckCircle2 className="h-3.5 w-3.5" /> Redeemed {new Date(tx.redeemed_at!).toLocaleDateString()}
+                  <CheckCircle2 className="h-3.5 w-3.5" /> {t("act.redeemed")} {new Date(tx.redeemed_at!).toLocaleDateString(locale)}
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
-                  <MapPin className="h-3.5 w-3.5" /> Show at venue
+                  <MapPin className="h-3.5 w-3.5" /> {t("act.showAtVenue")}
                 </span>
               )}
             </div>
@@ -86,7 +87,7 @@ export function ActivityCard({ tx }: { tx: ActivityTx }) {
           {tx.reference ?? `PKLY-${tx.id.slice(0, 8).toUpperCase()}`}
         </p>
         <p className="text-[10px] text-muted-foreground">
-          Issued {new Date(tx.created_at).toLocaleDateString()}
+          {lang === "sq" ? "Lëshuar" : "Issued"} {new Date(tx.created_at).toLocaleDateString(locale)}
         </p>
       </div>
     </div>

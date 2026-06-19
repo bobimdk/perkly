@@ -66,7 +66,7 @@ function CreateCompany({ onCreated }: { onCreated: () => void }) {
   const [name, setName] = useState("");
   const [industry, setIndustry] = useState("");
   const [city, setCity] = useState("Tiranë");
-  const [budget, setBudget] = useState(5000);
+  const [budget, setBudget] = useState<string>("5000");
   const [saving, setSaving] = useState(false);
 
   const save = async () => {
@@ -75,7 +75,7 @@ function CreateCompany({ onCreated }: { onCreated: () => void }) {
     const slug = `${slugify(name)}-${Math.random().toString(36).slice(2, 6)}`;
     const { error } = await supabase.from("companies").insert({
       owner_id: user.id, name: name.trim(), slug, industry, city,
-      monthly_default_budget_all: budget,
+      monthly_default_budget_all: Number(budget) || 0,
     });
     setSaving(false);
     if (error) return toast.error(error.message);
@@ -96,7 +96,7 @@ function CreateCompany({ onCreated }: { onCreated: () => void }) {
           <div className="space-y-1.5"><Label>Industry</Label><Input value={industry} onChange={(e) => setIndustry(e.target.value)} placeholder="Software, Retail…" /></div>
           <div className="space-y-1.5"><Label>City</Label><Input value={city} onChange={(e) => setCity(e.target.value)} /></div>
         </div>
-        <div className="space-y-1.5"><Label>Default monthly budget per employee (ALL)</Label><Input type="number" value={budget} onChange={(e) => setBudget(Number(e.target.value))} /></div>
+        <div className="space-y-1.5"><Label>Default monthly budget per employee (ALL)</Label><Input type="number" inputMode="numeric" min={0} placeholder="0" value={budget} onChange={(e) => setBudget(e.target.value)} /></div>
         <Button onClick={save} disabled={saving || !name.trim()} className="w-full">
           {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null} Create company
         </Button>
@@ -419,7 +419,7 @@ function EmployeeRequestCard({ request, onChanged }: { request: BenefitRequest; 
 
 function AutoRules({ company, rules, onChanged }: { company: Company; rules: ReturnType<typeof Object>; onChanged: () => void }) {
   const [name, setName] = useState("");
-  const [maxAmount, setMaxAmount] = useState(2000);
+  const [maxAmount, setMaxAmount] = useState<string>("2000");
   return (
     <div className="space-y-4">
       <Dialog>
@@ -428,14 +428,15 @@ function AutoRules({ company, rules, onChanged }: { company: Company; rules: Ret
           <DialogHeader><DialogTitle>Create auto-approval rule</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1.5"><Label>Rule name</Label><Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Small perks under 2000 ALL" /></div>
-            <div className="space-y-1.5"><Label>Max amount (ALL)</Label><Input type="number" value={maxAmount} onChange={(e) => setMaxAmount(Number(e.target.value))} /></div>
+            <div className="space-y-1.5"><Label>Max amount (ALL)</Label><Input type="number" inputMode="numeric" min={0} placeholder="0" value={maxAmount} onChange={(e) => setMaxAmount(e.target.value)} /></div>
           </div>
           <DialogFooter>
             <Button onClick={async () => {
-              const { error } = await supabase.from("auto_approval_rules").insert({ company_id: company.id, name: name || `Up to ${maxAmount} ALL`, max_amount_all: maxAmount });
+              const maxAmountNum = Number(maxAmount) || 0;
+              const { error } = await supabase.from("auto_approval_rules").insert({ company_id: company.id, name: name || `Up to ${maxAmountNum} ALL`, max_amount_all: maxAmountNum });
               if (error) return toast.error(error.message);
               toast.success("Rule created");
-              setName(""); setMaxAmount(2000);
+              setName(""); setMaxAmount("2000");
               onChanged();
             }}>Save</Button>
           </DialogFooter>
