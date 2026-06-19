@@ -40,7 +40,9 @@ export type Category = {
 export type ProviderRow = {
   id: string; owner_id: string | null; slug: string; name: string; tagline: string | null;
   description: string | null; logo_url: string | null; cover_url: string | null; website: string | null;
-  email: string | null; phone: string | null; city: string | null; status: "pending" | "active" | "suspended";
+  email: string | null; phone: string | null; city: string | null; address: string | null;
+  lat: number | null; lng: number | null;
+  status: "pending" | "active" | "suspended";
   rating_avg: number; rating_count: number; created_at: string; updated_at: string;
 };
 

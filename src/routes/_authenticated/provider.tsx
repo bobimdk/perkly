@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, Upload, Image as ImageIcon, ExternalLink, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload, Image as ImageIcon, ExternalLink, Loader2, MapPin, Crosshair } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { ConciergeOrb } from "@/components/concierge/concierge-orb";
 import { Button } from "@/components/ui/button";
@@ -192,6 +192,8 @@ function ProviderDetail({ provider }: { provider: ProviderRow }) {
         <NewOfferDialog providerId={provider.id} onCreated={() => qc.invalidateQueries({ queryKey: ["provider-offers", provider.id] })} />
       </div>
 
+      <LocationEditor provider={provider} onSaved={() => qc.invalidateQueries({ queryKey: ["my-providers"] })} />
+
       <div className="grid gap-3 sm:grid-cols-5">
         <StatCard label="Published" value={stats.published} />
         <StatCard label="Pending" value={stats.pending} />
@@ -234,6 +236,101 @@ function StatCard({ label, value }: { label: string; value: number | string }) {
     <div className="rounded-2xl border border-border bg-card p-4">
       <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{label}</p>
       <p className="mt-1 font-display text-2xl font-bold">{value}</p>
+    </div>
+  );
+}
+
+function LocationEditor({ provider, onSaved }: { provider: ProviderRow; onSaved: () => void }) {
+  const [address, setAddress] = useState(provider.address ?? "");
+  const [city, setCity] = useState(provider.city ?? "");
+  const [lat, setLat] = useState<string>(provider.lat != null ? String(provider.lat) : "");
+  const [lng, setLng] = useState<string>(provider.lng != null ? String(provider.lng) : "");
+  const [saving, setSaving] = useState(false);
+  const [locating, setLocating] = useState(false);
+
+  const useCurrent = () => {
+    if (!navigator.geolocation) return toast.error("Geolocation not supported");
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLat(pos.coords.latitude.toFixed(6));
+        setLng(pos.coords.longitude.toFixed(6));
+        setLocating(false);
+        toast.success("Pinned your current location");
+      },
+      (err) => { setLocating(false); toast.error(err.message); },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  };
+
+  const geocode = async () => {
+    if (!address.trim()) return toast.error("Enter an address first");
+    setLocating(true);
+    try {
+      const q = encodeURIComponent(`${address}, ${city || "Tiranë"}, Albania`);
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${q}`);
+      const data = await res.json();
+      if (!data?.[0]) { toast.error("Address not found"); return; }
+      setLat(Number(data[0].lat).toFixed(6));
+      setLng(Number(data[0].lon).toFixed(6));
+      toast.success("Address located");
+    } catch (e: any) { toast.error(e.message); }
+    finally { setLocating(false); }
+  };
+
+  const save = async () => {
+    const latN = lat ? Number(lat) : null;
+    const lngN = lng ? Number(lng) : null;
+    if ((latN !== null && (isNaN(latN) || latN < -90 || latN > 90)) ||
+        (lngN !== null && (isNaN(lngN) || lngN < -180 || lngN > 180))) {
+      return toast.error("Invalid coordinates");
+    }
+    setSaving(true);
+    const { error } = await supabase.from("providers")
+      .update({ address: address || null, city: city || null, lat: latN, lng: lngN })
+      .eq("id", provider.id);
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("Business location updated");
+    onSaved();
+  };
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-5">
+      <div className="flex items-center gap-2">
+        <MapPin className="h-4 w-4 text-primary" />
+        <p className="font-display font-semibold">Business location</p>
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">Set where your business is so employees can find it on the map.</p>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div className="space-y-1.5 sm:col-span-2">
+          <Label>Street address</Label>
+          <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="e.g. Rruga e Durrësit 23" />
+        </div>
+        <div className="space-y-1.5">
+          <Label>City</Label>
+          <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Tiranë" />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Latitude</Label>
+          <Input value={lat} onChange={(e) => setLat(e.target.value)} placeholder="41.3275" />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Longitude</Label>
+          <Input value={lng} onChange={(e) => setLng(e.target.value)} placeholder="19.8189" />
+        </div>
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Button variant="outline" size="sm" onClick={useCurrent} disabled={locating}>
+          <Crosshair className="mr-2 h-4 w-4" /> Use current location
+        </Button>
+        <Button variant="outline" size="sm" onClick={geocode} disabled={locating || !address.trim()}>
+          <MapPin className="mr-2 h-4 w-4" /> Locate from address
+        </Button>
+        <Button size="sm" onClick={save} disabled={saving} className="ml-auto">
+          {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null} Save location
+        </Button>
+      </div>
     </div>
   );
 }
