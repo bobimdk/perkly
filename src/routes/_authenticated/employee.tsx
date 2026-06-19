@@ -110,20 +110,20 @@ function EmployeePage() {
             <div className="overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary/10 via-card to-card p-6 shadow-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Wallet className="h-4 w-4" />
-                <p className="font-mono text-[10px] uppercase tracking-widest">Monthly budget · {companyQuery.data.company.name}</p>
+                <p className="font-mono text-[10px] uppercase tracking-widest">{t("emp.monthly")} · {companyQuery.data.company.name}</p>
               </div>
-              <p className="mt-3 font-display text-4xl font-bold">{formatPrice(remainingBudget)}<span className="ml-2 text-base font-normal text-muted-foreground">remaining</span></p>
+              <p className="mt-3 font-display text-4xl font-bold">{formatPrice(remainingBudget)}<span className="ml-2 text-base font-normal text-muted-foreground">{t("emp.remaining")}</span></p>
               {budget ? (
                 <>
                   <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted">
                     <div className="h-full rounded-full bg-gradient-to-r from-primary to-primary-glow transition-all duration-700" style={{ width: `${budgetPct}%` }} />
                   </div>
                   <p className="mt-2 text-xs text-muted-foreground">
-                    {formatPrice(Number(budget.used_all))} used of {formatPrice(Number(budget.total_all))} this month
+                    {formatPrice(Number(budget.used_all))} {t("emp.usedOf")} {formatPrice(Number(budget.total_all))} {t("emp.thisMonth")}
                   </p>
                 </>
               ) : (
-                <p className="mt-2 text-xs text-muted-foreground">Your employer hasn't set a budget for this period yet.</p>
+                <p className="mt-2 text-xs text-muted-foreground">{t("emp.noBudget")}</p>
               )}
             </div>
 
