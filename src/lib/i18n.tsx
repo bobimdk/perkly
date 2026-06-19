@@ -331,6 +331,7 @@ const dictionaries: Record<Lang, Dict> = {
     "map.pyramid": "Piramida e Tiranës",
     "map.from": "nga",
     "map.seeMore": "Shiko më shumë →",
+    "map.checkIn": "Përdorim i përfitimit",
     "map.live": "Live",
 
     // Employee dashboard
