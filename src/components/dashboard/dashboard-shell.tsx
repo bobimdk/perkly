@@ -22,6 +22,7 @@ export function DashboardShell({
   children: ReactNode;
 }) {
   const { profile, roles, signOut } = useAuth();
+  const { t } = useI18n();
   const { lang, currency, setLang, setCurrency } = useI18n();
   const navigate = useNavigate();
 
