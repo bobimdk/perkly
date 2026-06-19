@@ -217,20 +217,20 @@ function HowItWorks({ t }: { t: (k: string) => string }) {
 
 function Categories({ t }: { t: (k: string) => string }) {
   const cats = [
-    { icon: Dumbbell, label: "Fitness", color: "from-amber-400 to-orange-500" },
-    { icon: Heart, label: "Wellness", color: "from-rose-400 to-pink-500" },
-    { icon: GraduationCap, label: "Learning", color: "from-sky-400 to-blue-500" },
-    { icon: Plane, label: "Travel", color: "from-cyan-400 to-teal-500" },
-    { icon: UtensilsCrossed, label: "Food", color: "from-lime-400 to-emerald-500" },
-    { icon: Laptop, label: "Technology", color: "from-violet-400 to-indigo-500" },
-    { icon: Stethoscope, label: "Healthcare", color: "from-red-400 to-rose-500" },
-    { icon: Music, label: "Entertainment", color: "from-fuchsia-400 to-purple-500" },
+    { icon: Dumbbell, label: t("cat.fitness"), color: "from-amber-400 to-orange-500" },
+    { icon: Heart, label: t("cat.wellness"), color: "from-rose-400 to-pink-500" },
+    { icon: GraduationCap, label: t("cat.learning"), color: "from-sky-400 to-blue-500" },
+    { icon: Plane, label: t("cat.travel"), color: "from-cyan-400 to-teal-500" },
+    { icon: UtensilsCrossed, label: t("cat.food"), color: "from-lime-400 to-emerald-500" },
+    { icon: Laptop, label: t("cat.tech"), color: "from-violet-400 to-indigo-500" },
+    { icon: Stethoscope, label: t("cat.healthcare"), color: "from-red-400 to-rose-500" },
+    { icon: Music, label: t("cat.entertainment"), color: "from-fuchsia-400 to-purple-500" },
   ];
   return (
     <section id="features" className="bg-muted/30 py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="reveal mx-auto max-w-2xl text-center">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-primary">Categories</p>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-primary">{t("cats.kicker")}</p>
           <h2 className="mt-3 font-display text-4xl font-bold sm:text-5xl">{t("cats.title")}</h2>
         </div>
         <div className="mt-14 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
@@ -245,7 +245,7 @@ function Categories({ t }: { t: (k: string) => string }) {
               </div>
               <p className="mt-4 font-display text-lg font-semibold">{c.label}</p>
               <p className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                30+ offers
+                {t("cats.offers")}
               </p>
             </div>
           ))}
@@ -257,11 +257,12 @@ function Categories({ t }: { t: (k: string) => string }) {
 
 function AIFeatures({ t }: { t: (k: string) => string }) {
   const items = [
-    { icon: MessageCircle, t: t("ai.concierge"), d: "Chat in plain Albanian or English. The AI finds, bundles and submits benefits for you." },
-    { icon: Compass, t: t("ai.recs"), d: "Personalized picks based on your role, budget and what colleagues love." },
-    { icon: Package, t: t("ai.bundle"), d: "Tell it a goal — 'a month of wellness' — get a full multi-vendor package within budget." },
-    { icon: BarChart3, t: t("ai.insights"), d: "Employer dashboards surface engagement gaps and money about to expire." },
+    { icon: MessageCircle, t: t("ai.concierge"), d: t("ai.concierge.d") },
+    { icon: Compass, t: t("ai.recs"), d: t("ai.recs.d") },
+    { icon: Package, t: t("ai.bundle"), d: t("ai.bundle.d") },
+    { icon: BarChart3, t: t("ai.insights"), d: t("ai.insights.d") },
   ];
+
   return (
     <section className="py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
