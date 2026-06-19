@@ -149,6 +149,7 @@ const dictionaries: Record<Lang, Dict> = {
     "map.pyramid": "Piramida e Tiranës",
     "map.from": "from",
     "map.seeMore": "See more →",
+    "map.checkIn": "Perk check-in",
     "map.live": "Live",
 
     // Employee dashboard
