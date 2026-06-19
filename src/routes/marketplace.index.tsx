@@ -71,12 +71,12 @@ function MarketplacePage() {
       {/* Hero */}
       <section className="border-b border-border/60 bg-gradient-to-br from-primary/8 via-background to-background">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
-          <p className="font-mono text-[11px] uppercase tracking-widest text-primary">Perkly marketplace</p>
+          <p className="font-mono text-[11px] uppercase tracking-widest text-primary">{t("mkt.kicker")}</p>
           <h1 className="mt-3 font-display text-3xl font-bold sm:text-5xl">
-            Discover benefits <span className="text-gradient-amber">worth your time</span>
+            {t("mkt.title.a")} <span className="text-gradient-amber">{t("mkt.title.b")}</span>
           </h1>
           <p className="mt-3 max-w-2xl text-sm text-muted-foreground sm:text-base">
-            From the best gyms in Tirana to spa days, language courses and weekend getaways — handpicked for modern teams.
+            {t("mkt.sub")}
           </p>
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
@@ -85,18 +85,18 @@ function MarketplacePage() {
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search for yoga, hotels, courses…"
+                placeholder={t("mkt.search")}
                 className="h-12 rounded-xl pl-10 text-sm shadow-sm"
               />
             </div>
             <Button variant="outline" className="h-12 rounded-xl shadow-sm">
-              <SlidersHorizontal className="mr-2 h-4 w-4" /> Filters
+              <SlidersHorizontal className="mr-2 h-4 w-4" /> {t("mkt.filters")}
             </Button>
           </div>
 
           {/* Categories */}
           <div className="mt-6 flex flex-wrap gap-2">
-            <CategoryPill active={!category} onClick={() => setCategory(undefined)}>All</CategoryPill>
+            <CategoryPill active={!category} onClick={() => setCategory(undefined)}>{t("mkt.all")}</CategoryPill>
             {(categoriesQuery.data ?? []).map((c) => (
               <CategoryPill key={c.id} active={category === c.slug} onClick={() => setCategory(c.slug)}>
                 {lang === "sq" ? c.name_sq : c.name_en}
