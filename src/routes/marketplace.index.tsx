@@ -56,11 +56,11 @@ function MarketplacePage() {
 
   const onFavorite = async (id: string) => {
     if (!user) {
-      toast.info("Sign in to save offers");
+      toast.info(t("mk.signInSave"));
       return;
     }
     const liked = await toggleFavorite(id, user.id);
-    toast.success(liked ? "Saved to favorites" : "Removed from favorites");
+    toast.success(liked ? t("mk.saved") : t("mk.removedFav"));
     favoritesQuery.refetch();
   };
 
