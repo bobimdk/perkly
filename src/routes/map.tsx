@@ -418,7 +418,7 @@ function MapPage() {
             ))}
             {(providers.data ?? []).length === 0 ? (
               <li className="rounded-xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
-                No businesses on the map yet.
+                {t("map.empty")}
               </li>
             ) : null}
           </ul>
