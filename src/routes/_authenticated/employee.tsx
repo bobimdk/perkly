@@ -219,6 +219,8 @@ function EmployeePage() {
                 </div>
               )}
             </section>
+
+            {user ? <FavoritesPanel userId={user.id} /> : null}
           </div>
 
 
