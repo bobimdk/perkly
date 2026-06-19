@@ -326,6 +326,7 @@ const dictionaries: Record<Lang, Dict> = {
     "map.pyramidHint": "Distancat llogariten nga Piramida e Tiranës, Shqipëri. Ndaje vendndodhjen tënde për distanca të sakta.",
     "map.empty": "Ende nuk ka biznese në hartë.",
     "map.youAreHere": "Ti je këtu",
+    "map.yourLocation": "vendndodhja jote",
     "map.pyramid": "Piramida e Tiranës",
     "map.from": "nga",
     "map.seeMore": "Shiko më shumë →",
