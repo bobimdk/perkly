@@ -314,6 +314,22 @@ const dictionaries: Record<Lang, Dict> = {
     "mk.perk3": "Konfirmim me email dhe brenda aplikacionit",
     "mk.provider": "Ofruesi",
 
+    // Map
+    "map.title": "Përfitime pranë meje",
+    "map.sub": "Hartë në kohë reale e vendeve ku kolegët përdorin përfitimet e tyre. Lejo vendndodhjen për të parë bizneset më të afërta.",
+    "map.useMyLocation": "Përdor vendndodhjen time",
+    "map.locating": "Po vendosemi…",
+    "map.recenter": "Qendro te unë",
+    "map.nearestYou": "Më të afërt me ty",
+    "map.nearestPyramid": "Më të afërt me Piramidën e Tiranës",
+    "map.pyramidHint": "Distancat llogariten nga Piramida e Tiranës, Shqipëri. Ndaje vendndodhjen tënde për distanca të sakta.",
+    "map.empty": "Ende nuk ka biznese në hartë.",
+    "map.youAreHere": "Ti je këtu",
+    "map.pyramid": "Piramida e Tiranës",
+    "map.from": "nga",
+    "map.seeMore": "Shiko më shumë →",
+    "map.live": "Live",
+
     // Employee dashboard
     "emp.title": "Përfitimet e mia",
     "emp.monthly": "Buxheti mujor",
