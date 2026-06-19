@@ -344,12 +344,13 @@ function MapPage() {
 
   const nearest = useMemo(() => {
     const list = providers.data ?? [];
-    if (!userPos) return list.slice(0, 10).map((p) => ({ ...p, _km: null as number | null }));
+    const origin = userPos ?? PIRAMIDA;
     return list
-      .map((p) => ({ ...p, _km: distanceKm(userPos, p) }))
+      .map((p) => ({ ...p, _km: distanceKm(origin, p) }))
       .sort((a, b) => (a._km ?? 99999) - (b._km ?? 99999))
       .slice(0, 12);
   }, [providers.data, userPos]);
+
 
   const focus = (p: ProviderPin) => {
     mapRef.current?.flyTo([p.lat, p.lng], 16, { duration: 0.8 });
