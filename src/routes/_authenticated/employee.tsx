@@ -223,7 +223,7 @@ function EmployeePage() {
           {/* Right: company + notifications */}
           <aside className="space-y-4">
             <div className="rounded-3xl border border-border bg-card p-5">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Funded by</p>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{t("emp.fundedBy")}</p>
               <div className="mt-2 flex items-center gap-3">
                 <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary"><Building2 className="h-5 w-5" /></div>
                 <div>
@@ -234,9 +234,9 @@ function EmployeePage() {
             </div>
 
             <div className="rounded-3xl border border-border bg-card p-5">
-              <div className="flex items-center gap-2"><Bell className="h-4 w-4 text-primary" /><p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Notifications</p></div>
+              <div className="flex items-center gap-2"><Bell className="h-4 w-4 text-primary" /><p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{t("emp.notifications")}</p></div>
               {notifQuery.isLoading ? <Skeleton className="mt-3 h-24 rounded-lg" /> : (notifQuery.data ?? []).length === 0 ? (
-                <p className="mt-3 text-sm text-muted-foreground">All caught up. ✨</p>
+                <p className="mt-3 text-sm text-muted-foreground">{t("emp.allCaught")}</p>
               ) : (
                 <ul className="mt-3 space-y-2">
                   {notifQuery.data!.map((n) => (
