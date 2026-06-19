@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { MarketingNav, MarketingFooter } from "@/components/marketing/marketing-shell";
+import { PerklyHero } from "@/components/marketing/perkly-hero";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import {
@@ -49,7 +50,7 @@ function LandingPage() {
     <div className="min-h-screen bg-background">
       <MarketingNav />
       <main>
-        <Hero t={t} />
+        <PerklyHero />
         <TrustStrip />
         <HowItWorks t={t} />
         <Categories t={t} />
