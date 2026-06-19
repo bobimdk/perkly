@@ -134,6 +134,24 @@ const dictionaries: Record<Lang, Dict> = {
     "mk.perk3": "Confirmation by email and in-app",
     "mk.provider": "Provider",
 
+    // Map
+    "map.title": "Benefits near me",
+    "map.sub": "Real-time map of where colleagues are using their perks. Allow location to see the closest businesses to you.",
+    "map.useMyLocation": "Use my location",
+    "map.locating": "Locating…",
+    "map.recenter": "Recenter on me",
+    "map.nearestYou": "Nearest to you",
+    "map.nearestPyramid": "Nearest to Piramida e Tiranës",
+    "map.pyramidHint": "Showing distances from Piramida e Tiranës, Albania. Share your location for exact distances.",
+    "map.empty": "No businesses on the map yet.",
+    "map.youAreHere": "You are here",
+    "map.yourLocation": "your location",
+    "map.pyramid": "Piramida e Tiranës",
+    "map.from": "from",
+    "map.seeMore": "See more →",
+    "map.checkIn": "Perk check-in",
+    "map.live": "Live",
+
     // Employee dashboard
     "emp.title": "My benefits",
     "emp.monthly": "Monthly budget",
@@ -297,6 +315,24 @@ const dictionaries: Record<Lang, Dict> = {
     "mk.perk2": "Pa kosto paraprake — paguhet nga buxheti yt mujor",
     "mk.perk3": "Konfirmim me email dhe brenda aplikacionit",
     "mk.provider": "Ofruesi",
+
+    // Map
+    "map.title": "Përfitime pranë meje",
+    "map.sub": "Hartë në kohë reale e vendeve ku kolegët përdorin përfitimet e tyre. Lejo vendndodhjen për të parë bizneset më të afërta.",
+    "map.useMyLocation": "Përdor vendndodhjen time",
+    "map.locating": "Po vendosemi…",
+    "map.recenter": "Qendro te unë",
+    "map.nearestYou": "Më të afërt me ty",
+    "map.nearestPyramid": "Më të afërt me Piramidën e Tiranës",
+    "map.pyramidHint": "Distancat llogariten nga Piramida e Tiranës, Shqipëri. Ndaje vendndodhjen tënde për distanca të sakta.",
+    "map.empty": "Ende nuk ka biznese në hartë.",
+    "map.youAreHere": "Ti je këtu",
+    "map.yourLocation": "vendndodhja jote",
+    "map.pyramid": "Piramida e Tiranës",
+    "map.from": "nga",
+    "map.seeMore": "Shiko më shumë →",
+    "map.checkIn": "Përdorim i përfitimit",
+    "map.live": "Live",
 
     // Employee dashboard
     "emp.title": "Përfitimet e mia",

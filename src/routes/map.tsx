@@ -6,6 +6,7 @@ import { MarketingNav, MarketingFooter } from "@/components/marketing/marketing-
 import { Button } from "@/components/ui/button";
 import { fetchCheckIns } from "@/lib/phase5";
 import { imageFor, CATEGORY_IMAGE, DEFAULT_BUSINESS_IMAGE } from "@/lib/category-images";
+import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/map")({
@@ -143,11 +144,14 @@ function imageForProvider(p: ProviderPin) {
 }
 
 function MapPage() {
+  const { t } = useI18n();
+  useEffect(() => { document.title = `${t("map.title")} · Perkly`; }, [t]);
   const checkins = useQuery({ queryKey: ["checkins"], queryFn: () => fetchCheckIns(500) });
   const providers = useQuery({ queryKey: ["provider-pins"], queryFn: fetchProviderPins });
 
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(false);
+  const [mapReady, setMapReady] = useState(false);
 
   const mapEl = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
@@ -211,13 +215,14 @@ function MapPage() {
     (async () => {
       const L = (await import("leaflet")).default;
       if (cancelled || !mapEl.current || mapRef.current) return;
-      const map = L.map(mapEl.current).setView([41.3275, 19.8189], 13);
+      const map = L.map(mapEl.current).setView([PIRAMIDA.lat, PIRAMIDA.lng], 14);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "© OpenStreetMap contributors",
         maxZoom: 19,
       }).addTo(map);
       mapRef.current = map;
       layerRef.current = L.layerGroup().addTo(map);
+      setMapReady(true);
     })();
     return () => {
       cancelled = true;
@@ -247,26 +252,28 @@ function MapPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Render user marker
+  // Render user / Pyramid marker
   useEffect(() => {
-    if (!mapRef.current || !userPos) return;
+    if (!mapRef.current || !mapReady) return;
     (async () => {
       const L = (await import("leaflet")).default;
+      const pos = userPos ?? PIRAMIDA;
+      const label = userPos ? t("map.youAreHere") : t("map.pyramid");
       if (userMarkerRef.current) {
-        userMarkerRef.current.setLatLng([userPos.lat, userPos.lng]);
+        userMarkerRef.current.setLatLng([pos.lat, pos.lng]).setPopupContent(`<strong>${label}</strong>`);
       } else {
-        userMarkerRef.current = L.marker([userPos.lat, userPos.lng], { icon: buildUserIcon(L) })
+        userMarkerRef.current = L.marker([pos.lat, pos.lng], { icon: buildUserIcon(L) })
           .addTo(mapRef.current)
-          .bindPopup("<strong>You are here</strong>");
+          .bindPopup(`<strong>${label}</strong>`);
       }
     })();
-  }, [userPos]);
+  }, [userPos, t, mapReady]);
 
   // Render provider + checkin markers
   useEffect(() => {
-    if (!mapRef.current || !layerRef.current) return;
+    if (!mapRef.current || !layerRef.current || !mapReady) return;
     const origin = userPos ?? PIRAMIDA;
-    const originLabel = userPos ? "your location" : "Piramida e Tiranës";
+    const originLabel = userPos ? t("map.yourLocation") : t("map.pyramid");
     (async () => {
       const L = (await import("leaflet")).default;
       layerRef.current.clearLayers();
@@ -293,12 +300,12 @@ function MapPage() {
             ${p.featured?.title ? `<div style="font-size:11px;color:#6b7280;margin-top:2px">${escapeHtml(p.featured.title)}</div>` : ""}
             <div style="margin-top:6px;display:flex;align-items:center;gap:6px;font-size:11px;color:#f59e0b;font-weight:600">
               <span>${fmtDistance(km)}</span>
-              <span style="color:#9ca3af;font-weight:400">from ${originLabel}</span>
+              <span style="color:#9ca3af;font-weight:400">${t("map.from")} ${originLabel}</span>
             </div>
             ${p.address ? `<div style="margin-top:4px;font-size:11px;color:#6b7280">${escapeHtml(p.address)}</div>` : ""}
             ${desc ? `<div style="margin-top:8px;font-size:12px;color:#374151;line-height:1.35">${escapeHtml(desc)}</div>` : ""}
             ${priceLine}
-            <a href="${ctaHref}" style="display:inline-block;margin-top:10px;padding:6px 12px;background:#f59e0b;color:white;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">See more →</a>
+            <a href="${ctaHref}" style="display:inline-block;margin-top:10px;padding:6px 12px;background:#f59e0b;color:white;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">${t("map.seeMore")}</a>
           </div>`;
         L.marker([p.lat, p.lng], { icon }).addTo(layerRef.current).bindPopup(html);
       }
@@ -306,10 +313,10 @@ function MapPage() {
         const icon = buildIcon(L, imageFor(c));
         L.marker([c.lat, c.lng], { icon })
           .addTo(layerRef.current)
-          .bindPopup(`<strong>${escapeHtml(c.provider_name ?? "Perk check-in")}</strong>`);
+          .bindPopup(`<strong>${escapeHtml(c.provider_name ?? t("map.checkIn"))}</strong>`);
       }
     })();
-  }, [providers.data, checkins.data, userPos]);
+  }, [providers.data, checkins.data, userPos, t, mapReady]);
 
 
   // Realtime check-ins
@@ -360,15 +367,13 @@ function MapPage() {
     <>
       <MarketingNav />
       <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
-        <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Live</p>
-        <h1 className="mt-1 font-display text-4xl font-bold">Benefits Near Me</h1>
-        <p className="mt-2 max-w-2xl text-muted-foreground">
-          Real-time map of where colleagues are using their perks. Allow location to see the closest businesses to you.
-        </p>
+        <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">{t("map.live")}</p>
+        <h1 className="mt-1 font-display text-4xl font-bold">{t("map.title")}</h1>
+        <p className="mt-2 max-w-2xl text-muted-foreground">{t("map.sub")}</p>
         <div className="mt-4">
           <Button onClick={requestLocation} disabled={locating} variant="outline" size="sm">
             <Crosshair className="mr-2 h-4 w-4" />
-            {userPos ? "Recenter on me" : locating ? "Locating…" : "Use my location"}
+            {userPos ? t("map.recenter") : locating ? t("map.locating") : t("map.useMyLocation")}
           </Button>
         </div>
       </div>
@@ -378,13 +383,11 @@ function MapPage() {
           <div className="flex items-center gap-2">
             <Navigation className="h-4 w-4 text-primary" />
             <p className="font-display font-semibold">
-              {userPos ? "Nearest to you" : "Nearest to Piramida e Tiranës"}
+              {userPos ? t("map.nearestYou") : t("map.nearestPyramid")}
             </p>
           </div>
           {!userPos ? (
-            <p className="mt-2 text-xs text-muted-foreground">
-              Showing distances from Piramida e Tiranës. Share your location for exact distances.
-            </p>
+            <p className="mt-2 text-xs text-muted-foreground">{t("map.pyramidHint")}</p>
           ) : null}
 
           <ul className="mt-3 max-h-[520px] space-y-2 overflow-y-auto pr-1">
@@ -417,7 +420,7 @@ function MapPage() {
             ))}
             {(providers.data ?? []).length === 0 ? (
               <li className="rounded-xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
-                No businesses on the map yet.
+                {t("map.empty")}
               </li>
             ) : null}
           </ul>
