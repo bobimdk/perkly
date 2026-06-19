@@ -12,6 +12,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { LanguageSwitch, CurrencySwitch } from "@/components/ui/lang-currency-switch";
 
 export function DashboardShell({
   title,
