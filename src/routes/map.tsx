@@ -271,7 +271,7 @@ function MapPage() {
 
   // Render provider + checkin markers
   useEffect(() => {
-    if (!mapRef.current || !layerRef.current) return;
+    if (!mapRef.current || !layerRef.current || !mapReady) return;
     const origin = userPos ?? PIRAMIDA;
     const originLabel = userPos ? t("map.yourLocation") : t("map.pyramid");
     (async () => {
@@ -316,7 +316,7 @@ function MapPage() {
           .bindPopup(`<strong>${escapeHtml(c.provider_name ?? t("map.checkIn"))}</strong>`);
       }
     })();
-  }, [providers.data, checkins.data, userPos, t]);
+  }, [providers.data, checkins.data, userPos, t, mapReady]);
 
 
   // Realtime check-ins
