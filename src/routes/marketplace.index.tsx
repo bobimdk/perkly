@@ -132,8 +132,8 @@ function MarketplacePage() {
 
         {!offersQuery.isLoading && (offersQuery.data ?? []).length === 0 ? (
           <div className="mt-12 rounded-2xl border border-dashed border-border bg-card p-12 text-center">
-            <p className="font-display text-lg font-semibold">No offers match your search</p>
-            <p className="mt-2 text-sm text-muted-foreground">Try a different category or search term.</p>
+            <p className="font-display text-lg font-semibold">{t("mkt.empty.title")}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{t("mkt.empty.sub")}</p>
           </div>
         ) : null}
       </section>
