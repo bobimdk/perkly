@@ -254,7 +254,7 @@ function MapPage() {
 
   // Render user / Pyramid marker
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef.current || !mapReady) return;
     (async () => {
       const L = (await import("leaflet")).default;
       const pos = userPos ?? PIRAMIDA;
@@ -267,7 +267,7 @@ function MapPage() {
           .bindPopup(`<strong>${label}</strong>`);
       }
     })();
-  }, [userPos, t]);
+  }, [userPos, t, mapReady]);
 
   // Render provider + checkin markers
   useEffect(() => {
