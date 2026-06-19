@@ -6,6 +6,7 @@ import { MarketingNav, MarketingFooter } from "@/components/marketing/marketing-
 import { Button } from "@/components/ui/button";
 import { fetchCheckIns } from "@/lib/phase5";
 import { imageFor, CATEGORY_IMAGE, DEFAULT_BUSINESS_IMAGE } from "@/lib/category-images";
+import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/map")({
