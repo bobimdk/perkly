@@ -134,6 +134,22 @@ const dictionaries: Record<Lang, Dict> = {
     "mk.perk3": "Confirmation by email and in-app",
     "mk.provider": "Provider",
 
+    // Map
+    "map.title": "Benefits near me",
+    "map.sub": "Real-time map of where colleagues are using their perks. Allow location to see the closest businesses to you.",
+    "map.useMyLocation": "Use my location",
+    "map.locating": "Locating…",
+    "map.recenter": "Recenter on me",
+    "map.nearestYou": "Nearest to you",
+    "map.nearestPyramid": "Nearest to Piramida e Tiranës",
+    "map.pyramidHint": "Showing distances from Piramida e Tiranës, Albania. Share your location for exact distances.",
+    "map.empty": "No businesses on the map yet.",
+    "map.youAreHere": "You are here",
+    "map.pyramid": "Piramida e Tiranës",
+    "map.from": "from",
+    "map.seeMore": "See more →",
+    "map.live": "Live",
+
     // Employee dashboard
     "emp.title": "My benefits",
     "emp.monthly": "Monthly budget",
