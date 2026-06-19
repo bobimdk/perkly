@@ -264,7 +264,7 @@ function MapPage() {
     })();
   }, [userPos, t, mapReady]);
 
-  // Render provider + checkin markers
+  // Render offer + checkin markers
   useEffect(() => {
     if (!mapRef.current || !layerRef.current || !mapReady) return;
     const origin = userPos ?? PIRAMIDA;
@@ -272,27 +272,25 @@ function MapPage() {
     (async () => {
       const L = (await import("leaflet")).default;
       layerRef.current.clearLayers();
-      for (const p of providers.data ?? []) {
-        const icon = buildIcon(L, imageForProvider(p));
+      for (const p of offers.data ?? []) {
+        const icon = buildIcon(L, imageForOffer(p));
         const km = distanceKm(origin, p);
         const desc =
-          p.featured?.subtitle ||
-          (p.featured?.description ? p.featured.description.slice(0, 140) : null) ||
-          p.tagline ||
-          (p.description ? p.description.slice(0, 140) : null) ||
+          p.subtitle ||
+          (p.description ? p.description.slice(0, 140) : "") ||
           "";
         const priceLine =
-          p.featured && (p.featured.price_all != null || p.featured.price_eur != null)
+          p.price_all != null || p.price_eur != null
             ? `<div style="margin-top:6px;font-family:ui-monospace,monospace;font-size:11px;color:#f59e0b;font-weight:600">
-                 ${p.featured.price_all != null ? `${p.featured.price_all} ALL` : ""}
-                 ${p.featured.price_eur != null ? ` · €${p.featured.price_eur}` : ""}
+                 ${p.price_all != null ? `${p.price_all} ALL` : ""}
+                 ${p.price_eur != null ? ` · €${p.price_eur}` : ""}
                </div>`
             : "";
-        const ctaHref = p.featured ? `/marketplace/${p.featured.slug}` : `/marketplace`;
+        const ctaHref = `/marketplace/${p.slug}`;
         const html = `
           <div style="min-width:220px;max-width:260px;font-family:inherit">
-            <div style="font-weight:700;font-size:14px;line-height:1.2">${escapeHtml(p.name)}</div>
-            ${p.featured?.title ? `<div style="font-size:11px;color:#6b7280;margin-top:2px">${escapeHtml(p.featured.title)}</div>` : ""}
+            <div style="font-weight:700;font-size:14px;line-height:1.2">${escapeHtml(p.title)}</div>
+            <div style="font-size:11px;color:#6b7280;margin-top:2px">${escapeHtml(p.name)}</div>
             <div style="margin-top:6px;display:flex;align-items:center;gap:6px;font-size:11px;color:#f59e0b;font-weight:600">
               <span>${fmtDistance(km)}</span>
               <span style="color:#9ca3af;font-weight:400">${t("map.from")} ${originLabel}</span>
@@ -311,7 +309,7 @@ function MapPage() {
           .bindPopup(`<strong>${escapeHtml(c.provider_name ?? t("map.checkIn"))}</strong>`);
       }
     })();
-  }, [providers.data, checkins.data, userPos, t, mapReady]);
+  }, [offers.data, checkins.data, userPos, t, mapReady]);
 
 
   // Realtime check-ins
@@ -345,16 +343,16 @@ function MapPage() {
   }, []);
 
   const nearest = useMemo(() => {
-    const list = providers.data ?? [];
+    const list = offers.data ?? [];
     const origin = userPos ?? PIRAMIDA;
     return list
       .map((p) => ({ ...p, _km: distanceKm(origin, p) }))
       .sort((a, b) => (a._km ?? 99999) - (b._km ?? 99999))
       .slice(0, 12);
-  }, [providers.data, userPos]);
+  }, [offers.data, userPos]);
 
 
-  const focus = (p: ProviderPin) => {
+  const focus = (p: OfferPin) => {
     mapRef.current?.flyTo([p.lat, p.lng], 16, { duration: 0.8 });
   };
 
