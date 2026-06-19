@@ -21,7 +21,8 @@ export const Route = createFileRoute("/map")({
   component: MapPage,
 });
 
-type FeaturedOffer = {
+type OfferPin = {
+  id: string;
   slug: string;
   title: string;
   subtitle: string | null;
@@ -29,65 +30,58 @@ type FeaturedOffer = {
   price_all: number | null;
   price_eur: number | null;
   cover_url: string | null;
-};
-
-type ProviderPin = {
-  id: string;
-  name: string;
-  slug: string;
+  category_slug: string | null;
+  provider_id: string;
+  name: string; // provider name (used by marker label / nearest list)
+  provider_slug: string;
   logo_url: string | null;
-  tagline: string | null;
-  description: string | null;
   address: string | null;
   city: string | null;
   lat: number;
   lng: number;
-  category_slug: string | null;
-  featured: FeaturedOffer | null;
 };
 
 // Piramida e Tiranës — fallback "current location" when geolocation denied
 const PIRAMIDA = { lat: 41.3236, lng: 19.8197 };
 
-async function fetchProviderPins(): Promise<ProviderPin[]> {
+async function fetchOfferPins(): Promise<OfferPin[]> {
   const { data, error } = await supabase
-    .from("providers")
+    .from("offers")
     .select(
-      "id,name,slug,logo_url,tagline,description,address,city,lat,lng," +
-        "offers(slug,title,subtitle,description,price_all,price_eur,cover_url,status,categories(slug))",
+      "id,slug,title,subtitle,description,price_all,price_eur,cover_url,status," +
+        "categories(slug)," +
+        "providers!inner(id,name,slug,logo_url,address,city,lat,lng,status)",
     )
-    .eq("status", "active")
-    .not("lat", "is", null)
-    .not("lng", "is", null);
+    .eq("status", "published")
+    .eq("providers.status", "active")
+    .not("providers.lat", "is", null)
+    .not("providers.lng", "is", null);
   if (error) throw error;
-  return (data ?? []).map((p: any) => {
-    const offers: any[] = Array.isArray(p.offers) ? p.offers : [];
-    const published = offers.find((o) => o?.status === "published") ?? offers[0] ?? null;
-    return {
-      id: p.id,
-      name: p.name,
-      slug: p.slug,
-      logo_url: p.logo_url,
-      tagline: p.tagline,
-      description: p.description,
-      address: p.address,
-      city: p.city,
-      lat: Number(p.lat),
-      lng: Number(p.lng),
-      category_slug: published?.categories?.slug ?? null,
-      featured: published
-        ? {
-            slug: published.slug,
-            title: published.title,
-            subtitle: published.subtitle ?? null,
-            description: published.description ?? null,
-            price_all: published.price_all ?? null,
-            price_eur: published.price_eur ?? null,
-            cover_url: published.cover_url ?? null,
-          }
-        : null,
-    };
-  });
+  return (data ?? [])
+    .map((o: any) => {
+      const pr = o.providers;
+      if (!pr || pr.lat == null || pr.lng == null) return null;
+      return {
+        id: o.id,
+        slug: o.slug,
+        title: o.title,
+        subtitle: o.subtitle ?? null,
+        description: o.description ?? null,
+        price_all: o.price_all ?? null,
+        price_eur: o.price_eur ?? null,
+        cover_url: o.cover_url ?? null,
+        category_slug: o.categories?.slug ?? null,
+        provider_id: pr.id,
+        name: pr.name,
+        provider_slug: pr.slug,
+        logo_url: pr.logo_url,
+        address: pr.address,
+        city: pr.city,
+        lat: Number(pr.lat),
+        lng: Number(pr.lng),
+      } as OfferPin;
+    })
+    .filter((x): x is OfferPin => x !== null);
 }
 
 function fmtDistance(km: number) {
