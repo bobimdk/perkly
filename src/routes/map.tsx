@@ -212,7 +212,7 @@ function MapPage() {
     (async () => {
       const L = (await import("leaflet")).default;
       if (cancelled || !mapEl.current || mapRef.current) return;
-      const map = L.map(mapEl.current).setView([41.3275, 19.8189], 13);
+      const map = L.map(mapEl.current).setView([PIRAMIDA.lat, PIRAMIDA.lng], 14);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "© OpenStreetMap contributors",
         maxZoom: 19,
