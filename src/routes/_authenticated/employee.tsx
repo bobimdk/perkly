@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_authenticated/employee")({
 function EmployeePage() {
   const { user, roles } = useAuth();
   const qc = useQueryClient();
-  const { formatPrice } = useI18n();
+  const { formatPrice, t } = useI18n();
 
   // If this account is actually a provider / employer / admin, send them to the right dashboard
   // instead of showing the "you're not linked to a company" screen.
