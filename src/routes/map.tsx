@@ -21,7 +21,8 @@ export const Route = createFileRoute("/map")({
   component: MapPage,
 });
 
-type FeaturedOffer = {
+type OfferPin = {
+  id: string;
   slug: string;
   title: string;
   subtitle: string | null;
@@ -29,65 +30,58 @@ type FeaturedOffer = {
   price_all: number | null;
   price_eur: number | null;
   cover_url: string | null;
-};
-
-type ProviderPin = {
-  id: string;
-  name: string;
-  slug: string;
+  category_slug: string | null;
+  provider_id: string;
+  name: string; // provider name (used by marker label / nearest list)
+  provider_slug: string;
   logo_url: string | null;
-  tagline: string | null;
-  description: string | null;
   address: string | null;
   city: string | null;
   lat: number;
   lng: number;
-  category_slug: string | null;
-  featured: FeaturedOffer | null;
 };
 
 // Piramida e Tiranës — fallback "current location" when geolocation denied
 const PIRAMIDA = { lat: 41.3236, lng: 19.8197 };
 
-async function fetchProviderPins(): Promise<ProviderPin[]> {
+async function fetchOfferPins(): Promise<OfferPin[]> {
   const { data, error } = await supabase
-    .from("providers")
+    .from("offers")
     .select(
-      "id,name,slug,logo_url,tagline,description,address,city,lat,lng," +
-        "offers(slug,title,subtitle,description,price_all,price_eur,cover_url,status,categories(slug))",
+      "id,slug,title,subtitle,description,price_all,price_eur,cover_url,status," +
+        "categories(slug)," +
+        "providers!inner(id,name,slug,logo_url,address,city,lat,lng,status)",
     )
-    .eq("status", "active")
-    .not("lat", "is", null)
-    .not("lng", "is", null);
+    .eq("status", "published")
+    .eq("providers.status", "active")
+    .not("providers.lat", "is", null)
+    .not("providers.lng", "is", null);
   if (error) throw error;
-  return (data ?? []).map((p: any) => {
-    const offers: any[] = Array.isArray(p.offers) ? p.offers : [];
-    const published = offers.find((o) => o?.status === "published") ?? offers[0] ?? null;
-    return {
-      id: p.id,
-      name: p.name,
-      slug: p.slug,
-      logo_url: p.logo_url,
-      tagline: p.tagline,
-      description: p.description,
-      address: p.address,
-      city: p.city,
-      lat: Number(p.lat),
-      lng: Number(p.lng),
-      category_slug: published?.categories?.slug ?? null,
-      featured: published
-        ? {
-            slug: published.slug,
-            title: published.title,
-            subtitle: published.subtitle ?? null,
-            description: published.description ?? null,
-            price_all: published.price_all ?? null,
-            price_eur: published.price_eur ?? null,
-            cover_url: published.cover_url ?? null,
-          }
-        : null,
-    };
-  });
+  return (data ?? [])
+    .map((o: any) => {
+      const pr = o.providers;
+      if (!pr || pr.lat == null || pr.lng == null) return null;
+      return {
+        id: o.id,
+        slug: o.slug,
+        title: o.title,
+        subtitle: o.subtitle ?? null,
+        description: o.description ?? null,
+        price_all: o.price_all ?? null,
+        price_eur: o.price_eur ?? null,
+        cover_url: o.cover_url ?? null,
+        category_slug: o.categories?.slug ?? null,
+        provider_id: pr.id,
+        name: pr.name,
+        provider_slug: pr.slug,
+        logo_url: pr.logo_url,
+        address: pr.address,
+        city: pr.city,
+        lat: Number(pr.lat),
+        lng: Number(pr.lng),
+      } as OfferPin;
+    })
+    .filter((x): x is OfferPin => x !== null);
 }
 
 function fmtDistance(km: number) {
@@ -137,8 +131,9 @@ function buildUserIcon(L: any) {
   });
 }
 
-function imageForProvider(p: ProviderPin) {
-  return p.logo_url
+function imageForOffer(p: OfferPin) {
+  return p.cover_url
+    || p.logo_url
     || (p.category_slug ? CATEGORY_IMAGE[p.category_slug] : undefined)
     || DEFAULT_BUSINESS_IMAGE;
 }
@@ -147,7 +142,7 @@ function MapPage() {
   const { t } = useI18n();
   useEffect(() => { document.title = `${t("map.title")} · Perkly`; }, [t]);
   const checkins = useQuery({ queryKey: ["checkins"], queryFn: () => fetchCheckIns(500) });
-  const providers = useQuery({ queryKey: ["provider-pins"], queryFn: fetchProviderPins });
+  const offers = useQuery({ queryKey: ["map-offer-pins"], queryFn: fetchOfferPins });
 
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(false);
@@ -269,7 +264,7 @@ function MapPage() {
     })();
   }, [userPos, t, mapReady]);
 
-  // Render provider + checkin markers
+  // Render offer + checkin markers
   useEffect(() => {
     if (!mapRef.current || !layerRef.current || !mapReady) return;
     const origin = userPos ?? PIRAMIDA;
@@ -277,27 +272,25 @@ function MapPage() {
     (async () => {
       const L = (await import("leaflet")).default;
       layerRef.current.clearLayers();
-      for (const p of providers.data ?? []) {
-        const icon = buildIcon(L, imageForProvider(p));
+      for (const p of offers.data ?? []) {
+        const icon = buildIcon(L, imageForOffer(p));
         const km = distanceKm(origin, p);
         const desc =
-          p.featured?.subtitle ||
-          (p.featured?.description ? p.featured.description.slice(0, 140) : null) ||
-          p.tagline ||
-          (p.description ? p.description.slice(0, 140) : null) ||
+          p.subtitle ||
+          (p.description ? p.description.slice(0, 140) : "") ||
           "";
         const priceLine =
-          p.featured && (p.featured.price_all != null || p.featured.price_eur != null)
+          p.price_all != null || p.price_eur != null
             ? `<div style="margin-top:6px;font-family:ui-monospace,monospace;font-size:11px;color:#f59e0b;font-weight:600">
-                 ${p.featured.price_all != null ? `${p.featured.price_all} ALL` : ""}
-                 ${p.featured.price_eur != null ? ` · €${p.featured.price_eur}` : ""}
+                 ${p.price_all != null ? `${p.price_all} ALL` : ""}
+                 ${p.price_eur != null ? ` · €${p.price_eur}` : ""}
                </div>`
             : "";
-        const ctaHref = p.featured ? `/marketplace/${p.featured.slug}` : `/marketplace`;
+        const ctaHref = `/marketplace/${p.slug}`;
         const html = `
           <div style="min-width:220px;max-width:260px;font-family:inherit">
-            <div style="font-weight:700;font-size:14px;line-height:1.2">${escapeHtml(p.name)}</div>
-            ${p.featured?.title ? `<div style="font-size:11px;color:#6b7280;margin-top:2px">${escapeHtml(p.featured.title)}</div>` : ""}
+            <div style="font-weight:700;font-size:14px;line-height:1.2">${escapeHtml(p.title)}</div>
+            <div style="font-size:11px;color:#6b7280;margin-top:2px">${escapeHtml(p.name)}</div>
             <div style="margin-top:6px;display:flex;align-items:center;gap:6px;font-size:11px;color:#f59e0b;font-weight:600">
               <span>${fmtDistance(km)}</span>
               <span style="color:#9ca3af;font-weight:400">${t("map.from")} ${originLabel}</span>
@@ -316,7 +309,7 @@ function MapPage() {
           .bindPopup(`<strong>${escapeHtml(c.provider_name ?? t("map.checkIn"))}</strong>`);
       }
     })();
-  }, [providers.data, checkins.data, userPos, t, mapReady]);
+  }, [offers.data, checkins.data, userPos, t, mapReady]);
 
 
   // Realtime check-ins
@@ -350,16 +343,16 @@ function MapPage() {
   }, []);
 
   const nearest = useMemo(() => {
-    const list = providers.data ?? [];
+    const list = offers.data ?? [];
     const origin = userPos ?? PIRAMIDA;
     return list
       .map((p) => ({ ...p, _km: distanceKm(origin, p) }))
       .sort((a, b) => (a._km ?? 99999) - (b._km ?? 99999))
       .slice(0, 12);
-  }, [providers.data, userPos]);
+  }, [offers.data, userPos]);
 
 
-  const focus = (p: ProviderPin) => {
+  const focus = (p: OfferPin) => {
     mapRef.current?.flyTo([p.lat, p.lng], 16, { duration: 0.8 });
   };
 
@@ -398,13 +391,14 @@ function MapPage() {
                   className="flex w-full items-center gap-3 rounded-xl border border-border bg-background p-2 text-left transition-colors hover:bg-muted"
                 >
                   <img
-                    src={imageForProvider(p)}
+                    src={imageForOffer(p)}
                     alt=""
                     className="h-10 w-10 flex-shrink-0 rounded-full border border-border object-cover"
                     onError={(e) => ((e.target as HTMLImageElement).src = DEFAULT_BUSINESS_IMAGE)}
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-display text-sm font-semibold">{p.name}</p>
+                    <p className="truncate font-display text-sm font-semibold">{p.title}</p>
+                    <p className="truncate text-[11px] text-muted-foreground">{p.name}</p>
                     <p className="truncate text-[11px] text-muted-foreground">
                       <MapPin className="mr-0.5 inline h-3 w-3" />
                       {p.address || p.city || "—"}
@@ -418,7 +412,7 @@ function MapPage() {
                 </button>
               </li>
             ))}
-            {(providers.data ?? []).length === 0 ? (
+            {(offers.data ?? []).length === 0 ? (
               <li className="rounded-xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
                 {t("map.empty")}
               </li>
