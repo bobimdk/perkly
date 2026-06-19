@@ -20,37 +20,86 @@ export const Route = createFileRoute("/map")({
   component: MapPage,
 });
 
+type FeaturedOffer = {
+  slug: string;
+  title: string;
+  subtitle: string | null;
+  description: string | null;
+  price_all: number | null;
+  price_eur: number | null;
+  cover_url: string | null;
+};
+
 type ProviderPin = {
   id: string;
   name: string;
   slug: string;
   logo_url: string | null;
+  tagline: string | null;
+  description: string | null;
   address: string | null;
   city: string | null;
   lat: number;
   lng: number;
   category_slug: string | null;
+  featured: FeaturedOffer | null;
 };
+
+// Piramida e Tiranës — fallback "current location" when geolocation denied
+const PIRAMIDA = { lat: 41.3236, lng: 19.8197 };
 
 async function fetchProviderPins(): Promise<ProviderPin[]> {
   const { data, error } = await supabase
     .from("providers")
-    .select("id,name,slug,logo_url,address,city,lat,lng,offers(categories(slug))")
+    .select(
+      "id,name,slug,logo_url,tagline,description,address,city,lat,lng," +
+        "offers(slug,title,subtitle,description,price_all,price_eur,cover_url,status,categories(slug))",
+    )
     .eq("status", "active")
     .not("lat", "is", null)
     .not("lng", "is", null);
   if (error) throw error;
-  return (data ?? []).map((p: any) => ({
-    id: p.id,
-    name: p.name,
-    slug: p.slug,
-    logo_url: p.logo_url,
-    address: p.address,
-    city: p.city,
-    lat: Number(p.lat),
-    lng: Number(p.lng),
-    category_slug: p.offers?.[0]?.categories?.slug ?? null,
-  }));
+  return (data ?? []).map((p: any) => {
+    const offers: any[] = Array.isArray(p.offers) ? p.offers : [];
+    const published = offers.find((o) => o?.status === "published") ?? offers[0] ?? null;
+    return {
+      id: p.id,
+      name: p.name,
+      slug: p.slug,
+      logo_url: p.logo_url,
+      tagline: p.tagline,
+      description: p.description,
+      address: p.address,
+      city: p.city,
+      lat: Number(p.lat),
+      lng: Number(p.lng),
+      category_slug: published?.categories?.slug ?? null,
+      featured: published
+        ? {
+            slug: published.slug,
+            title: published.title,
+            subtitle: published.subtitle ?? null,
+            description: published.description ?? null,
+            price_all: published.price_all ?? null,
+            price_eur: published.price_eur ?? null,
+            cover_url: published.cover_url ?? null,
+          }
+        : null,
+    };
+  });
+}
+
+function fmtDistance(km: number) {
+  return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
+}
+
+function escapeHtml(s: string) {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function distanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
