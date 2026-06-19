@@ -26,7 +26,7 @@ export const Route = createFileRoute("/marketplace/")({
 });
 
 function MarketplacePage() {
-  const { lang } = useI18n();
+  const { lang, t } = useI18n();
   const { user } = useAuth();
   const [tab, setTab] = useState<OfferFilter["tab"]>("trending");
   const [search, setSearch] = useState("");
