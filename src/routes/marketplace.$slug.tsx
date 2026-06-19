@@ -23,7 +23,7 @@ export const Route = createFileRoute("/marketplace/$slug")({
 
 function OfferDetailPage() {
   const { slug } = Route.useParams();
-  const { formatPrice, lang } = useI18n();
+  const { formatPrice, lang, t } = useI18n();
   const { user } = useAuth();
   const [activeImg, setActiveImg] = useState(0);
 
@@ -70,7 +70,7 @@ function OfferDetailPage() {
 
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <Link to="/marketplace" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-4 w-4" /> Back to marketplace
+          <ArrowLeft className="h-4 w-4" /> {t("mk.back")}
         </Link>
 
         <div className="mt-6 grid gap-10 lg:grid-cols-[1.4fr_1fr]">
@@ -105,7 +105,7 @@ function OfferDetailPage() {
                 ) : null}
                 {offer.is_limited_time ? (
                   <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-3 py-1 text-xs font-semibold text-destructive">
-                    <Clock className="h-3 w-3" /> Limited time
+                    <Clock className="h-3 w-3" /> {t("mk.limited")}
                   </span>
                 ) : null}
               </div>
@@ -118,26 +118,26 @@ function OfferDetailPage() {
                 ) : null}
                 <span className="inline-flex items-center gap-1">
                   <Star className="h-4 w-4 fill-warning text-warning" />
-                  {offer.rating_avg ? offer.rating_avg.toFixed(1) : "New"} · {offer.rating_count} reviews
+                  {offer.rating_avg ? offer.rating_avg.toFixed(1) : t("mk.new")} · {offer.rating_count} {t("mk.reviews")}
                 </span>
                 {offer.remaining != null ? (
-                  <span className="inline-flex items-center gap-1"><Users className="h-4 w-4" /> {offer.remaining} spots left</span>
+                  <span className="inline-flex items-center gap-1"><Users className="h-4 w-4" /> {offer.remaining} {t("mk.spotsLeft")}</span>
                 ) : null}
               </div>
 
               <div className="mt-8 space-y-4">
-                <h2 className="font-display text-xl font-semibold">About this perk</h2>
+                <h2 className="font-display text-xl font-semibold">{t("mk.about")}</h2>
                 <p className="leading-relaxed text-foreground/80">{offer.description}</p>
               </div>
 
               {/* Reviews */}
               <div className="mt-12">
-                <h2 className="font-display text-xl font-semibold">Reviews</h2>
+                <h2 className="font-display text-xl font-semibold">{t("mk.reviewsTitle")}</h2>
                 {reviewsQuery.isLoading ? (
                   <Skeleton className="mt-4 h-24 rounded-xl" />
                 ) : (reviewsQuery.data ?? []).length === 0 ? (
                   <p className="mt-4 rounded-2xl border border-dashed border-border bg-card p-6 text-sm text-muted-foreground">
-                    No reviews yet. Be the first to share your experience after you redeem this perk.
+                    {t("mk.noReviews")}
                   </p>
                 ) : (
                   <ul className="mt-4 space-y-3">
@@ -181,41 +181,41 @@ function OfferDetailPage() {
                 size="lg"
                 className="mt-6 w-full rounded-xl shadow-sm"
                 onClick={async () => {
-                  if (!user) return toast.info("Sign in to build your package");
+                  if (!user) return toast.info(t("mk.signInPackage"));
                   try {
                     await addOfferToDraft(user.id, { id: offer.id, provider_id: offer.provider_id, price_all: Number(offer.price_all) });
-                    toast.success("Added to your package");
+                    toast.success(t("mk.added"));
                     import("@/lib/gamification").then((m) => m.progressQuest(user.id, "daily_add_item").catch(() => {}));
                   } catch (e) { toast.error((e as Error).message); }
                 }}
               >
-                <ShoppingBag className="mr-2 h-4 w-4" /> Add to my package
+                <ShoppingBag className="mr-2 h-4 w-4" /> {t("mk.addToPackage")}
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 className="mt-3 w-full rounded-xl"
                 onClick={async () => {
-                  if (!user) return toast.info("Sign in to save offers");
+                  if (!user) return toast.info(t("mk.signInSave"));
                   const liked = await toggleFavorite(offer.id, user.id);
-                  toast.success(liked ? "Saved" : "Removed from favorites");
+                  toast.success(liked ? t("mk.saved") : t("mk.removedFav"));
                   favoritesQuery.refetch();
                 }}
               >
                 <Heart className={`mr-2 h-4 w-4 ${isFav ? "fill-destructive text-destructive" : ""}`} />
-                {isFav ? "Saved" : "Save for later"}
+                {isFav ? t("mk.saved") : t("mk.saveLater")}
               </Button>
 
               <ul className="mt-6 space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 text-success" /> Instant approval via your employer's rules</li>
-                <li className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 text-success" /> No upfront cost — paid from your monthly budget</li>
-                <li className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 text-success" /> Confirmation by email and in-app</li>
+                <li className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 text-success" /> {t("mk.perk1")}</li>
+                <li className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 text-success" /> {t("mk.perk2")}</li>
+                <li className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 h-4 w-4 text-success" /> {t("mk.perk3")}</li>
               </ul>
             </div>
 
             {offer.providers ? (
               <div className="mt-4 rounded-3xl border border-border bg-card p-5">
-                <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Provider</p>
+                <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{t("mk.provider")}</p>
                 <div className="mt-2 flex items-center gap-3">
                   {offer.providers.logo_url ? (
                     <img src={offer.providers.logo_url} alt="" className="h-12 w-12 rounded-full object-cover" />
