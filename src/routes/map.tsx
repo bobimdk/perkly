@@ -313,7 +313,7 @@ function MapPage() {
           .bindPopup(`<strong>${escapeHtml(c.provider_name ?? t("map.checkIn"))}</strong>`);
       }
     })();
-  }, [providers.data, checkins.data, userPos]);
+  }, [providers.data, checkins.data, userPos, t]);
 
 
   // Realtime check-ins
