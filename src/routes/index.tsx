@@ -50,7 +50,7 @@ function LandingPage() {
     <div className="min-h-screen bg-background">
       <MarketingNav />
       <main>
-        <Hero t={t} />
+        <PerklyHero />
         <TrustStrip />
         <HowItWorks t={t} />
         <Categories t={t} />
