@@ -144,6 +144,7 @@ function imageForProvider(p: ProviderPin) {
 }
 
 function MapPage() {
+  const { t } = useI18n();
   const checkins = useQuery({ queryKey: ["checkins"], queryFn: () => fetchCheckIns(500) });
   const providers = useQuery({ queryKey: ["provider-pins"], queryFn: fetchProviderPins });
 
