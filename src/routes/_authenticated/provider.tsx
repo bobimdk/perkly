@@ -192,6 +192,8 @@ function ProviderDetail({ provider }: { provider: ProviderRow }) {
         <NewOfferDialog providerId={provider.id} onCreated={() => qc.invalidateQueries({ queryKey: ["provider-offers", provider.id] })} />
       </div>
 
+      <LocationEditor provider={provider} onSaved={() => qc.invalidateQueries({ queryKey: ["my-providers"] })} />
+
       <div className="grid gap-3 sm:grid-cols-5">
         <StatCard label="Published" value={stats.published} />
         <StatCard label="Pending" value={stats.pending} />
