@@ -131,8 +131,9 @@ function buildUserIcon(L: any) {
   });
 }
 
-function imageForProvider(p: ProviderPin) {
-  return p.logo_url
+function imageForOffer(p: OfferPin) {
+  return p.cover_url
+    || p.logo_url
     || (p.category_slug ? CATEGORY_IMAGE[p.category_slug] : undefined)
     || DEFAULT_BUSINESS_IMAGE;
 }
@@ -141,7 +142,7 @@ function MapPage() {
   const { t } = useI18n();
   useEffect(() => { document.title = `${t("map.title")} · Perkly`; }, [t]);
   const checkins = useQuery({ queryKey: ["checkins"], queryFn: () => fetchCheckIns(500) });
-  const providers = useQuery({ queryKey: ["provider-pins"], queryFn: fetchProviderPins });
+  const offers = useQuery({ queryKey: ["map-offer-pins"], queryFn: fetchOfferPins });
 
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(false);
