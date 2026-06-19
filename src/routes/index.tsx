@@ -73,7 +73,7 @@ function Hero({ t }: { t: (k: string) => string }) {
         <div className="reveal">
           <div className="inline-flex items-center gap-3 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
             <span className="h-px w-8 bg-foreground/40" />
-            Albania first · Global ready
+            {t("hero.badge")}
           </div>
           <h1 className="mt-6 font-display text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
             {t("hero.title.a")}{" "}
@@ -93,12 +93,13 @@ function Hero({ t }: { t: (k: string) => string }) {
             </Button>
           </div>
           <div className="mt-10 flex flex-wrap items-center gap-6 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-            <span>20+ providers</span>
+            <span>{t("hero.stat.providers")}</span>
             <span className="h-1 w-1 rounded-full bg-muted-foreground/50" />
-            <span>4 roles</span>
+            <span>{t("hero.stat.roles")}</span>
             <span className="h-1 w-1 rounded-full bg-muted-foreground/50" />
             <span>SQ · EN · ALL · EUR</span>
           </div>
+
         </div>
 
         <div className="reveal relative">
