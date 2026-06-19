@@ -100,6 +100,7 @@ function EmployeePage() {
 
   return (
     <DashboardShell title={t("emp.title")}>
+      {user ? <PendingInvitesPanel userId={user.id} /> : null}
       {companyQuery.isLoading || draftQuery.isLoading ? (
         <Skeleton className="h-64 rounded-2xl" />
       ) : !companyQuery.data ? (
