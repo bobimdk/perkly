@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth, defaultRouteForRole, type AppRole } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Gift, ArrowLeft, Briefcase, User, Store, ShieldCheck } from "lucide-react";
@@ -121,7 +122,7 @@ function SignInForm() {
             Forgot?
           </Link>
         </div>
-        <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+        <PasswordInput id="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
       </div>
       <Button type="submit" disabled={submitting} className="w-full">
         {submitting ? "Signing in…" : "Sign in"}
@@ -205,7 +206,7 @@ function SignUpForm() {
       </div>
       <div className="space-y-2">
         <Label htmlFor="su-pw">Password</Label>
-        <Input id="su-pw" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
+        <PasswordInput id="su-pw" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
       </div>
       <Button type="submit" disabled={submitting} className="w-full">
         {submitting ? "Creating account…" : "Create my account"}
