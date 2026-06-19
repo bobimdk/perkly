@@ -381,13 +381,11 @@ function MapPage() {
           <div className="flex items-center gap-2">
             <Navigation className="h-4 w-4 text-primary" />
             <p className="font-display font-semibold">
-              {userPos ? "Nearest to you" : "Nearest to Piramida e Tiranës"}
+              {userPos ? t("map.nearestYou") : t("map.nearestPyramid")}
             </p>
           </div>
           {!userPos ? (
-            <p className="mt-2 text-xs text-muted-foreground">
-              Showing distances from Piramida e Tiranës. Share your location for exact distances.
-            </p>
+            <p className="mt-2 text-xs text-muted-foreground">{t("map.pyramidHint")}</p>
           ) : null}
 
           <ul className="mt-3 max-h-[520px] space-y-2 overflow-y-auto pr-1">
