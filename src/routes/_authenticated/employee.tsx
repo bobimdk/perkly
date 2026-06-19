@@ -101,7 +101,7 @@ function EmployeePage() {
       {companyQuery.isLoading || draftQuery.isLoading ? (
         <Skeleton className="h-64 rounded-2xl" />
       ) : !companyQuery.data ? (
-        <NoEmployer />
+        <NoEmployer t={t} />
       ) : (
         <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
           {/* Left: Budget + Package + History */}
