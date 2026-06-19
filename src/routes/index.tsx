@@ -73,7 +73,7 @@ function Hero({ t }: { t: (k: string) => string }) {
         <div className="reveal">
           <div className="inline-flex items-center gap-3 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
             <span className="h-px w-8 bg-foreground/40" />
-            Albania first · Global ready
+            {t("hero.badge")}
           </div>
           <h1 className="mt-6 font-display text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
             {t("hero.title.a")}{" "}
@@ -93,12 +93,13 @@ function Hero({ t }: { t: (k: string) => string }) {
             </Button>
           </div>
           <div className="mt-10 flex flex-wrap items-center gap-6 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-            <span>20+ providers</span>
+            <span>{t("hero.stat.providers")}</span>
             <span className="h-1 w-1 rounded-full bg-muted-foreground/50" />
-            <span>4 roles</span>
+            <span>{t("hero.stat.roles")}</span>
             <span className="h-1 w-1 rounded-full bg-muted-foreground/50" />
             <span>SQ · EN · ALL · EUR</span>
           </div>
+
         </div>
 
         <div className="reveal relative">
@@ -110,12 +111,13 @@ function Hero({ t }: { t: (k: string) => string }) {
 }
 
 function HeroCard() {
+  const { t } = useI18n();
   return (
     <div className="card-tilt card-tilt-hover relative mx-auto w-full max-w-md rounded-3xl border border-border bg-card p-6 shadow-2xl shadow-primary/10">
       <div className="flex items-center justify-between">
         <div>
           <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Monthly budget
+            {t("hero.card.monthly")}
           </p>
           <p className="mt-1 font-display text-3xl font-bold">
             12,400 <span className="text-base text-muted-foreground">ALL</span>
@@ -129,8 +131,8 @@ function HeroCard() {
         <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-primary to-primary-glow" />
       </div>
       <div className="mt-2 flex justify-between font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-        <span>Used 8,200</span>
-        <span>Left 4,200</span>
+        <span>{t("hero.card.used")} 8,200</span>
+        <span>{t("hero.card.left")} 4,200</span>
       </div>
 
       <div className="mt-6 space-y-3">
@@ -145,7 +147,7 @@ function HeroCard() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">{row.name}</p>
-              <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Active</p>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{t("hero.card.active")}</p>
             </div>
             <span className="font-mono text-xs font-semibold">{row.price}</span>
           </div>
@@ -155,13 +157,15 @@ function HeroCard() {
   );
 }
 
+
 function TrustStrip() {
+  const { t } = useI18n();
   const names = ["Vodafone AL", "One Albania", "BKT", "Raiffeisen", "Albtelecom", "ProCredit"];
   return (
     <section className="border-y border-border/60 bg-background py-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <p className="text-center font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          Trusted by forward-thinking teams
+          {t("trust.title")}
         </p>
         <div className="mt-5 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 opacity-70">
           {names.map((n) => (
@@ -175,6 +179,7 @@ function TrustStrip() {
   );
 }
 
+
 function HowItWorks({ t }: { t: (k: string) => string }) {
   const steps = [
     { n: "01", t: t("how.s1.t"), d: t("how.s1.d") },
@@ -185,7 +190,7 @@ function HowItWorks({ t }: { t: (k: string) => string }) {
     <section id="how" className="py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="reveal mx-auto max-w-2xl text-center">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-primary">Workflow</p>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-primary">{t("how.kicker")}</p>
           <h2 className="mt-3 font-display text-4xl font-bold sm:text-5xl">{t("how.title")}</h2>
           <p className="mt-4 text-lg text-muted-foreground">{t("how.sub")}</p>
         </div>
@@ -212,20 +217,20 @@ function HowItWorks({ t }: { t: (k: string) => string }) {
 
 function Categories({ t }: { t: (k: string) => string }) {
   const cats = [
-    { icon: Dumbbell, label: "Fitness", color: "from-amber-400 to-orange-500" },
-    { icon: Heart, label: "Wellness", color: "from-rose-400 to-pink-500" },
-    { icon: GraduationCap, label: "Learning", color: "from-sky-400 to-blue-500" },
-    { icon: Plane, label: "Travel", color: "from-cyan-400 to-teal-500" },
-    { icon: UtensilsCrossed, label: "Food", color: "from-lime-400 to-emerald-500" },
-    { icon: Laptop, label: "Technology", color: "from-violet-400 to-indigo-500" },
-    { icon: Stethoscope, label: "Healthcare", color: "from-red-400 to-rose-500" },
-    { icon: Music, label: "Entertainment", color: "from-fuchsia-400 to-purple-500" },
+    { icon: Dumbbell, label: t("cat.fitness"), color: "from-amber-400 to-orange-500" },
+    { icon: Heart, label: t("cat.wellness"), color: "from-rose-400 to-pink-500" },
+    { icon: GraduationCap, label: t("cat.learning"), color: "from-sky-400 to-blue-500" },
+    { icon: Plane, label: t("cat.travel"), color: "from-cyan-400 to-teal-500" },
+    { icon: UtensilsCrossed, label: t("cat.food"), color: "from-lime-400 to-emerald-500" },
+    { icon: Laptop, label: t("cat.tech"), color: "from-violet-400 to-indigo-500" },
+    { icon: Stethoscope, label: t("cat.healthcare"), color: "from-red-400 to-rose-500" },
+    { icon: Music, label: t("cat.entertainment"), color: "from-fuchsia-400 to-purple-500" },
   ];
   return (
     <section id="features" className="bg-muted/30 py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="reveal mx-auto max-w-2xl text-center">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-primary">Categories</p>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-primary">{t("cats.kicker")}</p>
           <h2 className="mt-3 font-display text-4xl font-bold sm:text-5xl">{t("cats.title")}</h2>
         </div>
         <div className="mt-14 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
@@ -240,7 +245,7 @@ function Categories({ t }: { t: (k: string) => string }) {
               </div>
               <p className="mt-4 font-display text-lg font-semibold">{c.label}</p>
               <p className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                30+ offers
+                {t("cats.offers")}
               </p>
             </div>
           ))}
@@ -252,16 +257,17 @@ function Categories({ t }: { t: (k: string) => string }) {
 
 function AIFeatures({ t }: { t: (k: string) => string }) {
   const items = [
-    { icon: MessageCircle, t: t("ai.concierge"), d: "Chat in plain Albanian or English. The AI finds, bundles and submits benefits for you." },
-    { icon: Compass, t: t("ai.recs"), d: "Personalized picks based on your role, budget and what colleagues love." },
-    { icon: Package, t: t("ai.bundle"), d: "Tell it a goal — 'a month of wellness' — get a full multi-vendor package within budget." },
-    { icon: BarChart3, t: t("ai.insights"), d: "Employer dashboards surface engagement gaps and money about to expire." },
+    { icon: MessageCircle, t: t("ai.concierge"), d: t("ai.concierge.d") },
+    { icon: Compass, t: t("ai.recs"), d: t("ai.recs.d") },
+    { icon: Package, t: t("ai.bundle"), d: t("ai.bundle.d") },
+    { icon: BarChart3, t: t("ai.insights"), d: t("ai.insights.d") },
   ];
+
   return (
     <section className="py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="reveal mx-auto max-w-2xl text-center">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-primary">Intelligence</p>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-primary">{t("ai.kicker")}</p>
           <h2 className="mt-3 font-display text-4xl font-bold sm:text-5xl">{t("ai.title")}</h2>
         </div>
         <div className="mt-14 grid gap-6 md:grid-cols-2">
@@ -308,7 +314,7 @@ function Testimonials({ t }: { t: (k: string) => string }) {
     <section id="providers" className="bg-muted/30 py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="reveal mx-auto max-w-2xl text-center">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-primary">Voices</p>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-primary">{t("test.kicker")}</p>
           <h2 className="mt-3 font-display text-4xl font-bold sm:text-5xl">{t("test.title")}</h2>
         </div>
         <div className="mt-14 grid gap-6 md:grid-cols-3">
@@ -337,6 +343,7 @@ function Testimonials({ t }: { t: (k: string) => string }) {
 }
 
 function CTA() {
+  const { t } = useI18n();
   return (
     <section className="py-24 sm:py-32">
       <div className="mx-auto max-w-5xl px-4 sm:px-6">
@@ -344,17 +351,17 @@ function CTA() {
           <div className="absolute inset-0 opacity-20 [background-image:radial-gradient(circle_at_20%_30%,white_0,transparent_30%),radial-gradient(circle_at_80%_70%,white_0,transparent_30%)]" />
           <div className="relative">
             <h2 className="font-display text-4xl font-bold sm:text-5xl">
-              Ready to build perks people love?
+              {t("cta.title")}
             </h2>
             <p className="mt-4 max-w-2xl text-lg opacity-90">
-              Join the platform reshaping employee benefits across Albania — and soon all of Europe.
+              {t("cta.sub")}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg" variant="secondary" className="h-12 px-6 text-base">
-                <Link to="/auth">Create your free account</Link>
+                <Link to="/auth">{t("cta.primary")}</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-12 border-white/30 bg-transparent px-6 text-base text-primary-foreground hover:bg-white/10 hover:text-primary-foreground">
-                <a href="#how">See how it works</a>
+                <a href="#how">{t("cta.secondary")}</a>
               </Button>
             </div>
           </div>
@@ -363,3 +370,4 @@ function CTA() {
     </section>
   );
 }
+

@@ -1,17 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { useI18n, type Lang, type Currency } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
-import { Gift, ChevronDown } from "lucide-react";
+import { Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { LanguageSwitch, CurrencySwitch } from "@/components/ui/lang-currency-switch";
 
 export function MarketingNav() {
-  const { t, lang, currency, setLang, setCurrency } = useI18n();
+  const { t } = useI18n();
   const { user } = useAuth();
 
   return (
@@ -26,39 +21,31 @@ export function MarketingNav() {
 
         <nav className="hidden items-center gap-6 md:flex">
           <Link to="/marketplace" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-            Marketplace
+            {t("nav.marketplace")}
           </Link>
           <Link to="/circles" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-            Circles
+            {t("nav.circles")}
           </Link>
           <Link to="/drops" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-            Drops
+            {t("nav.drops")}
           </Link>
           <Link to="/map" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-            Near me
+            {t("nav.nearMe")}
           </Link>
           <a href="/#how" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
             {t("nav.how")}
           </a>
         </nav>
 
-        <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger className="hidden items-center gap-1 rounded-md px-2 py-1 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:bg-muted sm:flex">
-              {lang} · {currency} <ChevronDown className="h-3 w-3" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem onClick={() => setLang("en" as Lang)}>English</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setLang("sq" as Lang)}>Shqip</DropdownMenuItem>
-              <div className="my-1 h-px bg-border" />
-              <DropdownMenuItem onClick={() => setCurrency("ALL" as Currency)}>ALL (Lek)</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setCurrency("EUR" as Currency)}>EUR (€)</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <div className="flex items-center gap-1.5">
+          <div className="hidden items-center gap-1.5 sm:flex">
+            <LanguageSwitch />
+            <CurrencySwitch />
+          </div>
 
           {user ? (
             <Button asChild variant="default" size="sm">
-              <Link to="/auth">Dashboard</Link>
+              <Link to="/auth">{t("nav.dashboard")}</Link>
             </Button>
           ) : (
             <>
@@ -70,6 +57,14 @@ export function MarketingNav() {
               </Button>
             </>
           )}
+        </div>
+      </div>
+
+      {/* Mobile switches row */}
+      <div className="border-t border-border/40 bg-background/60 sm:hidden">
+        <div className="mx-auto flex max-w-7xl items-center justify-end gap-1.5 px-4 py-1.5">
+          <LanguageSwitch />
+          <CurrencySwitch />
         </div>
       </div>
     </header>
@@ -90,12 +85,12 @@ export function MarketingFooter() {
           </div>
           <p className="mt-3 text-sm text-muted-foreground">{t("footer.tag")}</p>
           <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Made in Tirana · Built for the world
+            {t("footer.madeIn")}
           </p>
         </div>
-        <FooterCol title="Company" items={["About", "Careers", "Press", "Contact"]} />
-        <FooterCol title="Product" items={["Marketplace", "AI Concierge", "For Employers", "For Providers"]} />
-        <FooterCol title="Legal" items={["Privacy", "Terms", "Security", "DPA"]} />
+        <FooterCol title={t("footer.company")} items={["About", "Careers", "Press", "Contact"]} />
+        <FooterCol title={t("footer.product")} items={["Marketplace", "AI Concierge", "For Employers", "For Providers"]} />
+        <FooterCol title={t("footer.legal")} items={["Privacy", "Terms", "Security", "DPA"]} />
       </div>
       <div className="border-t border-border/60 py-6 text-center font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
         © {new Date().getFullYear()} Perkly · All rights reserved

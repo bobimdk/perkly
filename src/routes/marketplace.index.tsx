@@ -26,7 +26,7 @@ export const Route = createFileRoute("/marketplace/")({
 });
 
 function MarketplacePage() {
-  const { lang } = useI18n();
+  const { lang, t } = useI18n();
   const { user } = useAuth();
   const [tab, setTab] = useState<OfferFilter["tab"]>("trending");
   const [search, setSearch] = useState("");
@@ -56,11 +56,11 @@ function MarketplacePage() {
 
   const onFavorite = async (id: string) => {
     if (!user) {
-      toast.info("Sign in to save offers");
+      toast.info(t("mk.signInSave"));
       return;
     }
     const liked = await toggleFavorite(id, user.id);
-    toast.success(liked ? "Saved to favorites" : "Removed from favorites");
+    toast.success(liked ? t("mk.saved") : t("mk.removedFav"));
     favoritesQuery.refetch();
   };
 
@@ -71,12 +71,12 @@ function MarketplacePage() {
       {/* Hero */}
       <section className="border-b border-border/60 bg-gradient-to-br from-primary/8 via-background to-background">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
-          <p className="font-mono text-[11px] uppercase tracking-widest text-primary">Perkly marketplace</p>
+          <p className="font-mono text-[11px] uppercase tracking-widest text-primary">{t("mkt.kicker")}</p>
           <h1 className="mt-3 font-display text-3xl font-bold sm:text-5xl">
-            Discover benefits <span className="text-gradient-amber">worth your time</span>
+            {t("mkt.title.a")} <span className="text-gradient-amber">{t("mkt.title.b")}</span>
           </h1>
           <p className="mt-3 max-w-2xl text-sm text-muted-foreground sm:text-base">
-            From the best gyms in Tirana to spa days, language courses and weekend getaways — handpicked for modern teams.
+            {t("mkt.sub")}
           </p>
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
@@ -85,18 +85,18 @@ function MarketplacePage() {
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search for yoga, hotels, courses…"
+                placeholder={t("mkt.search")}
                 className="h-12 rounded-xl pl-10 text-sm shadow-sm"
               />
             </div>
             <Button variant="outline" className="h-12 rounded-xl shadow-sm">
-              <SlidersHorizontal className="mr-2 h-4 w-4" /> Filters
+              <SlidersHorizontal className="mr-2 h-4 w-4" /> {t("mkt.filters")}
             </Button>
           </div>
 
           {/* Categories */}
           <div className="mt-6 flex flex-wrap gap-2">
-            <CategoryPill active={!category} onClick={() => setCategory(undefined)}>All</CategoryPill>
+            <CategoryPill active={!category} onClick={() => setCategory(undefined)}>{t("mkt.all")}</CategoryPill>
             {(categoriesQuery.data ?? []).map((c) => (
               <CategoryPill key={c.id} active={category === c.slug} onClick={() => setCategory(c.slug)}>
                 {lang === "sq" ? c.name_sq : c.name_en}
@@ -110,10 +110,10 @@ function MarketplacePage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <Tabs value={tab} onValueChange={(v) => setTab(v as OfferFilter["tab"])}>
           <TabsList className="h-11 rounded-xl bg-muted/60 p-1">
-            <TabsTrigger value="trending" className="rounded-lg px-4"><Flame className="mr-1.5 h-3.5 w-3.5" /> Trending</TabsTrigger>
-            <TabsTrigger value="new" className="rounded-lg px-4"><Zap className="mr-1.5 h-3.5 w-3.5" /> New</TabsTrigger>
-            <TabsTrigger value="recommended" className="rounded-lg px-4"><Star className="mr-1.5 h-3.5 w-3.5" /> Recommended</TabsTrigger>
-            <TabsTrigger value="limited" className="rounded-lg px-4"><Clock className="mr-1.5 h-3.5 w-3.5" /> Limited</TabsTrigger>
+            <TabsTrigger value="trending" className="rounded-lg px-4"><Flame className="mr-1.5 h-3.5 w-3.5" /> {t("mkt.tab.trending")}</TabsTrigger>
+            <TabsTrigger value="new" className="rounded-lg px-4"><Zap className="mr-1.5 h-3.5 w-3.5" /> {t("mkt.tab.new")}</TabsTrigger>
+            <TabsTrigger value="recommended" className="rounded-lg px-4"><Star className="mr-1.5 h-3.5 w-3.5" /> {t("mkt.tab.recommended")}</TabsTrigger>
+            <TabsTrigger value="limited" className="rounded-lg px-4"><Clock className="mr-1.5 h-3.5 w-3.5" /> {t("mkt.tab.limited")}</TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -132,8 +132,8 @@ function MarketplacePage() {
 
         {!offersQuery.isLoading && (offersQuery.data ?? []).length === 0 ? (
           <div className="mt-12 rounded-2xl border border-dashed border-border bg-card p-12 text-center">
-            <p className="font-display text-lg font-semibold">No offers match your search</p>
-            <p className="mt-2 text-sm text-muted-foreground">Try a different category or search term.</p>
+            <p className="font-display text-lg font-semibold">{t("mkt.empty.title")}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{t("mkt.empty.sub")}</p>
           </div>
         ) : null}
       </section>

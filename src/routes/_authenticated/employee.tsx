@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_authenticated/employee")({
 function EmployeePage() {
   const { user, roles } = useAuth();
   const qc = useQueryClient();
-  const { formatPrice } = useI18n();
+  const { formatPrice, t } = useI18n();
 
   // If this account is actually a provider / employer / admin, send them to the right dashboard
   // instead of showing the "you're not linked to a company" screen.
@@ -78,7 +78,7 @@ function EmployeePage() {
     setSubmitting(true);
     try {
       await submitPackage(draftQuery.data.id, note);
-      toast.success("Package submitted!");
+      toast.success(t("emp.packageSubmitted"));
       setNote("");
       if (user) progressQuest(user.id, "weekly_submit").catch(() => {});
       qc.invalidateQueries({ queryKey: ["draft-package", user?.id] });
@@ -90,18 +90,18 @@ function EmployeePage() {
       qc.invalidateQueries({ queryKey: ["quest-progress", user?.id] });
     } catch (e) {
       const msg = (e as Error).message;
-      toast.error(msg === "no_company" ? "Ask your employer to add you to their team first." : msg);
+      toast.error(msg === "no_company" ? t("emp.noCompanyError") : msg);
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <DashboardShell title="My benefits">
+    <DashboardShell title={t("emp.title")}>
       {companyQuery.isLoading || draftQuery.isLoading ? (
         <Skeleton className="h-64 rounded-2xl" />
       ) : !companyQuery.data ? (
-        <NoEmployer />
+        <NoEmployer t={t} />
       ) : (
         <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
           {/* Left: Budget + Package + History */}
@@ -110,20 +110,20 @@ function EmployeePage() {
             <div className="overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary/10 via-card to-card p-6 shadow-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Wallet className="h-4 w-4" />
-                <p className="font-mono text-[10px] uppercase tracking-widest">Monthly budget · {companyQuery.data.company.name}</p>
+                <p className="font-mono text-[10px] uppercase tracking-widest">{t("emp.monthly")} · {companyQuery.data.company.name}</p>
               </div>
-              <p className="mt-3 font-display text-4xl font-bold">{formatPrice(remainingBudget)}<span className="ml-2 text-base font-normal text-muted-foreground">remaining</span></p>
+              <p className="mt-3 font-display text-4xl font-bold">{formatPrice(remainingBudget)}<span className="ml-2 text-base font-normal text-muted-foreground">{t("emp.remaining")}</span></p>
               {budget ? (
                 <>
                   <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted">
                     <div className="h-full rounded-full bg-gradient-to-r from-primary to-primary-glow transition-all duration-700" style={{ width: `${budgetPct}%` }} />
                   </div>
                   <p className="mt-2 text-xs text-muted-foreground">
-                    {formatPrice(Number(budget.used_all))} used of {formatPrice(Number(budget.total_all))} this month
+                    {formatPrice(Number(budget.used_all))} {t("emp.usedOf")} {formatPrice(Number(budget.total_all))} {t("emp.thisMonth")}
                   </p>
                 </>
               ) : (
-                <p className="mt-2 text-xs text-muted-foreground">Your employer hasn't set a budget for this period yet.</p>
+                <p className="mt-2 text-xs text-muted-foreground">{t("emp.noBudget")}</p>
               )}
             </div>
 
@@ -131,24 +131,24 @@ function EmployeePage() {
             <section className="rounded-3xl border border-border bg-card p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Smart package builder</p>
-                  <h2 className="font-display text-xl font-bold">Your draft package</h2>
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{t("emp.builderKicker")}</p>
+                  <h2 className="font-display text-xl font-bold">{t("emp.builderTitle")}</h2>
                 </div>
-                <Button asChild variant="outline" size="sm"><Link to="/marketplace">Add benefits</Link></Button>
+                <Button asChild variant="outline" size="sm"><Link to="/marketplace">{t("emp.addBenefits")}</Link></Button>
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
                 <GiftDialog />
-                <Button asChild variant="outline" size="sm"><Link to="/circles">Join a circle</Link></Button>
-                <Button asChild variant="outline" size="sm"><Link to="/drops">Seasonal drops</Link></Button>
+                <Button asChild variant="outline" size="sm"><Link to="/circles">{t("emp.joinCircle")}</Link></Button>
+                <Button asChild variant="outline" size="sm"><Link to="/drops">{t("emp.seasonalDrops")}</Link></Button>
               </div>
 
 
               {items.length === 0 ? (
                 <div className="mt-6 rounded-2xl border border-dashed border-border bg-muted/30 p-10 text-center">
                   <ShoppingBag className="mx-auto h-8 w-8 text-muted-foreground" />
-                  <p className="mt-3 font-display text-base font-semibold">Your package is empty</p>
-                  <p className="mt-1 text-sm text-muted-foreground">Pick benefits from the marketplace and they'll appear here.</p>
-                  <Button asChild className="mt-4"><Link to="/marketplace">Browse marketplace</Link></Button>
+                  <p className="mt-3 font-display text-base font-semibold">{t("pkg.empty")}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{t("pkg.emptySub")}</p>
+                  <Button asChild className="mt-4"><Link to="/marketplace">{t("pkg.browse")}</Link></Button>
                 </div>
               ) : (
                 <>
@@ -181,20 +181,20 @@ function EmployeePage() {
 
                   <div className="mt-4 rounded-2xl bg-muted/40 p-4">
                     <div className="flex items-end justify-between">
-                      <p className="font-display text-sm font-semibold">Total</p>
+                      <p className="font-display text-sm font-semibold">{t("pkg.total")}</p>
                       <p className="font-display text-2xl font-bold text-primary">{formatPrice(draftTotal)}</p>
                     </div>
                     {budget && draftTotal > remainingBudget ? (
                       <p className="mt-2 text-xs font-medium text-destructive">
-                        This exceeds your remaining budget by {formatPrice(draftTotal - remainingBudget)} — you can still submit for approval.
+                        {t("emp.exceedsBudget")} {formatPrice(draftTotal - remainingBudget)} {t("emp.canStillSubmit")}
                       </p>
                     ) : null}
                   </div>
 
-                  <Textarea className="mt-4" rows={2} placeholder="Add a note for your manager (optional)" value={note} onChange={(e) => setNote(e.target.value)} />
+                  <Textarea className="mt-4" rows={2} placeholder={t("emp.noteHint")} value={note} onChange={(e) => setNote(e.target.value)} />
                   <Button className="mt-3 w-full" size="lg" onClick={submit} disabled={submitting || draftTotal === 0}>
                     {submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-                    Submit package for approval
+                    {t("emp.submitForApproval")}
                   </Button>
                 </>
               )}
@@ -204,24 +204,26 @@ function EmployeePage() {
             <section className="rounded-3xl border border-border bg-card p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Your activities</p>
-                  <h2 className="font-display text-xl font-bold">Approved benefits — show & scan at the venue</h2>
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{t("emp.activitiesKicker")}</p>
+                  <h2 className="font-display text-xl font-bold">{t("emp.activitiesTitle")}</h2>
                 </div>
               </div>
               {txQuery.isLoading ? <Skeleton className="mt-4 h-40 rounded-xl" /> : (txQuery.data ?? []).length === 0 ? (
-                <p className="mt-4 text-sm text-muted-foreground">Once your employer approves a package, your venue passes appear here with a QR code.</p>
+                <p className="mt-4 text-sm text-muted-foreground">{t("emp.noActivities")}</p>
               ) : (
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                  {txQuery.data!.map((t) => <ActivityCard key={t.id} tx={t} />)}
+                  {txQuery.data!.map((tx) => <ActivityCard key={tx.id} tx={tx} />)}
                 </div>
               )}
             </section>
           </div>
 
+
+
           {/* Right: company + notifications */}
           <aside className="space-y-4">
             <div className="rounded-3xl border border-border bg-card p-5">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Funded by</p>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{t("emp.fundedBy")}</p>
               <div className="mt-2 flex items-center gap-3">
                 <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary"><Building2 className="h-5 w-5" /></div>
                 <div>
@@ -232,9 +234,9 @@ function EmployeePage() {
             </div>
 
             <div className="rounded-3xl border border-border bg-card p-5">
-              <div className="flex items-center gap-2"><Bell className="h-4 w-4 text-primary" /><p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Notifications</p></div>
+              <div className="flex items-center gap-2"><Bell className="h-4 w-4 text-primary" /><p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{t("emp.notifications")}</p></div>
               {notifQuery.isLoading ? <Skeleton className="mt-3 h-24 rounded-lg" /> : (notifQuery.data ?? []).length === 0 ? (
-                <p className="mt-3 text-sm text-muted-foreground">All caught up. ✨</p>
+                <p className="mt-3 text-sm text-muted-foreground">{t("emp.allCaught")}</p>
               ) : (
                 <ul className="mt-3 space-y-2">
                   {notifQuery.data!.map((n) => (
@@ -270,13 +272,13 @@ function EmployeePage() {
   );
 }
 
-function NoEmployer() {
+function NoEmployer({ t }: { t: (k: string) => string }) {
   return (
     <div className="mx-auto max-w-xl rounded-3xl border border-dashed border-border bg-card p-10 text-center">
       <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary"><Building2 className="h-7 w-7" /></div>
-      <h2 className="mt-4 font-display text-2xl font-bold">You're not linked to a company yet</h2>
-      <p className="mt-1 text-sm text-muted-foreground">Ask your employer to add you using the email on your profile, and your monthly budget will activate immediately.</p>
-      <Button asChild className="mt-6"><Link to="/marketplace">Browse the marketplace meanwhile</Link></Button>
+      <h2 className="mt-4 font-display text-2xl font-bold">{t("emp.noCompany.title")}</h2>
+      <p className="mt-1 text-sm text-muted-foreground">{t("emp.noCompany.sub")}</p>
+      <Button asChild className="mt-6"><Link to="/marketplace">{t("emp.browseMeanwhile")}</Link></Button>
     </div>
   );
 }
