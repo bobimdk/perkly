@@ -365,15 +365,13 @@ function MapPage() {
     <>
       <MarketingNav />
       <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
-        <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Live</p>
-        <h1 className="mt-1 font-display text-4xl font-bold">Benefits Near Me</h1>
-        <p className="mt-2 max-w-2xl text-muted-foreground">
-          Real-time map of where colleagues are using their perks. Allow location to see the closest businesses to you.
-        </p>
+        <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">{t("map.live")}</p>
+        <h1 className="mt-1 font-display text-4xl font-bold">{t("map.title")}</h1>
+        <p className="mt-2 max-w-2xl text-muted-foreground">{t("map.sub")}</p>
         <div className="mt-4">
           <Button onClick={requestLocation} disabled={locating} variant="outline" size="sm">
             <Crosshair className="mr-2 h-4 w-4" />
-            {userPos ? "Recenter on me" : locating ? "Locating…" : "Use my location"}
+            {userPos ? t("map.recenter") : locating ? t("map.locating") : t("map.useMyLocation")}
           </Button>
         </div>
       </div>
