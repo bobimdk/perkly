@@ -145,6 +145,7 @@ const dictionaries: Record<Lang, Dict> = {
     "map.pyramidHint": "Showing distances from Piramida e Tiranës, Albania. Share your location for exact distances.",
     "map.empty": "No businesses on the map yet.",
     "map.youAreHere": "You are here",
+    "map.yourLocation": "your location",
     "map.pyramid": "Piramida e Tiranës",
     "map.from": "from",
     "map.seeMore": "See more →",
