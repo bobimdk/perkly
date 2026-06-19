@@ -303,7 +303,7 @@ function MapPage() {
             ${p.address ? `<div style="margin-top:4px;font-size:11px;color:#6b7280">${escapeHtml(p.address)}</div>` : ""}
             ${desc ? `<div style="margin-top:8px;font-size:12px;color:#374151;line-height:1.35">${escapeHtml(desc)}</div>` : ""}
             ${priceLine}
-            <a href="${ctaHref}" style="display:inline-block;margin-top:10px;padding:6px 12px;background:#f59e0b;color:white;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">See more →</a>
+            <a href="${ctaHref}" style="display:inline-block;margin-top:10px;padding:6px 12px;background:#f59e0b;color:white;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">${t("map.seeMore")}</a>
           </div>`;
         L.marker([p.lat, p.lng], { icon }).addTo(layerRef.current).bindPopup(html);
       }
