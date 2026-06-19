@@ -397,7 +397,8 @@ function MapPage() {
                     onError={(e) => ((e.target as HTMLImageElement).src = DEFAULT_BUSINESS_IMAGE)}
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-display text-sm font-semibold">{p.name}</p>
+                    <p className="truncate font-display text-sm font-semibold">{p.title}</p>
+                    <p className="truncate text-[11px] text-muted-foreground">{p.name}</p>
                     <p className="truncate text-[11px] text-muted-foreground">
                       <MapPin className="mr-0.5 inline h-3 w-3" />
                       {p.address || p.city || "—"}
