@@ -2,7 +2,8 @@ import type { ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
 import { useI18n } from "@/lib/i18n";
-import { Gift, LogOut, Bell } from "lucide-react";
+import { Gift, LogOut } from "lucide-react";
+import { NotificationsBell } from "@/components/dashboard/notifications-bell";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -48,9 +49,7 @@ export function DashboardShell({
               <CurrencySwitch />
             </div>
 
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-4 w-4" />
-            </Button>
+            <NotificationsBell />
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

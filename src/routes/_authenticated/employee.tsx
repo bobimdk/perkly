@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { Wallet, Bell, Send, Trash2, Loader2, Building2, ShoppingBag, Clock, CheckCircle2, XCircle, Plus, Minus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Wallet, Bell, Send, Trash2, Loader2, Building2, ShoppingBag, Clock, CheckCircle2, XCircle, Plus, Minus, Mail, Heart } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +13,8 @@ import {
   fetchMyTransactions, fetchNotifications, markNotificationRead,
   submitPackage, updateItemQuantity,
 } from "@/lib/perkly";
+import { toggleFavorite } from "@/lib/marketplace";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ConciergeOrb } from "@/components/concierge/concierge-orb";
 import { GamificationPanel } from "@/components/gamification/gamification-panel";
@@ -98,6 +100,7 @@ function EmployeePage() {
 
   return (
     <DashboardShell title={t("emp.title")}>
+      {user ? <PendingInvitesPanel userId={user.id} /> : null}
       {companyQuery.isLoading || draftQuery.isLoading ? (
         <Skeleton className="h-64 rounded-2xl" />
       ) : !companyQuery.data ? (
@@ -216,6 +219,8 @@ function EmployeePage() {
                 </div>
               )}
             </section>
+
+            {user ? <FavoritesPanel userId={user.id} /> : null}
           </div>
 
 
@@ -282,3 +287,215 @@ function NoEmployer({ t }: { t: (k: string) => string }) {
     </div>
   );
 }
+
+type CompanyInviteRow = {
+  id: string;
+  company_id: string;
+  email: string;
+  status: "pending" | "accepted" | "rejected" | "cancelled";
+  message: string | null;
+  created_at: string;
+  companies?: { name: string; city: string | null } | null;
+};
+
+function PendingInvitesPanel({ userId }: { userId: string }) {
+  const qc = useQueryClient();
+
+  const q = useQuery({
+    queryKey: ["my-invites", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("company_invites" as never)
+        .select("*, companies(name, city)")
+        .eq("status", "pending")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as unknown as CompanyInviteRow[];
+    },
+  });
+
+  useEffect(() => {
+    const ch = supabase
+      .channel(`invites-emp-${userId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "company_invites" },
+        () => qc.invalidateQueries({ queryKey: ["my-invites", userId] }),
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "company_employees", filter: `user_id=eq.${userId}` },
+        () => qc.invalidateQueries({ queryKey: ["my-employer", userId] }),
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [userId, qc]);
+
+  const accept = async (id: string) => {
+    const { error } = await supabase.rpc("accept_company_invite" as never, { _invite_id: id } as never);
+    if (error) return toast.error(error.message);
+    toast.success("Ftesa u pranua — mirë se erdhët në ekip!");
+    qc.invalidateQueries({ queryKey: ["my-invites", userId] });
+    qc.invalidateQueries({ queryKey: ["my-employer", userId] });
+  };
+  const reject = async (id: string) => {
+    const { error } = await supabase.rpc("reject_company_invite" as never, { _invite_id: id } as never);
+    if (error) return toast.error(error.message);
+    toast.success("Ftesa u refuzua");
+    qc.invalidateQueries({ queryKey: ["my-invites", userId] });
+  };
+
+  const list = q.data ?? [];
+  if (list.length === 0) return null;
+
+  return (
+    <section className="mb-6 space-y-3">
+      <div className="flex items-center gap-2">
+        <Mail className="h-4 w-4 text-primary" />
+        <p className="font-display text-lg font-semibold">Ftesa në pritje</p>
+      </div>
+      <ul className="space-y-3">
+        {list.map((inv) => (
+          <li key={inv.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-primary/40 bg-primary/5 p-4">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
+              <Building2 className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-display font-semibold">{inv.companies?.name ?? "Një biznes"}</p>
+              <p className="text-xs text-muted-foreground">
+                Ju ftoi më {new Date(inv.created_at).toLocaleString()}
+                {inv.companies?.city ? ` · ${inv.companies.city}` : ""}
+              </p>
+              {inv.message ? <p className="mt-1 text-sm text-foreground/80">"{inv.message}"</p> : null}
+            </div>
+            <Button variant="outline" size="sm" onClick={() => reject(inv.id)}>
+              <XCircle className="mr-1 h-4 w-4" /> Refuzo
+            </Button>
+            <Button size="sm" onClick={() => accept(inv.id)}>
+              <CheckCircle2 className="mr-1 h-4 w-4" /> Prano
+            </Button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+type FavoriteRow = {
+  id: string;
+  offer_id: string;
+  created_at: string;
+  offers: {
+    id: string;
+    slug: string;
+    title: string;
+    subtitle: string | null;
+    description: string | null;
+    cover_url: string | null;
+    price_all: number;
+    providers: { name: string; slug: string } | null;
+  } | null;
+};
+
+function FavoritesPanel({ userId }: { userId: string }) {
+  const qc = useQueryClient();
+  const { formatPrice } = useI18n();
+
+  const q = useQuery({
+    queryKey: ["my-favorites", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("favorites")
+        .select("id, offer_id, created_at, offers(id, slug, title, subtitle, description, cover_url, price_all, providers(name, slug))")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as unknown as FavoriteRow[];
+    },
+  });
+
+  useEffect(() => {
+    const ch = supabase
+      .channel(`fav-${userId}`)
+      .on("postgres_changes",
+        { event: "*", schema: "public", table: "favorites", filter: `user_id=eq.${userId}` },
+        () => qc.invalidateQueries({ queryKey: ["my-favorites", userId] }))
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [userId, qc]);
+
+  const remove = async (offerId: string) => {
+    try {
+      await toggleFavorite(offerId, userId);
+      toast.success("Hequr nga të preferuarat");
+      qc.invalidateQueries({ queryKey: ["my-favorites", userId] });
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  };
+
+  const list = q.data ?? [];
+
+  return (
+    <section className="rounded-3xl border border-border bg-card p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Bibloteka juaj</p>
+          <h2 className="font-display text-xl font-bold flex items-center gap-2">
+            <Heart className="h-5 w-5 text-destructive fill-destructive" /> Të preferuarat
+          </h2>
+        </div>
+        <Button asChild variant="outline" size="sm">
+          <Link to="/marketplace">Shfleto marketplace-in</Link>
+        </Button>
+      </div>
+
+      {q.isLoading ? (
+        <Skeleton className="mt-4 h-40 rounded-xl" />
+      ) : list.length === 0 ? (
+        <p className="mt-6 rounded-xl border border-dashed border-border bg-muted/30 p-8 text-center text-sm text-muted-foreground">
+          Nuk keni asnjë të preferuar ende.
+        </p>
+      ) : (
+        <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+          {list.map((f) => f.offers ? (
+            <li key={f.id} className="flex gap-3 rounded-2xl border border-border bg-background p-3">
+              <div className="h-20 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-muted">
+                {f.offers.cover_url ? (
+                  <img src={f.offers.cover_url} alt="" className="h-full w-full object-cover" />
+                ) : null}
+              </div>
+              <div className="min-w-0 flex-1">
+                <Link
+                  to="/marketplace/$slug"
+                  params={{ slug: f.offers.slug }}
+                  className="line-clamp-1 font-display font-semibold hover:underline"
+                >
+                  {f.offers.title}
+                </Link>
+                {f.offers.providers?.name ? (
+                  <p className="text-xs text-muted-foreground">{f.offers.providers.name}</p>
+                ) : null}
+                {f.offers.subtitle || f.offers.description ? (
+                  <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                    {f.offers.subtitle ?? f.offers.description}
+                  </p>
+                ) : null}
+                <div className="mt-2 flex items-center justify-between">
+                  <p className="font-display text-sm font-bold text-primary">
+                    {formatPrice(Number(f.offers.price_all))}
+                  </p>
+                  <Button size="sm" variant="ghost" onClick={() => remove(f.offer_id)}>
+                    <Heart className="mr-1 h-3.5 w-3.5 fill-destructive text-destructive" />
+                    Hiq
+                  </Button>
+                </div>
+              </div>
+            </li>
+          ) : null)}
+        </ul>
+      )}
+    </section>
+  );
+}
+

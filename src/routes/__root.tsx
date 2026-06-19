@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/lib/auth-context";
 import { I18nProvider } from "@/lib/i18n";
 import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
@@ -160,6 +161,22 @@ function RootComponent() {
     });
     return () => sub.subscription.unsubscribe();
   }, [router, queryClient]);
+
+  // Click-anywhere-to-dismiss for sonner toasts
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+      const t = target.closest("[data-sonner-toast]") as HTMLElement | null;
+      if (!t) return;
+      const id = t.getAttribute("data-id");
+      if (id) toast.dismiss(id);
+      else toast.dismiss();
+    };
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
