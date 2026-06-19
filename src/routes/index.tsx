@@ -314,7 +314,7 @@ function Testimonials({ t }: { t: (k: string) => string }) {
     <section id="providers" className="bg-muted/30 py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="reveal mx-auto max-w-2xl text-center">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-primary">Voices</p>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-primary">{t("test.kicker")}</p>
           <h2 className="mt-3 font-display text-4xl font-bold sm:text-5xl">{t("test.title")}</h2>
         </div>
         <div className="mt-14 grid gap-6 md:grid-cols-3">
