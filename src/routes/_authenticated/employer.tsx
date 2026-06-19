@@ -432,10 +432,11 @@ function AutoRules({ company, rules, onChanged }: { company: Company; rules: Ret
           </div>
           <DialogFooter>
             <Button onClick={async () => {
-              const { error } = await supabase.from("auto_approval_rules").insert({ company_id: company.id, name: name || `Up to ${maxAmount} ALL`, max_amount_all: maxAmount });
+              const maxAmountNum = Number(maxAmount) || 0;
+              const { error } = await supabase.from("auto_approval_rules").insert({ company_id: company.id, name: name || `Up to ${maxAmountNum} ALL`, max_amount_all: maxAmountNum });
               if (error) return toast.error(error.message);
               toast.success("Rule created");
-              setName(""); setMaxAmount(2000);
+              setName(""); setMaxAmount("2000");
               onChanged();
             }}>Save</Button>
           </DialogFooter>
