@@ -538,4 +538,24 @@ const BC_CSS = `
 .bc-send:disabled { opacity:.5; cursor:not-allowed; transform:none; }
 
 .bc-fly-heart { position:absolute; pointer-events:none; font-size:18px; animation: bc-fly 1.1s ease-out forwards; z-index:50; }
+
+.bc-voice { display:flex; align-items:center; gap:10px; background:none; border:none; padding:2px 4px; cursor:pointer; }
+.bc-voice-play { width:28px; height:28px; border-radius:50%; display:grid; place-items:center; font-size:11px; }
+.bc-voice-sent .bc-voice-play { background:rgba(255,255,255,.25); color:#fff; }
+.bc-voice-recv .bc-voice-play { background:linear-gradient(160deg,#fbbf24,#d97706); color:#fff; }
+.bc-voice-bars { display:flex; align-items:center; gap:2px; height:22px; }
+.bc-voice-bar { width:2px; border-radius:1px; display:inline-block; }
+.bc-voice-sent .bc-voice-bar { background:#fff; }
+.bc-voice-recv .bc-voice-bar { background:#d97706; }
+.bc-voice-dur { font-size:11px; font-variant-numeric: tabular-nums; }
+.bc-voice-sent .bc-voice-dur { color:rgba(255,255,255,.9); }
+.bc-voice-recv .bc-voice-dur { color:#8a7d68; }
+
+.bc-mic-btn:hover { transform: scale(1.15); transition: transform .2s ease; }
+.bc-rec-cancel { color:#c0392b !important; font-size:16px !important; }
+.bc-rec-live { flex:1; display:flex; align-items:center; gap:10px; color:#21180a; font-size:13px; }
+.bc-rec-pulse { width:10px; height:10px; border-radius:50%; background:#e63946; animation: bc-pulseA 1.2s infinite; box-shadow:0 0 0 0 rgba(230,57,70,.5); }
+.bc-rec-time { font-weight:700; font-variant-numeric: tabular-nums; color:#c0392b; }
+.bc-rec-hint { color:#8a7d68; font-size:12px; }
+
 `;
