@@ -249,6 +249,8 @@ export type Friendship = {
   other?: ProfileLite | null;
 };
 
+const sb: any = supabase;
+
 export async function fetchProfileByUsername(username: string) {
   const { data, error } = await sb
     .from("profiles" as any)
