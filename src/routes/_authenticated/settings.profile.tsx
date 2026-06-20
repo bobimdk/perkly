@@ -38,7 +38,7 @@ const emptyBasics: Basics = {
 function SettingsProfilePage() {
   const { user, refresh } = useAuth();
   const qc = useQueryClient();
-  const navigate = useNavigate();
+  // no router navigation needed
   const [basics, setBasics] = useState<Basics>(emptyBasics);
   const [saving, setSaving] = useState(false);
 
