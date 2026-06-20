@@ -292,7 +292,7 @@ function MapPage() {
         const ctaHref = `/marketplace/${p.slug}`;
         const html = `
           <div style="min-width:220px;max-width:260px;font-family:inherit">
-            <div style="font-weight:700;font-size:14px;line-height:1.2">${escapeHtml(p.title)}</div>
+            <div style="font-weight:700;font-size:14px;line-height:1.2">${escapeHtml(p.title)}${p.is_sponsored ? ' <span style="display:inline-block;margin-left:4px;padding:1px 6px;border-radius:999px;background:#f59e0b;color:#451a03;font-size:10px;font-weight:800;letter-spacing:.05em">★ SPONSOR</span>' : ""}</div>
             <div style="font-size:11px;color:#6b7280;margin-top:2px">${escapeHtml(p.name)}</div>
             <div style="margin-top:6px;display:flex;align-items:center;gap:6px;font-size:11px;color:#f59e0b;font-weight:600">
               <span>${fmtDistance(km)}</span>
