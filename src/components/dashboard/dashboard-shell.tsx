@@ -44,6 +44,14 @@ export function DashboardShell({
           </Link>
 
           <div className="flex items-center gap-2">
+            {roles.includes("employee") ? (
+              <Button asChild variant="ghost" size="sm" className="gap-2">
+                <Link to={"/network" as any}>
+                  <Users className="h-4 w-4" />
+                  <span className="hidden sm:inline">Shto shokë</span>
+                </Link>
+              </Button>
+            ) : null}
             <div className="hidden items-center gap-1.5 sm:flex">
               <LanguageSwitch />
               <CurrencySwitch />
