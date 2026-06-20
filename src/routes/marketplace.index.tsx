@@ -34,6 +34,11 @@ function MarketplacePage() {
   const [search, setSearch] = useState("");
   const [debounced, setDebounced] = useState("");
   const [category, setCategory] = useState<string | undefined>(undefined);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [minPrice, setMinPrice] = useState<string>("");
+  const [maxPrice, setMaxPrice] = useState<string>("");
+  const [city, setCity] = useState<string>("");
+  const [draft, setDraft] = useState({ minPrice: "", maxPrice: "", city: "" });
 
   useEffect(() => {
     const t = setTimeout(() => setDebounced(search.trim()), 250);
@@ -41,8 +46,15 @@ function MarketplacePage() {
   }, [search]);
 
   const filter: OfferFilter = useMemo(
-    () => ({ tab, search: debounced || undefined, categorySlug: category }),
-    [tab, debounced, category],
+    () => ({
+      tab,
+      search: debounced || undefined,
+      categorySlug: category,
+      minPrice: minPrice ? Number(minPrice) : undefined,
+      maxPrice: maxPrice ? Number(maxPrice) : undefined,
+      city: city || undefined,
+    }),
+    [tab, debounced, category, minPrice, maxPrice, city],
   );
 
   const categoriesQuery = useQuery({ queryKey: ["categories"], queryFn: fetchCategories });
