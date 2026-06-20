@@ -25,10 +25,8 @@ export const translateBatch = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     const { lang, texts } = data;
-    if (lang === "en" || texts.length === 0) {
-      const empty: Record<string, string> = {};
-      for (const t of texts) empty[t] = t;
-      return { translations: empty };
+    if (texts.length === 0) {
+      return { translations: {} as Record<string, string> };
     }
 
     const result: Record<string, string> = {};
@@ -44,7 +42,6 @@ export const translateBatch = createServerFn({ method: "POST" })
 
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) {
-      // Graceful fallback: identity translation
       for (const t of todo) result[t] = t;
       return { translations: result };
     }
@@ -52,12 +49,12 @@ export const translateBatch = createServerFn({ method: "POST" })
     const provider = createLovableAiGatewayProvider(apiKey);
     const langName = LANG_NAMES[lang] ?? lang;
 
-    // Build numbered prompt to make JSON parsing reliable
     const numbered = todo.map((t, i) => `${i + 1}. ${JSON.stringify(t)}`).join("\n");
 
     const system = [
-      `You are a professional UI translator. Translate the given UI strings from English into ${langName}.`,
+      `You are a professional UI translator. Auto-detect the source language of each string and translate into ${langName}.`,
       `Rules:`,
+      `- If a string is already in ${langName}, return it unchanged.`,
       `- Preserve placeholders, numbers, emoji, punctuation, URLs and brand names (Perkly, Tirana, names).`,
       `- Keep the same casing style and trailing/leading whitespace.`,
       `- Return ONLY a JSON object mapping the 1-based index (as string) to the translated string. No prose, no markdown.`,
