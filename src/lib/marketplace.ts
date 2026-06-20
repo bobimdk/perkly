@@ -91,6 +91,8 @@ export async function fetchOffers(filter: OfferFilter = {}): Promise<OfferRow[]>
   if (filter.categorySlug) {
     rows = rows.filter((r) => r.categories?.slug === filter.categorySlug);
   }
+  // Pin sponsored providers to the top
+  rows.sort((a, b) => Number(b.providers?.is_sponsored ?? 0) - Number(a.providers?.is_sponsored ?? 0));
   return rows;
 }
 
