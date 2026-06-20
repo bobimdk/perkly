@@ -112,6 +112,8 @@ const dictionaries: Record<Lang, Dict> = {
     "mkt.tab.limited": "Limited",
     "mkt.empty.title": "No offers match your search",
     "mkt.empty.sub": "Try a different category or search term.",
+    "mkt.sponsored.title": "Sponsored",
+    "mkt.sponsored.sub": "Hand-picked partners featured for you",
 
     // Marketplace / offer detail
     "mk.back": "Back to marketplace",
