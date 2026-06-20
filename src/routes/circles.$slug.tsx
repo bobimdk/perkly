@@ -371,7 +371,11 @@ function CirclePage() {
                       <div className="bc-bubble-wrap">
                         <ReactionBar />
                         <div className="bc-bubble bc-bubble-sent" onClick={popHeart}>
-                          {m.body}
+                          {m.kind === "voice" && m.audio_url ? (
+                            <VoiceBubble path={m.audio_url} durationMs={m.duration_ms} sent />
+                          ) : (
+                            m.body
+                          )}
                           <div className="bc-time bc-time-sent">
                             {fmtTime(m.created_at)}
                             <span className="bc-seen" />
