@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter } from "@/components/ui/sheet";
+import { Label } from "@/components/ui/label";
 import { fetchCategories, fetchOffers, fetchUserFavoriteIds, toggleFavorite, type OfferFilter } from "@/lib/marketplace";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
