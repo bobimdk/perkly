@@ -229,8 +229,6 @@ export async function findUserByEmail(email: string) {
 
 export type ProfileLite = {
   id: string;
-
-const sb: any = supabase;
   username: string | null;
   first_name: string | null;
   last_name: string | null;
