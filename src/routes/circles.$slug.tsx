@@ -439,17 +439,35 @@ function CirclePage() {
               send();
             }}
           >
-            <button type="button" className="bc-emoji-btn" aria-label="emoji">😊</button>
-            <input
-              className="bc-input"
-              placeholder="Write a message…"
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              maxLength={500}
-            />
-            <button type="button" className="bc-mic" aria-label="voice">🎤</button>
-            <button type="submit" className="bc-send" disabled={sending || !draft.trim()} aria-label="send">➤</button>
+            {recording ? (
+              <>
+                <button type="button" className="bc-mic bc-rec-cancel" onClick={() => stopRecording(true)} aria-label="cancel">✕</button>
+                <div className="bc-rec-live">
+                  <span className="bc-rec-pulse" />
+                  <span className="bc-rec-time">{fmtDur(recElapsed)}</span>
+                  <span className="bc-rec-hint">Recording… tap ➤ to send</span>
+                </div>
+                <button type="button" className="bc-send" onClick={() => stopRecording(false)} disabled={sending} aria-label="send voice">➤</button>
+              </>
+            ) : (
+              <>
+                <button type="button" className="bc-emoji-btn" aria-label="emoji">😊</button>
+                <input
+                  className="bc-input"
+                  placeholder="Write a message…"
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  maxLength={500}
+                />
+                {draft.trim() ? (
+                  <button type="submit" className="bc-send" disabled={sending} aria-label="send">➤</button>
+                ) : (
+                  <button type="button" className="bc-mic bc-mic-btn" onClick={startRecording} aria-label="record voice">🎤</button>
+                )}
+              </>
+            )}
           </form>
+
 
           <FloatHearts hearts={hearts} />
         </div>
