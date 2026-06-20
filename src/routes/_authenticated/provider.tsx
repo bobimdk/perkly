@@ -212,6 +212,8 @@ function ProviderDetail({ provider }: { provider: ProviderRow }) {
 
       <BusinessProfileEditor provider={provider} onSaved={() => qc.invalidateQueries({ queryKey: ["my-providers"] })} />
 
+      <PromoteCard provider={provider} />
+
       <LocationEditor provider={provider} onSaved={() => qc.invalidateQueries({ queryKey: ["my-providers"] })} />
 
       <div className="grid gap-3 sm:grid-cols-5">
