@@ -23,7 +23,7 @@ import {
   fetchGiftsReceived,
   fetchActivity,
 } from "@/lib/phase5";
-import { supabase } from "@/integrations/supabase/client";
+
 import { useAuth } from "@/lib/auth-context";
 import { useI18n } from "@/lib/i18n";
 import { toast } from "sonner";
