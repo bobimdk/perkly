@@ -276,7 +276,7 @@ function MapPage() {
       const L = (await import("leaflet")).default;
       layerRef.current.clearLayers();
       for (const p of offers.data ?? []) {
-        const icon = buildIcon(L, imageForOffer(p));
+        const icon = buildIcon(L, imageForOffer(p), false, !!p.is_sponsored);
         const km = distanceKm(origin, p);
         const desc =
           p.subtitle ||
