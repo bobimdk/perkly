@@ -363,9 +363,17 @@ function BusinessProfileEditor({ provider, onSaved }: { provider: ProviderRow; o
   const [name, setName] = useState(provider.name);
   const [tagline, setTagline] = useState(provider.tagline ?? "");
   const [description, setDescription] = useState(provider.description ?? "");
-  const [email, setEmail] = useState(provider.email ?? "");
-  const [phone, setPhone] = useState(provider.phone ?? "");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [website, setWebsite] = useState(provider.website ?? "");
+
+  useEffect(() => {
+    let alive = true;
+    fetchProviderContact(provider.id)
+      .then((c) => { if (alive && c) { setEmail(c.email ?? ""); setPhone(c.phone ?? ""); } })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [provider.id]);
   const [saving, setSaving] = useState(false);
 
   const save = async () => {
