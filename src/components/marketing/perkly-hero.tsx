@@ -302,6 +302,7 @@ export function PerklyHero() {
 
       {/* Card A */}
       <div
+        className="perkly-card-a"
         style={{
           position: "absolute",
           top: 90,
