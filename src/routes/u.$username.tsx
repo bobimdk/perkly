@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { MapPin, UserPlus, UserCheck, Mail, Briefcase, Loader2, Clock, Gift } from "lucide-react";
+import { MapPin, UserPlus, UserCheck, Mail, Briefcase, Loader2, Clock, Gift, Pencil, GraduationCap, Sparkles, Heart, Languages, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -16,7 +17,13 @@ import {
   respondFriendRequest,
   removeFriend,
   sendGift,
+  fetchExperiences,
+  fetchEducation,
+  fetchMutualConnections,
+  fetchGiftsReceived,
+  fetchActivity,
 } from "@/lib/phase5";
+
 import { useAuth } from "@/lib/auth-context";
 import { useI18n } from "@/lib/i18n";
 import { toast } from "sonner";
@@ -59,6 +66,32 @@ function ProfilePage() {
     queryKey: ["friendship", user?.id, profile?.id],
     queryFn: () => getFriendshipBetween(user!.id, profile!.id),
     enabled: !!user && !!profile && user?.id !== profile.id,
+  });
+
+  const experiencesQ = useQuery({
+    queryKey: ["experiences", profile?.id],
+    queryFn: () => fetchExperiences(profile!.id),
+    enabled: !!profile,
+  });
+  const educationQ = useQuery({
+    queryKey: ["education", profile?.id],
+    queryFn: () => fetchEducation(profile!.id),
+    enabled: !!profile,
+  });
+  const mutualsQ = useQuery({
+    queryKey: ["mutuals", user?.id, profile?.id],
+    queryFn: () => fetchMutualConnections(user!.id, profile!.id),
+    enabled: !!user && !!profile && user?.id !== profile.id,
+  });
+  const giftsQ = useQuery({
+    queryKey: ["gifts-received", profile?.id],
+    queryFn: () => fetchGiftsReceived(profile!.id, 6),
+    enabled: !!profile,
+  });
+  const activityQ = useQuery({
+    queryKey: ["activity", profile?.id],
+    queryFn: () => fetchActivity(profile!.id, 10),
+    enabled: !!profile,
   });
 
   const isOwn = user?.id === profile?.id;
@@ -181,7 +214,9 @@ function ProfilePage() {
 
                 <div className="mt-4 flex flex-wrap gap-2">
                   {isOwn ? (
-                    <Button variant="outline" size="sm" disabled className="rounded-full">Your profile</Button>
+                    <Button asChild variant="outline" size="sm" className="rounded-full">
+                      <Link to="/settings/profile"><Pencil className="mr-2 h-4 w-4" /> Edit profile</Link>
+                    </Button>
                   ) : !user ? (
                     <Button asChild size="sm" className="rounded-full"><Link to="/auth">Sign in to connect</Link></Button>
                   ) : status === "none" ? (
@@ -217,24 +252,141 @@ function ProfilePage() {
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-3">
-          {profile.bio ? (
-            <div className="rounded-2xl border border-border bg-card p-5 md:col-span-2">
-              <h2 className="font-display text-lg font-semibold">About</h2>
-              <p className="mt-2 whitespace-pre-line text-sm text-foreground">{profile.bio}</p>
-            </div>
-          ) : null}
-          <div className="space-y-3 rounded-2xl border border-border bg-card p-5">
-            <h2 className="font-display text-lg font-semibold">Details</h2>
-            {profile.company_name ? (
-              <p className="flex items-center gap-2 text-sm"><Briefcase className="h-4 w-4 text-muted-foreground" /> {profile.company_name}</p>
+          <div className="space-y-4 md:col-span-2">
+            {profile.bio ? (
+              <section className="rounded-2xl border border-border bg-card p-5">
+                <h2 className="font-display text-lg font-semibold">About</h2>
+                <p className="mt-2 whitespace-pre-line text-sm text-foreground">{profile.bio}</p>
+              </section>
             ) : null}
-            {profile.role_title ? (
-              <p className="flex items-center gap-2 text-sm text-muted-foreground">{profile.role_title}</p>
+
+            {(experiencesQ.data?.length ?? 0) > 0 ? (
+              <section className="rounded-2xl border border-border bg-card p-5">
+                <h2 className="font-display text-lg font-semibold">Experience</h2>
+                <ul className="mt-3 space-y-4">
+                  {experiencesQ.data!.map((x) => (
+                    <li key={x.id} className="flex gap-3">
+                      <div className="grid h-10 w-10 shrink-0 place-items-center rounded bg-muted"><Briefcase className="h-5 w-5 text-muted-foreground" /></div>
+                      <div className="min-w-0">
+                        <p className="font-semibold leading-tight">{x.title}</p>
+                        {x.company ? <p className="text-sm text-muted-foreground">{x.company}{x.location ? ` · ${x.location}` : ""}</p> : null}
+                        <p className="text-xs text-muted-foreground">{[x.start_date, x.end_date || "Present"].filter(Boolean).join(" — ")}</p>
+                        {x.description ? <p className="mt-1 text-sm">{x.description}</p> : null}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </section>
             ) : null}
-            {profile.email && (isOwn || status === "accepted") ? (
-              <p className="flex items-center gap-2 text-sm"><Mail className="h-4 w-4 text-muted-foreground" /> {profile.email}</p>
+
+            {(educationQ.data?.length ?? 0) > 0 ? (
+              <section className="rounded-2xl border border-border bg-card p-5">
+                <h2 className="font-display text-lg font-semibold">Education</h2>
+                <ul className="mt-3 space-y-4">
+                  {educationQ.data!.map((x) => (
+                    <li key={x.id} className="flex gap-3">
+                      <div className="grid h-10 w-10 shrink-0 place-items-center rounded bg-muted"><GraduationCap className="h-5 w-5 text-muted-foreground" /></div>
+                      <div className="min-w-0">
+                        <p className="font-semibold leading-tight">{x.school}</p>
+                        {(x.degree || x.field) ? <p className="text-sm text-muted-foreground">{[x.degree, x.field].filter(Boolean).join(", ")}</p> : null}
+                        {(x.start_year || x.end_year) ? <p className="text-xs text-muted-foreground">{x.start_year ?? "?"} — {x.end_year ?? "Present"}</p> : null}
+                        {x.description ? <p className="mt-1 text-sm">{x.description}</p> : null}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+
+            {(profile.skills?.length || profile.interests?.length || profile.languages?.length) ? (
+              <section className="rounded-2xl border border-border bg-card p-5">
+                <h2 className="font-display text-lg font-semibold">Skills & Interests</h2>
+                {profile.skills?.length ? (
+                  <div className="mt-3">
+                    <p className="mb-1.5 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground"><Sparkles className="h-3 w-3" /> Skills</p>
+                    <div className="flex flex-wrap gap-1.5">{profile.skills.map((s: string) => <Badge key={s} variant="secondary">{s}</Badge>)}</div>
+                  </div>
+                ) : null}
+                {profile.interests?.length ? (
+                  <div className="mt-3">
+                    <p className="mb-1.5 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground"><Heart className="h-3 w-3" /> Interests</p>
+                    <div className="flex flex-wrap gap-1.5">{profile.interests.map((s: string) => <Badge key={s} variant="outline">{s}</Badge>)}</div>
+                  </div>
+                ) : null}
+                {profile.languages?.length ? (
+                  <div className="mt-3">
+                    <p className="mb-1.5 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground"><Languages className="h-3 w-3" /> Languages</p>
+                    <div className="flex flex-wrap gap-1.5">{profile.languages.map((s: string) => <Badge key={s} variant="outline">{s}</Badge>)}</div>
+                  </div>
+                ) : null}
+              </section>
+            ) : null}
+
+            {(activityQ.data?.length ?? 0) > 0 ? (
+              <section className="rounded-2xl border border-border bg-card p-5">
+                <h2 className="font-display text-lg font-semibold">Recent activity</h2>
+                <ul className="mt-3 space-y-3">
+                  {activityQ.data!.map((a, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm">
+                      <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                      <div className="min-w-0">
+                        <p className="font-medium">{a.title}</p>
+                        {a.detail ? <p className="text-xs text-muted-foreground">{a.detail}</p> : null}
+                        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{new Date(a.at).toLocaleDateString()}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </section>
             ) : null}
           </div>
+
+          <aside className="space-y-4">
+            <section className="rounded-2xl border border-border bg-card p-5">
+              <h2 className="font-display text-lg font-semibold">Details</h2>
+              <div className="mt-3 space-y-2 text-sm">
+                {profile.company_name ? (
+                  <p className="flex items-center gap-2"><Briefcase className="h-4 w-4 text-muted-foreground" /> {profile.company_name}</p>
+                ) : null}
+                {profile.role_title ? <p className="text-muted-foreground">{profile.role_title}</p> : null}
+                {profile.email && (isOwn || status === "accepted") ? (
+                  <p className="flex items-center gap-2"><Mail className="h-4 w-4 text-muted-foreground" /> {profile.email}</p>
+                ) : null}
+              </div>
+            </section>
+
+            {!isOwn && user && (mutualsQ.data?.count ?? 0) > 0 ? (
+              <section className="rounded-2xl border border-border bg-card p-5">
+                <h2 className="flex items-center gap-2 font-display text-lg font-semibold"><Users className="h-4 w-4" /> Mutual connections</h2>
+                <p className="mt-1 text-sm text-muted-foreground">{mutualsQ.data!.count} shared</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {mutualsQ.data!.sample.map((m) => (
+                    <Link key={m.id} to="/u/$username" params={{ username: m.username || m.id }} className="group flex items-center gap-2 rounded-full border border-border bg-background px-2 py-1 text-xs hover:bg-muted">
+                      <span className="grid h-6 w-6 place-items-center rounded-full bg-gradient-to-br from-primary to-primary-glow text-[10px] font-bold text-primary-foreground">
+                        {(m.first_name?.[0] ?? m.username?.[0] ?? "?").toUpperCase()}
+                      </span>
+                      <span className="max-w-[8rem] truncate group-hover:underline">{m.first_name || m.username}</span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {(giftsQ.data?.length ?? 0) > 0 ? (
+              <section className="rounded-2xl border border-border bg-card p-5">
+                <h2 className="flex items-center gap-2 font-display text-lg font-semibold"><Gift className="h-4 w-4" /> Gifts received</h2>
+                <ul className="mt-3 space-y-3">
+                  {giftsQ.data!.map((g) => (
+                    <li key={g.id} className="rounded-lg border border-border bg-background p-2.5">
+                      <p className="text-sm font-semibold">{formatPrice(Number(g.amount_all))} <span className="font-normal text-muted-foreground">from {g.sender?.first_name || g.sender?.username || "a friend"}</span></p>
+                      {g.message ? <p className="mt-0.5 text-xs italic text-muted-foreground">“{g.message}”</p> : null}
+                      <p className="mt-0.5 text-[10px] uppercase tracking-widest text-muted-foreground">{new Date(g.created_at).toLocaleDateString()}</p>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+          </aside>
         </div>
       </main>
 

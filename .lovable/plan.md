@@ -1,41 +1,68 @@
-# Plan — 6 features
 
-I'll ship this in 3 batches (each batch = one migration + UI). Confirm and I'll start with Batch 1.
+## Profile Page Upgrade
 
-## Batch 1 — Database foundation (one migration)
+Transform `/u/$username` into a richer LinkedIn-style profile, and add a dedicated `/settings/profile` editor for the owner.
 
-Adds the schema everything else depends on:
+### 1. Database changes (one migration)
 
-- **profiles**: add `username` (unique, slug), `headline`, `bio`, `cover_url`, `location`, `company_name`, `role_title`. Backfill `username` from email prefix.
-- **providers**: add `is_sponsored boolean default false`, `sponsored_until timestamptz`.
-- **friendships**: `id, requester_id, addressee_id, status('pending'|'accepted'|'declined'), created_at, updated_at`. Unique pair. RLS: both parties can read; requester inserts; either can update status; either can delete.
-- **Rename Drops → Packages in UI only**. Keep table `seasonal_drops` as-is (already have a `packages` table for something else — I'll verify and namespace correctly during build).
-- GRANTs + RLS + update triggers on every new/changed table.
+Extend `profiles` with structured fields:
+- `skills text[]` (default `'{}'`)
+- `interests text[]` (default `'{}'`)
+- `languages text[]` (default `'{}'`)
 
-## Batch 2 — Profiles, Friends, Gift-to-friend, Navbar
+Two new tables to support timeline sections:
 
-- **`/u/$username` profile page**: LinkedIn-style layout per your reference — cover banner, large circular avatar, name + headline, location, connections count, company chip on the right, action buttons (Connect / Message / Gift if friend). Pulls from `profiles` + counts from `friendships`.
-- **`/network` page** (employees only): search users by name/company/role, send friend requests, accept/decline incoming, list current friends. ~LinkedIn People-You-May-Know grid.
-- **Navbar (desktop + mobile hamburger)**: add **"Add Friends"** link for employees pointing to `/network`, with a small badge for pending requests.
-- **Gift dialog rewrite**: remove email field. Show clickable friend list (avatar + name + company). Click a friend → amount popup → confirm transfers from sender's `employee_budgets` to recipient's via existing `send_gift` RPC (will adapt RPC to accept `recipient_user_id` instead of email).
-- **Circles chat fix**: show sender username above bubble, make it a Link to `/u/$username`. Cleaner bubble design (rounded, alt alignment for self vs others, avatar, timestamp).
-- **Drops → Packages**: rename route `/drops` → `/packages`, all UI labels, nav entries. Add redirect from old path.
+`public.profile_experiences`
+- `id uuid pk`, `user_id uuid → profiles.id`, `title text`, `company text`, `location text`, `start_date date`, `end_date date null` (null = present), `description text`, `created_at timestamptz`
 
-## Batch 3 — Sponsored businesses
+`public.profile_education`
+- `id uuid pk`, `user_id uuid → profiles.id`, `school text`, `degree text`, `field text`, `start_year int`, `end_year int null`, `description text`, `created_at timestamptz`
 
-- **Marketplace**: ⭐ "Sponsored" badge on provider cards. Sponsored providers' offers pinned to top of "Recommended" rail.
-- **Map**: distinct pin icon (gold star) for `is_sponsored` providers, with "Sponsored" tag in the popup.
-- **Provider dashboard**: a "Promote business" card. For now an admin-only toggle (no Stripe yet) — provider sees status + can request promotion; admin flips `is_sponsored`. Confirm if you want self-serve paid promotion (Stripe) instead — that's a bigger add.
+Both tables get GRANTs (`SELECT` to anon+authenticated, write to authenticated, ALL to service_role), RLS enabled, policies: public read; owner insert/update/delete (`auth.uid() = user_id`).
 
-## Technical notes (skip if non-technical)
+### 2. Profile page (`src/routes/u.$username.tsx`)
 
-- Google Maps custom marker icons via `google.maps.Marker` `icon` prop (gold star SVG).
-- Friend search uses `profiles` full-text on `display_name || company_name || role_title`.
-- Profile route: `src/routes/u.$username.tsx` with loader fetching profile + counts.
-- Gift RPC signature change is backward-compatible (add new param, keep email path deprecated).
+Rebuild as a sectioned layout (keeps existing cover/avatar/header):
 
-## Questions before I start
+- **Header** — keep current avatar, name, headline, location, connect/gift buttons. Add Edit button for owner (links to `/settings/profile`).
+- **About** — existing bio block, full width.
+- **Experience** — list of `profile_experiences` rows with company, title, date range, description.
+- **Education** — list of `profile_education` rows.
+- **Skills & Interests** — chip rows for `skills`, `interests`, `languages`.
+- **Mutual connections** — for non-owner viewers, show count + up to 6 avatars of friends-in-common (query `friendships` accepted on both sides). Hidden when own profile or not signed in.
+- **Gifts received showcase** — last ~6 gifts received from `gifts` table where `recipient_id = profile.id`; show sender avatar, amount, message, date. Public.
+- **Activity feed** — combined recent: gifts sent/received, circles joined (`circle_members`), badges earned (`user_badges`). Sorted desc, limit 10.
 
-1. **Promotion flow**: admin toggle only for now, or wire Stripe checkout so providers self-serve?
-2. **Friend gift**: completely remove the email gift path, or keep both?
-3. Go ahead with all 3 batches in order?
+All section text in English so the auto-translator handles other languages.
+
+### 3. Settings page (`src/routes/_authenticated/settings.profile.tsx`)
+
+New dedicated editor (auth-required). Sections:
+- **Basics**: avatar upload, cover upload, first/last name, username, headline, location, bio.
+- **Skills / Interests / Languages**: tag-input chips backed by the new `text[]` columns.
+- **Experience**: list editor (add/edit/delete rows) for `profile_experiences`.
+- **Education**: list editor for `profile_education`.
+
+Each save goes through `supabase.from(...).upsert/update/delete` scoped to `auth.uid()`. On save, invalidate the `["profile", username]` query and toast success.
+
+Add a "Settings" link to the profile owner header and a top-nav entry visible when signed in.
+
+### 4. Helpers in `src/lib/phase5.ts`
+
+Add:
+- `fetchExperiences(userId)`, `upsertExperience(row)`, `deleteExperience(id)`
+- `fetchEducation(userId)`, `upsertEducation(row)`, `deleteEducation(id)`
+- `fetchMutualConnections(viewerId, profileId)` → `{ count, sample: Profile[] }`
+- `fetchGiftsReceived(profileId, limit=6)` → joins sender profile
+- `fetchActivity(profileId, limit=10)` → unions gifts + circle joins + badges
+
+### Technical notes
+
+- TanStack Query for all reads; `useSuspenseQuery` not required, keep `useQuery` to match existing pattern.
+- Public profile reads stay anon-friendly via existing public SELECT policies on `profiles`; new tables get matching public SELECT.
+- Settings route lives under `_authenticated/`, so the managed gate handles auth.
+- No translation keys needed — auto-translate handles English source strings.
+
+### Out of scope
+
+- No endorsements/kudos, no badges section beyond activity feed, no privacy toggles (per answers), no inline editing on the profile page.

@@ -400,3 +400,166 @@ export async function countConnections(userId: string) {
     .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`);
   return count ?? 0;
 }
+
+// ====================== EXPERIENCE & EDUCATION ======================
+
+export type Experience = {
+  id: string;
+  user_id: string;
+  title: string;
+  company: string | null;
+  location: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  description: string | null;
+};
+
+export type Education = {
+  id: string;
+  user_id: string;
+  school: string;
+  degree: string | null;
+  field: string | null;
+  start_year: number | null;
+  end_year: number | null;
+  description: string | null;
+};
+
+export async function fetchExperiences(userId: string) {
+  const { data, error } = await supabase
+    .from("profile_experiences")
+    .select("*")
+    .eq("user_id", userId)
+    .order("start_date", { ascending: false, nullsFirst: false });
+  if (error) throw error;
+  return (data ?? []) as Experience[];
+}
+
+export async function upsertExperience(row: Partial<Experience> & { user_id: string; title: string }) {
+  const { data, error } = await supabase
+    .from("profile_experiences")
+    .upsert(row as any)
+    .select()
+    .maybeSingle();
+  if (error) throw error;
+  return data as Experience;
+}
+
+export async function deleteExperience(id: string) {
+  const { error } = await supabase.from("profile_experiences").delete().eq("id", id);
+  if (error) throw error;
+}
+
+export async function fetchEducation(userId: string) {
+  const { data, error } = await supabase
+    .from("profile_education")
+    .select("*")
+    .eq("user_id", userId)
+    .order("start_year", { ascending: false, nullsFirst: false });
+  if (error) throw error;
+  return (data ?? []) as Education[];
+}
+
+export async function upsertEducation(row: Partial<Education> & { user_id: string; school: string }) {
+  const { data, error } = await supabase
+    .from("profile_education")
+    .upsert(row as any)
+    .select()
+    .maybeSingle();
+  if (error) throw error;
+  return data as Education;
+}
+
+export async function deleteEducation(id: string) {
+  const { error } = await supabase.from("profile_education").delete().eq("id", id);
+  if (error) throw error;
+}
+
+// ====================== MUTUAL CONNECTIONS ======================
+
+export async function fetchMutualConnections(viewerId: string, profileId: string) {
+  if (viewerId === profileId) return { count: 0, sample: [] as ProfileLite[] };
+  const [{ data: mine }, { data: theirs }] = await Promise.all([
+    sb.from("friendships" as any).select("requester_id, addressee_id").eq("status", "accepted")
+      .or(`requester_id.eq.${viewerId},addressee_id.eq.${viewerId}`),
+    sb.from("friendships" as any).select("requester_id, addressee_id").eq("status", "accepted")
+      .or(`requester_id.eq.${profileId},addressee_id.eq.${profileId}`),
+  ]);
+  const peerIds = (rows: any[] | null, self: string) =>
+    new Set((rows ?? []).map((r: any) => (r.requester_id === self ? r.addressee_id : r.requester_id)));
+  const a = peerIds(mine, viewerId);
+  const b = peerIds(theirs, profileId);
+  const shared = Array.from(a).filter((id) => b.has(id) && id !== viewerId && id !== profileId);
+  if (shared.length === 0) return { count: 0, sample: [] as ProfileLite[] };
+  const { data: profs } = await sb.rpc("get_public_profiles", { _ids: shared.slice(0, 6) });
+  return { count: shared.length, sample: (profs ?? []) as ProfileLite[] };
+}
+
+// ====================== GIFTS RECEIVED ======================
+
+export type GiftReceived = {
+  id: string;
+  from_user: string;
+  amount_all: number;
+  message: string | null;
+  created_at: string;
+  sender?: ProfileLite | null;
+};
+
+export async function fetchGiftsReceived(profileId: string, limit = 6) {
+  const { data, error } = await supabase
+    .from("gifts")
+    .select("id, from_user, amount_all, message, created_at")
+    .eq("to_user", profileId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  const rows = (data ?? []) as GiftReceived[];
+  const ids = Array.from(new Set(rows.map((r) => r.from_user)));
+  if (ids.length === 0) return rows;
+  const { data: profs } = await sb.rpc("get_public_profiles", { _ids: ids });
+  const map = new Map<string, ProfileLite>();
+  (profs ?? []).forEach((p: any) => map.set(p.id, p));
+  return rows.map((r) => ({ ...r, sender: map.get(r.from_user) ?? null }));
+}
+
+// ====================== ACTIVITY FEED ======================
+
+export type ActivityItem = {
+  kind: "gift_received" | "gift_sent" | "circle_joined";
+  at: string;
+  title: string;
+  detail?: string | null;
+};
+
+export async function fetchActivity(profileId: string, limit = 10) {
+  const [gIn, gOut, cm] = await Promise.all([
+    supabase.from("gifts").select("id, amount_all, message, created_at, from_user").eq("to_user", profileId).order("created_at", { ascending: false }).limit(limit),
+    supabase.from("gifts").select("id, amount_all, message, created_at, to_user").eq("from_user", profileId).order("created_at", { ascending: false }).limit(limit),
+    sb.from("circle_members" as any).select("created_at, circles(name, slug)").eq("user_id", profileId).order("created_at", { ascending: false }).limit(limit),
+  ]);
+  const items: ActivityItem[] = [];
+  (gIn.data ?? []).forEach((r: any) => items.push({
+    kind: "gift_received", at: r.created_at,
+    title: `Received a gift of ${Number(r.amount_all).toLocaleString()} ALL`,
+    detail: r.message,
+  }));
+  (gOut.data ?? []).forEach((r: any) => items.push({
+    kind: "gift_sent", at: r.created_at,
+    title: `Sent a gift of ${Number(r.amount_all).toLocaleString()} ALL`,
+    detail: r.message,
+  }));
+  (cm.data ?? []).forEach((r: any) => items.push({
+    kind: "circle_joined", at: r.created_at,
+    title: `Joined circle ${r.circles?.name ?? ""}`.trim(),
+  }));
+  return items.sort((a, b) => +new Date(b.at) - +new Date(a.at)).slice(0, limit);
+}
+
+// ====================== PROFILE UPDATE ======================
+
+export async function updateOwnProfile(userId: string, patch: Record<string, any>) {
+  const { error } = await (supabase as any).from("profiles").update(patch).eq("id", userId);
+  if (error) throw error;
+}
+

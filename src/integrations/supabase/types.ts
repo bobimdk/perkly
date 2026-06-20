@@ -1102,6 +1102,100 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_education: {
+        Row: {
+          created_at: string
+          degree: string | null
+          description: string | null
+          end_year: number | null
+          field: string | null
+          id: string
+          school: string
+          start_year: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          degree?: string | null
+          description?: string | null
+          end_year?: number | null
+          field?: string | null
+          id?: string
+          school: string
+          start_year?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          degree?: string | null
+          description?: string | null
+          end_year?: number | null
+          field?: string | null
+          id?: string
+          school?: string
+          start_year?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_education_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profile_experiences: {
+        Row: {
+          company: string | null
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          location: string | null
+          start_date: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          location?: string | null
+          start_date?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          location?: string | null
+          start_date?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_experiences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1114,11 +1208,14 @@ export type Database = {
           first_name: string | null
           headline: string | null
           id: string
+          interests: string[]
           language: string
+          languages: string[]
           last_name: string | null
           location: string | null
           phone: string | null
           role_title: string | null
+          skills: string[]
           suspended: boolean
           suspended_reason: string | null
           updated_at: string
@@ -1135,11 +1232,14 @@ export type Database = {
           first_name?: string | null
           headline?: string | null
           id: string
+          interests?: string[]
           language?: string
+          languages?: string[]
           last_name?: string | null
           location?: string | null
           phone?: string | null
           role_title?: string | null
+          skills?: string[]
           suspended?: boolean
           suspended_reason?: string | null
           updated_at?: string
@@ -1156,11 +1256,14 @@ export type Database = {
           first_name?: string | null
           headline?: string | null
           id?: string
+          interests?: string[]
           language?: string
+          languages?: string[]
           last_name?: string | null
           location?: string | null
           phone?: string | null
           role_title?: string | null
+          skills?: string[]
           suspended?: boolean
           suspended_reason?: string | null
           updated_at?: string
@@ -1741,9 +1844,12 @@ export type Database = {
           first_name: string
           headline: string
           id: string
+          interests: string[]
+          languages: string[]
           last_name: string
           location: string
           role_title: string
+          skills: string[]
           username: string
         }[]
       }
@@ -1758,9 +1864,12 @@ export type Database = {
           first_name: string
           headline: string
           id: string
+          interests: string[]
+          languages: string[]
           last_name: string
           location: string
           role_title: string
+          skills: string[]
           username: string
         }[]
       }
