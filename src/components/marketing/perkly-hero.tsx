@@ -27,14 +27,18 @@ const CARDS: Card[] = [
 function MagneticButton({
   children,
   primary,
+  to,
+  href,
   style,
 }: {
   children: React.ReactNode;
   primary?: boolean;
+  to?: string;
+  href?: string;
   style?: CSSProperties;
 }) {
-  const ref = useRef<HTMLButtonElement>(null);
-  const onMove = (e: MouseEvent<HTMLButtonElement>) => {
+  const ref = useRef<HTMLAnchorElement>(null);
+  const onMove = (e: MouseEvent<HTMLAnchorElement>) => {
     const el = ref.current;
     if (!el) return;
     const r = el.getBoundingClientRect();
@@ -52,6 +56,8 @@ function MagneticButton({
     cursor: "pointer",
     transition: "transform .25s cubic-bezier(.2,.7,.2,1)",
     fontFamily: FONT_STACK,
+    display: "inline-block",
+    textDecoration: "none",
   };
   const variant: CSSProperties = primary
     ? {
@@ -67,10 +73,18 @@ function MagneticButton({
         padding: "16px 26px",
         border: "1px solid #e8d4a4",
       };
+  const merged = { ...base, ...variant, ...style };
+  if (to) {
+    return (
+      <Link ref={ref as any} to={to} onMouseMove={onMove as any} onMouseLeave={onLeave} style={merged}>
+        {children}
+      </Link>
+    );
+  }
   return (
-    <button ref={ref} onMouseMove={onMove} onMouseLeave={onLeave} style={{ ...base, ...variant, ...style }}>
+    <a ref={ref} href={href ?? "#"} onMouseMove={onMove} onMouseLeave={onLeave} style={merged}>
       {children}
-    </button>
+    </a>
   );
 }
 
