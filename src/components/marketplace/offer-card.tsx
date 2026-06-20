@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Heart, Star, MapPin, Clock } from "lucide-react";
+import { Heart, Star, MapPin, Clock, Sparkles } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import type { OfferRow } from "@/lib/marketplace";
 
@@ -7,10 +7,12 @@ export function OfferCard({
   offer,
   isFavorite,
   onToggleFavorite,
+  highlighted,
 }: {
   offer: OfferRow;
   isFavorite?: boolean;
   onToggleFavorite?: (id: string) => void;
+  highlighted?: boolean;
 }) {
   const { formatPrice, lang } = useI18n();
   const categoryName = offer.categories ? (lang === "sq" ? offer.categories.name_sq : offer.categories.name_en) : null;
@@ -19,7 +21,11 @@ export function OfferCard({
     <Link
       to="/marketplace/$slug"
       params={{ slug: offer.slug }}
-      className="card-tilt card-tilt-hover group block overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
+      className={`card-tilt card-tilt-hover group block overflow-hidden rounded-2xl bg-card shadow-sm transition-shadow ${
+        highlighted
+          ? "border-2 border-amber-400 shadow-[0_0_0_1px_rgba(251,191,36,0.4),0_10px_30px_-8px_rgba(251,191,36,0.25)] ring-1 ring-amber-400/40"
+          : "border border-border"
+      }`}
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-muted">
         {offer.cover_url ? (
@@ -32,8 +38,8 @@ export function OfferCard({
         ) : null}
         <div className="absolute left-3 top-3 flex flex-wrap gap-1">
           {offer.providers?.is_sponsored ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-950 shadow">
-              <Star className="h-3 w-3 fill-current" /> Sponsored
+            <span className={`inline-flex items-center gap-1 rounded-full bg-amber-400 px-2 py-0.5 font-semibold uppercase tracking-wider text-amber-950 shadow ${highlighted ? "text-[11px]" : "text-[10px]"}`}>
+              <Sparkles className={`h-3 w-3 fill-current ${highlighted ? "h-3.5 w-3.5" : ""}`} /> {highlighted ? "Sponsored" : "Sponsored"}
             </span>
           ) : null}
           {offer.is_limited_time ? (
