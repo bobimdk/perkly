@@ -54,12 +54,12 @@ export function GiftDialog() {
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setSelected(null); }}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
-          <Gift className="mr-2 h-4 w-4" /> Dhuro një shokë
+          <Gift className="mr-2 h-4 w-4" /> Send a gift
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{selected ? "Dërgo dhuratë" : "Zgjidh një shokë"}</DialogTitle>
+          <DialogTitle>{selected ? "Send gift" : "Pick a friend"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           {!selected ? (
@@ -68,9 +68,9 @@ export function GiftDialog() {
                 <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin" /></div>
               ) : friends.length === 0 ? (
                 <div className="space-y-3 py-6 text-center">
-                  <p className="text-sm text-muted-foreground">Ende nuk keni asnjë shokë në rrjet.</p>
+                  <p className="text-sm text-muted-foreground">You don't have any friends in your network yet.</p>
                   <Button asChild size="sm" onClick={() => setOpen(false)}>
-                    <Link to="/network"><UserPlus className="mr-2 h-4 w-4" /> Shto shokë</Link>
+                    <Link to="/network"><UserPlus className="mr-2 h-4 w-4" /> Add friends</Link>
                   </Button>
                 </div>
               ) : (
