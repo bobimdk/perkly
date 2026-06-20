@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
 import { useI18n } from "@/lib/i18n";
-import { Gift, LogOut } from "lucide-react";
+import { Gift, LogOut, Users } from "lucide-react";
 import { NotificationsBell } from "@/components/dashboard/notifications-bell";
 import { Button } from "@/components/ui/button";
 import {
