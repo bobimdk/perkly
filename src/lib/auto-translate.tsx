@@ -137,7 +137,7 @@ export function AutoTranslate() {
 
     const flush = async (knownNodes: Text[]) => {
       const targetLang = langRef.current;
-      if (targetLang === "en") return;
+      // translate in both directions; AI returns unchanged if already in target
       const batch = Array.from(pendingRef.current);
       pendingRef.current.clear();
       if (batch.length === 0) return;
