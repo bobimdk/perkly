@@ -117,19 +117,19 @@ export function GiftDialog() {
                 </div>
               </div>
               <div>
-                <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Shuma (ALL)</label>
+                <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Amount (ALL)</label>
                 <Input type="number" min={100} step={100} value={amount} onChange={(e) => setAmount(e.target.value)} />
-                <p className="mt-1 text-xs text-muted-foreground">{formatPrice(Number(amount) || 0)} do të transferohen nga buxheti juaj.</p>
+                <p className="mt-1 text-xs text-muted-foreground">{formatPrice(Number(amount) || 0)} will be transferred from your budget.</p>
               </div>
               <div>
-                <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Mesazh</label>
-                <Textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Gëzuar ditëlindjen! 🎂" rows={2} />
+                <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Message</label>
+                <Textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Happy birthday! 🎂" rows={2} />
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="ghost" onClick={() => setSelected(null)}><ArrowLeft className="mr-2 h-4 w-4" /> Mbrapa</Button>
+                <Button variant="ghost" onClick={() => setSelected(null)}><ArrowLeft className="mr-2 h-4 w-4" /> Back</Button>
                 <Button onClick={send} disabled={loading || !amount || Number(amount) <= 0}>
                   {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Gift className="mr-2 h-4 w-4" />}
-                  Dërgo dhuratë
+                  Send gift
                 </Button>
               </div>
             </>
