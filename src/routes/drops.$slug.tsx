@@ -72,7 +72,7 @@ function DropDetail() {
           <Link to="/drops" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4" /> All drops
           </Link>
-          <p className="mt-6 font-mono text-xs uppercase tracking-widest text-muted-foreground">Seasonal drop</p>
+          <p className="mt-6 font-mono text-xs uppercase tracking-widest text-muted-foreground">Seasonal package</p>
           <h1 className="mt-2 font-display text-5xl font-bold">{drop.title}</h1>
           <p className="mt-3 max-w-2xl text-lg text-muted-foreground">{drop.subtitle}</p>
 
