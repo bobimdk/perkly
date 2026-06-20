@@ -102,12 +102,13 @@ function ProfilePage() {
             style={{
               background: profile.cover_url
                 ? `url(${profile.cover_url}) center/cover`
-                : "linear-gradient(135deg, hsl(var(--primary) / 0.25), hsl(var(--primary-glow) / 0.2))",
+                : "linear-gradient(135deg, hsl(var(--primary) / 0.35), hsl(var(--primary-glow) / 0.25))",
             }}
           />
-          {/* Avatar overlapping */}
+          {/* Body */}
           <div className="relative px-4 pb-6 sm:px-8">
-            <div className="-mt-16 grid h-28 w-28 place-items-center rounded-full border-4 border-card bg-gradient-to-br from-primary to-primary-glow font-display text-4xl font-bold text-primary-foreground shadow sm:h-32 sm:w-32">
+            {/* Avatar overlapping cover */}
+            <div className="-mt-20 grid h-36 w-36 place-items-center rounded-full border-4 border-card bg-gradient-to-br from-primary to-primary-glow font-display text-5xl font-bold text-primary-foreground shadow-lg sm:h-44 sm:w-44">
               {profile.avatar_url ? (
                 <img src={profile.avatar_url} alt={fullName} className="h-full w-full rounded-full object-cover" />
               ) : (
@@ -115,45 +116,62 @@ function ProfilePage() {
               )}
             </div>
 
-            <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="mt-4 grid gap-6 sm:grid-cols-[1fr_auto]">
+              {/* Left: identity */}
               <div className="min-w-0">
-                <h1 className="truncate font-display text-2xl font-bold sm:text-3xl">{fullName}</h1>
+                <h1 className="font-display text-2xl font-bold sm:text-3xl">{fullName}</h1>
                 {profile.headline || profile.role_title ? (
-                  <p className="mt-1 text-sm text-foreground">
+                  <p className="mt-1 text-base text-foreground">
                     {profile.headline || `${profile.role_title}${profile.company_name ? ` at ${profile.company_name}` : ""}`}
                   </p>
                 ) : null}
-                <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                   {profile.location ? (
                     <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {profile.location}</span>
                   ) : null}
-                  <Link to="/network" className="font-semibold text-primary hover:underline">
-                    {connQ.data ?? 0} {(connQ.data ?? 0) === 1 ? "connection" : "connections"}
-                  </Link>
+                  {profile.email && (isOwn || status === "accepted") ? (
+                    <>
+                      <span aria-hidden>·</span>
+                      <a href={`mailto:${profile.email}`} className="font-semibold text-primary hover:underline">Contact info</a>
+                    </>
+                  ) : null}
+                </div>
+                <Link to="/network" className="mt-2 inline-block text-sm font-semibold text-primary hover:underline">
+                  {connQ.data ?? 0} {(connQ.data ?? 0) === 1 ? "connection" : "connections"}
+                </Link>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {isOwn ? (
+                    <Button variant="outline" size="sm" disabled className="rounded-full">Profili juaj</Button>
+                  ) : !user ? (
+                    <Button asChild size="sm" className="rounded-full"><Link to="/auth">Hyni për të lidhur</Link></Button>
+                  ) : status === "none" ? (
+                    <Button size="sm" className="rounded-full" onClick={connect}><UserPlus className="mr-2 h-4 w-4" /> Lidhu</Button>
+                  ) : status === "pending_out" ? (
+                    <Button size="sm" variant="outline" className="rounded-full" disabled><Clock className="mr-2 h-4 w-4" /> Pritet</Button>
+                  ) : status === "pending_in" ? (
+                    <>
+                      <Button size="sm" className="rounded-full" onClick={accept}><UserCheck className="mr-2 h-4 w-4" /> Prano</Button>
+                      <Button size="sm" variant="outline" className="rounded-full" onClick={decline}>Refuzo</Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button size="sm" variant="outline" className="rounded-full"><Gift className="mr-2 h-4 w-4" /> Dhuro</Button>
+                      <Button size="sm" variant="ghost" className="rounded-full" onClick={unfriend}>Hiq lidhjen</Button>
+                    </>
+                  )}
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2">
-                {isOwn ? (
-                  <Button variant="outline" size="sm" disabled>Profili juaj</Button>
-                ) : !user ? (
-                  <Button asChild size="sm"><Link to="/auth">Hyni për të lidhur</Link></Button>
-                ) : status === "none" ? (
-                  <Button size="sm" onClick={connect}><UserPlus className="mr-2 h-4 w-4" /> Lidhu</Button>
-                ) : status === "pending_out" ? (
-                  <Button size="sm" variant="outline" disabled><Clock className="mr-2 h-4 w-4" /> Pritet</Button>
-                ) : status === "pending_in" ? (
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={accept}><UserCheck className="mr-2 h-4 w-4" /> Prano</Button>
-                    <Button size="sm" variant="outline" onClick={decline}>Refuzo</Button>
+              {/* Right: company chip */}
+              {profile.company_name ? (
+                <div className="flex items-center gap-2 self-start rounded-lg border border-border bg-background px-3 py-2">
+                  <div className="grid h-8 w-8 shrink-0 place-items-center rounded bg-muted">
+                    <Briefcase className="h-4 w-4 text-muted-foreground" />
                   </div>
-                ) : (
-                  <>
-                    <Button size="sm" variant="outline"><Gift className="mr-2 h-4 w-4" /> Dhuro</Button>
-                    <Button size="sm" variant="ghost" onClick={unfriend}>Hiq lidhjen</Button>
-                  </>
-                )}
-              </div>
+                  <span className="text-sm font-medium">{profile.company_name}</span>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
