@@ -266,6 +266,7 @@ export function PerklyHero() {
           </div>
 
           <h1
+            className="perkly-h1"
             style={{
               ...revealStyle(80),
               fontWeight: 800,
@@ -282,7 +283,7 @@ export function PerklyHero() {
           <p
             style={{
               ...revealStyle(160),
-              fontSize: 20,
+              fontSize: 18,
               lineHeight: 1.55,
               color: "#5c4d2c",
               maxWidth: 500,
@@ -293,8 +294,8 @@ export function PerklyHero() {
           </p>
 
           <div style={{ ...revealStyle(240), display: "flex", gap: 13, marginTop: 32, flexWrap: "wrap" }}>
-            <MagneticButton primary>Get started free</MagneticButton>
-            <MagneticButton>Book a demo</MagneticButton>
+            <MagneticButton primary to="/auth">Get started free</MagneticButton>
+            <MagneticButton href="mailto:hello@perkly.al?subject=Perkly%20demo">Book a demo</MagneticButton>
           </div>
         </div>
       </div>
