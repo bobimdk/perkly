@@ -21,7 +21,11 @@ export function OfferCard({
     <Link
       to="/marketplace/$slug"
       params={{ slug: offer.slug }}
-      className="card-tilt card-tilt-hover group block overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
+      className={`card-tilt card-tilt-hover group block overflow-hidden rounded-2xl bg-card shadow-sm transition-shadow ${
+        highlighted
+          ? "border-2 border-amber-400 shadow-[0_0_0_1px_rgba(251,191,36,0.4),0_10px_30px_-8px_rgba(251,191,36,0.25)] ring-1 ring-amber-400/40"
+          : "border border-border"
+      }`}
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-muted">
         {offer.cover_url ? (
