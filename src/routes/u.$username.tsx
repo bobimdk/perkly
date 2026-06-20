@@ -68,6 +68,32 @@ function ProfilePage() {
     enabled: !!user && !!profile && user?.id !== profile.id,
   });
 
+  const experiencesQ = useQuery({
+    queryKey: ["experiences", profile?.id],
+    queryFn: () => fetchExperiences(profile!.id),
+    enabled: !!profile,
+  });
+  const educationQ = useQuery({
+    queryKey: ["education", profile?.id],
+    queryFn: () => fetchEducation(profile!.id),
+    enabled: !!profile,
+  });
+  const mutualsQ = useQuery({
+    queryKey: ["mutuals", user?.id, profile?.id],
+    queryFn: () => fetchMutualConnections(user!.id, profile!.id),
+    enabled: !!user && !!profile && user?.id !== profile.id,
+  });
+  const giftsQ = useQuery({
+    queryKey: ["gifts-received", profile?.id],
+    queryFn: () => fetchGiftsReceived(profile!.id, 6),
+    enabled: !!profile,
+  });
+  const activityQ = useQuery({
+    queryKey: ["activity", profile?.id],
+    queryFn: () => fetchActivity(profile!.id, 10),
+    enabled: !!profile,
+  });
+
   const isOwn = user?.id === profile?.id;
   const fs = friendshipQ.data;
   const status: "none" | "pending_out" | "pending_in" | "accepted" = !fs
