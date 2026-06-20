@@ -406,7 +406,8 @@ function EmployeesTable({ company, loading, employees, requests, onChanged }: {
   const add = async () => {
     if (!email.trim()) return;
     setAdding(true);
-    const { data: profile } = await supabase.from("profiles").select("id").eq("email", email.trim()).maybeSingle();
+    const { data: foundUserId } = await supabase.rpc("find_user_id_by_email" as any, { _email: email.trim() });
+    const profile = foundUserId ? { id: foundUserId as unknown as string } : null;
     const payload = {
       company_id: company.id,
       invite_email: email.trim(),
