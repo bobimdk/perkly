@@ -106,10 +106,7 @@ export async function fetchCircleMessages(circleId: string) {
   const msgs = (data ?? []) as CircleMessage[];
   const ids = Array.from(new Set(msgs.map((m) => m.user_id)));
   if (ids.length === 0) return msgs as (CircleMessage & { sender?: any })[];
-  const { data: profs } = await supabase
-    .from("profiles" as any)
-    .select("id, username, first_name, last_name, avatar_url")
-    .in("id", ids);
+  const { data: profs } = await (supabase as any).rpc("get_public_profiles", { _ids: ids });
   const map = new Map<string, any>();
   (profs ?? []).forEach((p: any) => map.set(p.id, p));
   return msgs.map((m) => ({ ...m, sender: map.get(m.user_id) ?? null })) as (CircleMessage & { sender?: any })[];
