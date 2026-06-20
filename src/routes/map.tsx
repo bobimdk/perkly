@@ -80,6 +80,7 @@ async function fetchOfferPins(): Promise<OfferPin[]> {
         city: pr.city,
         lat: Number(pr.lat),
         lng: Number(pr.lng),
+        is_sponsored: !!pr.is_sponsored,
       } as OfferPin;
     })
     .filter((x): x is OfferPin => x !== null);
