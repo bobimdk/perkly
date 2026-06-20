@@ -112,7 +112,7 @@ function ProviderPage() {
           </aside>
 
           <div>
-            {selected ? <ProviderDetail provider={selected} /> : null}
+            {selected ? <ProviderDetail key={selected.id} provider={selected} /> : null}
           </div>
         </div>
       )}
