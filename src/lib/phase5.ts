@@ -16,9 +16,13 @@ export type CircleMessage = {
   id: string;
   circle_id: string;
   user_id: string;
-  body: string;
+  body: string | null;
+  kind: "text" | "voice";
+  audio_url: string | null;
+  duration_ms: number | null;
   created_at: string;
 };
+
 
 export type SeasonalDrop = {
   id: string;
@@ -114,9 +118,43 @@ export async function fetchCircleMessages(circleId: string) {
 export async function postCircleMessage(circleId: string, userId: string, body: string) {
   const { error } = await supabase
     .from("circle_messages")
-    .insert({ circle_id: circleId, user_id: userId, body });
+    .insert({ circle_id: circleId, user_id: userId, body, kind: "text" } as any);
   if (error) throw error;
 }
+
+export async function postCircleVoiceMessage(
+  circleId: string,
+  userId: string,
+  blob: Blob,
+  durationMs: number,
+) {
+  const ext = blob.type.includes("mp4") ? "mp4" : blob.type.includes("ogg") ? "ogg" : "webm";
+  const path = `${userId}/${circleId}/${Date.now()}.${ext}`;
+  const { error: upErr } = await supabase.storage
+    .from("voice-notes")
+    .upload(path, blob, { contentType: blob.type || "audio/webm", upsert: false });
+  if (upErr) throw upErr;
+  const { error } = await supabase
+    .from("circle_messages")
+    .insert({
+      circle_id: circleId,
+      user_id: userId,
+      body: null,
+      kind: "voice",
+      audio_url: path,
+      duration_ms: Math.round(durationMs),
+    } as any);
+  if (error) throw error;
+}
+
+export async function getVoiceSignedUrl(path: string) {
+  const { data, error } = await supabase.storage
+    .from("voice-notes")
+    .createSignedUrl(path, 60 * 60);
+  if (error) throw error;
+  return data.signedUrl;
+}
+
 
 export async function listDrops() {
   const { data, error } = await supabase

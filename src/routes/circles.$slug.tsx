@@ -5,6 +5,8 @@ import {
   getCircleBySlug,
   fetchCircleMessages,
   postCircleMessage,
+  postCircleVoiceMessage,
+  getVoiceSignedUrl,
   isCircleMember,
   joinCircle,
   leaveCircle,
@@ -18,6 +20,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/circles/$slug")({
   component: CirclePage,
 });
+
 
 const AVATAR_COLORS = ["#e36f8a", "#5b87c4", "#c08a2e", "#9b6cd6", "#2ea58a"];
 function colorFor(id: string) {
@@ -57,6 +60,68 @@ function ReactionBar() {
         <button key={r} type="button" className="bc-react">{r}</button>
       ))}
     </div>
+  );
+}
+
+function fmtDur(ms: number) {
+  const s = Math.max(0, Math.round(ms / 1000));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+}
+
+function VoiceBubble({ path, durationMs, sent }: { path: string; durationMs: number | null; sent: boolean }) {
+  const [url, setUrl] = useState<string | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const ensureUrl = async () => {
+    if (url) return url;
+    try {
+      const u = await getVoiceSignedUrl(path);
+      setUrl(u);
+      return u;
+    } catch {
+      toast.error("Couldn't load voice note");
+      return null;
+    }
+  };
+
+  const toggle = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const u = await ensureUrl();
+    if (!u) return;
+    if (!audioRef.current) {
+      audioRef.current = new Audio(u);
+      audioRef.current.addEventListener("ended", () => { setPlaying(false); setProgress(0); });
+      audioRef.current.addEventListener("timeupdate", () => {
+        const a = audioRef.current!;
+        if (a.duration) setProgress(a.currentTime / a.duration);
+      });
+    }
+    if (playing) { audioRef.current.pause(); setPlaying(false); }
+    else { await audioRef.current.play(); setPlaying(true); }
+  };
+
+  useEffect(() => () => { audioRef.current?.pause(); }, []);
+
+  const bars = 22;
+  return (
+    <button type="button" onClick={toggle} className={`bc-voice ${sent ? "bc-voice-sent" : "bc-voice-recv"}`}>
+      <span className="bc-voice-play">{playing ? "⏸" : "▶"}</span>
+      <span className="bc-voice-bars">
+        {Array.from({ length: bars }).map((_, i) => (
+          <span
+            key={i}
+            className="bc-voice-bar"
+            style={{
+              height: `${6 + ((i * 7) % 14)}px`,
+              opacity: i / bars <= progress ? 1 : 0.45,
+            }}
+          />
+        ))}
+      </span>
+      <span className="bc-voice-dur">{fmtDur(durationMs ?? 0)}</span>
+    </button>
   );
 }
 
@@ -123,6 +188,70 @@ function CirclePage() {
       setSending(false);
     }
   };
+
+  // Voice recording
+  const [recording, setRecording] = useState(false);
+  const [recElapsed, setRecElapsed] = useState(0);
+  const recRef = useRef<MediaRecorder | null>(null);
+  const recChunks = useRef<Blob[]>([]);
+  const recStartedAt = useRef<number>(0);
+  const recTimer = useRef<number | null>(null);
+
+  const startRecording = async () => {
+    if (!circle || !user || recording) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mime = ["audio/webm", "audio/mp4", "audio/ogg"].find((t) =>
+        (window as any).MediaRecorder?.isTypeSupported?.(t),
+      );
+      const mr = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+      recChunks.current = [];
+      mr.ondataavailable = (e) => e.data.size > 0 && recChunks.current.push(e.data);
+      mr.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        const blob = new Blob(recChunks.current, { type: mr.mimeType || "audio/webm" });
+        const dur = Date.now() - recStartedAt.current;
+        if (recTimer.current) { window.clearInterval(recTimer.current); recTimer.current = null; }
+        setRecElapsed(0);
+        if (blob.size < 800 || dur < 400) { toast.error("Recording too short"); return; }
+        try {
+          setSending(true);
+          await postCircleVoiceMessage(circle.id, user.id, blob, dur);
+        } catch (e: any) {
+          toast.error(e.message ?? "Couldn't send voice note");
+        } finally {
+          setSending(false);
+        }
+      };
+      recRef.current = mr;
+      recStartedAt.current = Date.now();
+      mr.start();
+      setRecording(true);
+      recTimer.current = window.setInterval(() => {
+        setRecElapsed(Date.now() - recStartedAt.current);
+      }, 200) as unknown as number;
+    } catch {
+      toast.error("Microphone permission denied");
+    }
+  };
+
+  const stopRecording = (cancel = false) => {
+    const mr = recRef.current;
+    if (!mr) return;
+    if (cancel) {
+      mr.ondataavailable = null as any;
+      mr.onstop = () => mr.stream.getTracks().forEach((t) => t.stop());
+    }
+    if (mr.state !== "inactive") mr.stop();
+    recRef.current = null;
+    setRecording(false);
+    if (recTimer.current) { window.clearInterval(recTimer.current); recTimer.current = null; }
+    setRecElapsed(0);
+  };
+
+  useEffect(() => () => { if (recRef.current?.state === "recording") recRef.current.stop(); }, []);
+
+
 
   const join = async () => {
     if (!circle || !user) return;
@@ -242,7 +371,11 @@ function CirclePage() {
                       <div className="bc-bubble-wrap">
                         <ReactionBar />
                         <div className="bc-bubble bc-bubble-sent" onClick={popHeart}>
-                          {m.body}
+                          {m.kind === "voice" && m.audio_url ? (
+                            <VoiceBubble path={m.audio_url} durationMs={m.duration_ms} sent />
+                          ) : (
+                            m.body
+                          )}
                           <div className="bc-time bc-time-sent">
                             {fmtTime(m.created_at)}
                             <span className="bc-seen" />
@@ -285,7 +418,11 @@ function CirclePage() {
                         ) : (
                           <span className="bc-sender-name">{nameOf(m)}</span>
                         )}
-                        <div>{m.body}</div>
+                        {m.kind === "voice" && m.audio_url ? (
+                          <VoiceBubble path={m.audio_url} durationMs={m.duration_ms} sent={false} />
+                        ) : (
+                          <div>{m.body}</div>
+                        )}
                         <div className="bc-time">{fmtTime(m.created_at)}</div>
                       </div>
                     </div>
@@ -302,17 +439,35 @@ function CirclePage() {
               send();
             }}
           >
-            <button type="button" className="bc-emoji-btn" aria-label="emoji">😊</button>
-            <input
-              className="bc-input"
-              placeholder="Write a message…"
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              maxLength={500}
-            />
-            <button type="button" className="bc-mic" aria-label="voice">🎤</button>
-            <button type="submit" className="bc-send" disabled={sending || !draft.trim()} aria-label="send">➤</button>
+            {recording ? (
+              <>
+                <button type="button" className="bc-mic bc-rec-cancel" onClick={() => stopRecording(true)} aria-label="cancel">✕</button>
+                <div className="bc-rec-live">
+                  <span className="bc-rec-pulse" />
+                  <span className="bc-rec-time">{fmtDur(recElapsed)}</span>
+                  <span className="bc-rec-hint">Recording… tap ➤ to send</span>
+                </div>
+                <button type="button" className="bc-send" onClick={() => stopRecording(false)} disabled={sending} aria-label="send voice">➤</button>
+              </>
+            ) : (
+              <>
+                <button type="button" className="bc-emoji-btn" aria-label="emoji">😊</button>
+                <input
+                  className="bc-input"
+                  placeholder="Write a message…"
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  maxLength={500}
+                />
+                {draft.trim() ? (
+                  <button type="submit" className="bc-send" disabled={sending} aria-label="send">➤</button>
+                ) : (
+                  <button type="button" className="bc-mic bc-mic-btn" onClick={startRecording} aria-label="record voice">🎤</button>
+                )}
+              </>
+            )}
           </form>
+
 
           <FloatHearts hearts={hearts} />
         </div>
@@ -383,4 +538,24 @@ const BC_CSS = `
 .bc-send:disabled { opacity:.5; cursor:not-allowed; transform:none; }
 
 .bc-fly-heart { position:absolute; pointer-events:none; font-size:18px; animation: bc-fly 1.1s ease-out forwards; z-index:50; }
+
+.bc-voice { display:flex; align-items:center; gap:10px; background:none; border:none; padding:2px 4px; cursor:pointer; }
+.bc-voice-play { width:28px; height:28px; border-radius:50%; display:grid; place-items:center; font-size:11px; }
+.bc-voice-sent .bc-voice-play { background:rgba(255,255,255,.25); color:#fff; }
+.bc-voice-recv .bc-voice-play { background:linear-gradient(160deg,#fbbf24,#d97706); color:#fff; }
+.bc-voice-bars { display:flex; align-items:center; gap:2px; height:22px; }
+.bc-voice-bar { width:2px; border-radius:1px; display:inline-block; }
+.bc-voice-sent .bc-voice-bar { background:#fff; }
+.bc-voice-recv .bc-voice-bar { background:#d97706; }
+.bc-voice-dur { font-size:11px; font-variant-numeric: tabular-nums; }
+.bc-voice-sent .bc-voice-dur { color:rgba(255,255,255,.9); }
+.bc-voice-recv .bc-voice-dur { color:#8a7d68; }
+
+.bc-mic-btn:hover { transform: scale(1.15); transition: transform .2s ease; }
+.bc-rec-cancel { color:#c0392b !important; font-size:16px !important; }
+.bc-rec-live { flex:1; display:flex; align-items:center; gap:10px; color:#21180a; font-size:13px; }
+.bc-rec-pulse { width:10px; height:10px; border-radius:50%; background:#e63946; animation: bc-pulseA 1.2s infinite; box-shadow:0 0 0 0 rgba(230,57,70,.5); }
+.bc-rec-time { font-weight:700; font-variant-numeric: tabular-nums; color:#c0392b; }
+.bc-rec-hint { color:#8a7d68; font-size:12px; }
+
 `;
