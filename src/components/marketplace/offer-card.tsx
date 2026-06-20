@@ -31,6 +31,11 @@ export function OfferCard({
           />
         ) : null}
         <div className="absolute left-3 top-3 flex flex-wrap gap-1">
+          {offer.providers?.is_sponsored ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-950 shadow">
+              <Star className="h-3 w-3 fill-current" /> Sponsored
+            </span>
+          ) : null}
           {offer.is_limited_time ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-destructive/95 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-destructive-foreground">
               <Clock className="h-3 w-3" /> Limited
