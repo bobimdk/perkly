@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { MarketingNav, MarketingFooter } from "@/components/marketing/marketing-shell";
 import { PerklyHero } from "@/components/marketing/perkly-hero";
 import { useI18n } from "@/lib/i18n";
-import { Logo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import {
   Dumbbell,
@@ -13,6 +12,7 @@ import {
   Laptop,
   Stethoscope,
   Music,
+  Gift,
   Globe,
   Compass,
   MessageCircle,
@@ -125,7 +125,7 @@ function HeroCard() {
           </p>
         </div>
         <div className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-primary to-primary-glow text-primary-foreground">
-          <Logo size="md" />
+          <Gift className="h-5 w-5" />
         </div>
       </div>
       <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-muted">
