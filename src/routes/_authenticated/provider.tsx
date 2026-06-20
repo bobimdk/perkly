@@ -212,7 +212,7 @@ function ProviderDetail({ provider }: { provider: ProviderRow }) {
 
       <BusinessProfileEditor provider={provider} onSaved={() => qc.invalidateQueries({ queryKey: ["my-providers"] })} />
 
-      <PromoteCard provider={provider} />
+      <PromoteCard provider={provider} onUpdated={() => qc.invalidateQueries({ queryKey: ["my-providers"] })} />
 
       <LocationEditor provider={provider} onSaved={() => qc.invalidateQueries({ queryKey: ["my-providers"] })} />
 
@@ -264,8 +264,37 @@ function StatCard({ label, value }: { label: string; value: number | string }) {
   );
 }
 
-function PromoteCard({ provider }: { provider: ProviderRow }) {
+function PromoteCard({ provider, onUpdated }: { provider: ProviderRow; onUpdated: () => void }) {
   const sponsored = (provider as any).is_sponsored as boolean | undefined;
+  const sponsoredUntil = (provider as any).sponsored_until as string | null | undefined;
+  const [open, setOpen] = useState(false);
+  const [days, setDays] = useState(7);
+  const [paying, setPaying] = useState(false);
+  const PRICE_PER_DAY = 5;
+  const total = Math.max(1, days) * PRICE_PER_DAY;
+
+  const pay = async () => {
+    if (days < 1) return toast.error("Të paktën 1 ditë");
+    setPaying(true);
+    // Demo: simulate payment latency
+    await new Promise((r) => setTimeout(r, 900));
+    const base = sponsored && sponsoredUntil && new Date(sponsoredUntil) > new Date()
+      ? new Date(sponsoredUntil)
+      : new Date();
+    const until = new Date(base.getTime() + days * 24 * 60 * 60 * 1000);
+    const { error } = await supabase
+      .from("providers")
+      .update({ is_sponsored: true, sponsored_until: until.toISOString() } as any)
+      .eq("id", provider.id);
+    setPaying(false);
+    if (error) return toast.error(error.message);
+    toast.success(`Pagesa demo u krye • ${days} ditë promovim aktivizuar (€${total})`);
+    setOpen(false);
+    onUpdated();
+  };
+
+  const untilLabel = sponsoredUntil ? new Date(sponsoredUntil).toLocaleDateString() : null;
+
   return (
     <div className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100/40 p-5 dark:border-amber-900/40 dark:from-amber-950/40 dark:to-transparent">
       <div className="flex items-start justify-between gap-4">
@@ -275,8 +304,11 @@ function PromoteCard({ provider }: { provider: ProviderRow }) {
           </p>
           <h3 className="mt-1 font-display text-lg font-bold">Bëje biznesin tënd sponsor ⭐</h3>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            Bizneset sponsor shfaqen me një ikonë të veçantë në treg dhe në hartë, dhe ngrihen në krye të rekomandimeve.
+            Bizneset sponsor shfaqen me një ikonë të veçantë në treg dhe në hartë, dhe ngrihen në krye të rekomandimeve. <span className="font-semibold text-foreground">€{PRICE_PER_DAY}/ditë</span>.
           </p>
+          {sponsored && untilLabel ? (
+            <p className="mt-1 text-xs text-amber-700 dark:text-amber-400">Aktiv deri më {untilLabel}</p>
+          ) : null}
         </div>
         {sponsored ? (
           <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-3 py-1 text-xs font-semibold text-amber-950">
@@ -285,16 +317,43 @@ function PromoteCard({ provider }: { provider: ProviderRow }) {
         ) : null}
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
-        {sponsored ? (
-          <Button variant="outline" size="sm" disabled>Promovimi është aktiv</Button>
-        ) : (
-          <Button
-            size="sm"
-            onClick={() => toast.success("Kërkesa juaj për promovim u dërgua. Stafi ynë do t'ju kontaktojë së shpejti.")}
-          >
-            Kërko promovim
-          </Button>
-        )}
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm">{sponsored ? "Zgjat promovimin" : "Promovo biznesin"}</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Pagesë për promovim (demo)</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <Label>Sa ditë dëshironi të promovoheni?</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  max={365}
+                  value={days}
+                  onChange={(e) => setDays(Math.max(1, Number(e.target.value) || 1))}
+                />
+                <p className="text-xs text-muted-foreground">€{PRICE_PER_DAY} × {days} ditë</p>
+              </div>
+              <div className="flex items-center justify-between rounded-xl border border-border bg-muted/40 p-3">
+                <span className="text-sm text-muted-foreground">Total për pagesë</span>
+                <span className="font-display text-xl font-bold">€{total}</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Kjo është një pagesë demo. Asnjë kartë reale nuk debitohet.
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setOpen(false)} disabled={paying}>Anulo</Button>
+              <Button onClick={pay} disabled={paying}>
+                {paying ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Paguaj €{total}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
