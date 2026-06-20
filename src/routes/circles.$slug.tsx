@@ -189,6 +189,70 @@ function CirclePage() {
     }
   };
 
+  // Voice recording
+  const [recording, setRecording] = useState(false);
+  const [recElapsed, setRecElapsed] = useState(0);
+  const recRef = useRef<MediaRecorder | null>(null);
+  const recChunks = useRef<Blob[]>([]);
+  const recStartedAt = useRef<number>(0);
+  const recTimer = useRef<number | null>(null);
+
+  const startRecording = async () => {
+    if (!circle || !user || recording) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mime = ["audio/webm", "audio/mp4", "audio/ogg"].find((t) =>
+        (window as any).MediaRecorder?.isTypeSupported?.(t),
+      );
+      const mr = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+      recChunks.current = [];
+      mr.ondataavailable = (e) => e.data.size > 0 && recChunks.current.push(e.data);
+      mr.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        const blob = new Blob(recChunks.current, { type: mr.mimeType || "audio/webm" });
+        const dur = Date.now() - recStartedAt.current;
+        if (recTimer.current) { window.clearInterval(recTimer.current); recTimer.current = null; }
+        setRecElapsed(0);
+        if (blob.size < 800 || dur < 400) { toast.error("Recording too short"); return; }
+        try {
+          setSending(true);
+          await postCircleVoiceMessage(circle.id, user.id, blob, dur);
+        } catch (e: any) {
+          toast.error(e.message ?? "Couldn't send voice note");
+        } finally {
+          setSending(false);
+        }
+      };
+      recRef.current = mr;
+      recStartedAt.current = Date.now();
+      mr.start();
+      setRecording(true);
+      recTimer.current = window.setInterval(() => {
+        setRecElapsed(Date.now() - recStartedAt.current);
+      }, 200) as unknown as number;
+    } catch {
+      toast.error("Microphone permission denied");
+    }
+  };
+
+  const stopRecording = (cancel = false) => {
+    const mr = recRef.current;
+    if (!mr) return;
+    if (cancel) {
+      mr.ondataavailable = null as any;
+      mr.onstop = () => mr.stream.getTracks().forEach((t) => t.stop());
+    }
+    if (mr.state !== "inactive") mr.stop();
+    recRef.current = null;
+    setRecording(false);
+    if (recTimer.current) { window.clearInterval(recTimer.current); recTimer.current = null; }
+    setRecElapsed(0);
+  };
+
+  useEffect(() => () => { if (recRef.current?.state === "recording") recRef.current.stop(); }, []);
+
+
+
   const join = async () => {
     if (!circle || !user) return;
     setJoining(true);
