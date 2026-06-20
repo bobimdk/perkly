@@ -68,7 +68,7 @@ export type OfferFilter = {
 export async function fetchOffers(filter: OfferFilter = {}): Promise<OfferRow[]> {
   let q = supabase
     .from("offers")
-    .select("*, providers(id,name,slug,logo_url,rating_avg,city), categories(id,slug,name_sq,name_en,icon)")
+    .select("*, providers(id,name,slug,logo_url,rating_avg,city,is_sponsored), categories(id,slug,name_sq,name_en,icon)")
     .eq("status", "published");
 
   if (filter.search) q = q.ilike("title", `%${filter.search}%`);
@@ -97,7 +97,7 @@ export async function fetchOffers(filter: OfferFilter = {}): Promise<OfferRow[]>
 export async function fetchOfferBySlug(slug: string): Promise<OfferRow | null> {
   const { data, error } = await supabase
     .from("offers")
-    .select("*, providers(id,name,slug,logo_url,rating_avg,city), categories(id,slug,name_sq,name_en,icon)")
+    .select("*, providers(id,name,slug,logo_url,rating_avg,city,is_sponsored), categories(id,slug,name_sq,name_en,icon)")
     .eq("slug", slug)
     .maybeSingle();
   if (error) throw error;
@@ -168,7 +168,7 @@ export async function fetchProviderOffers(providerId: string): Promise<OfferRow[
 export async function fetchPendingOffers(): Promise<OfferRow[]> {
   const { data, error } = await supabase
     .from("offers")
-    .select("*, providers(id,name,slug,logo_url,rating_avg,city), categories(id,slug,name_sq,name_en,icon)")
+    .select("*, providers(id,name,slug,logo_url,rating_avg,city,is_sponsored), categories(id,slug,name_sq,name_en,icon)")
     .eq("status", "pending")
     .order("created_at", { ascending: false });
   if (error) throw error;
