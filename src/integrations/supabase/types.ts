@@ -645,6 +645,33 @@ export type Database = {
           },
         ]
       }
+      friendships: {
+        Row: {
+          addressee_id: string
+          created_at: string
+          id: string
+          requester_id: string
+          status: Database["public"]["Enums"]["friendship_status"]
+          updated_at: string
+        }
+        Insert: {
+          addressee_id: string
+          created_at?: string
+          id?: string
+          requester_id: string
+          status?: Database["public"]["Enums"]["friendship_status"]
+          updated_at?: string
+        }
+        Update: {
+          addressee_id?: string
+          created_at?: string
+          id?: string
+          requester_id?: string
+          status?: Database["public"]["Enums"]["friendship_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       fx_rates: {
         Row: {
           base: string
@@ -1069,45 +1096,66 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
+          company_name: string | null
+          cover_url: string | null
           created_at: string
           currency: string
           email: string | null
           first_name: string | null
+          headline: string | null
           id: string
           language: string
           last_name: string | null
+          location: string | null
           phone: string | null
+          role_title: string | null
           suspended: boolean
           suspended_reason: string | null
           updated_at: string
+          username: string | null
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
+          company_name?: string | null
+          cover_url?: string | null
           created_at?: string
           currency?: string
           email?: string | null
           first_name?: string | null
+          headline?: string | null
           id: string
           language?: string
           last_name?: string | null
+          location?: string | null
           phone?: string | null
+          role_title?: string | null
           suspended?: boolean
           suspended_reason?: string | null
           updated_at?: string
+          username?: string | null
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
+          company_name?: string | null
+          cover_url?: string | null
           created_at?: string
           currency?: string
           email?: string | null
           first_name?: string | null
+          headline?: string | null
           id?: string
           language?: string
           last_name?: string | null
+          location?: string | null
           phone?: string | null
+          role_title?: string | null
           suspended?: boolean
           suspended_reason?: string | null
           updated_at?: string
+          username?: string | null
         }
         Relationships: []
       }
@@ -1120,6 +1168,7 @@ export type Database = {
           description: string | null
           email: string | null
           id: string
+          is_sponsored: boolean
           lat: number | null
           lng: number | null
           logo_url: string | null
@@ -1129,6 +1178,7 @@ export type Database = {
           rating_avg: number
           rating_count: number
           slug: string
+          sponsored_until: string | null
           status: Database["public"]["Enums"]["provider_status"]
           tagline: string | null
           updated_at: string
@@ -1142,6 +1192,7 @@ export type Database = {
           description?: string | null
           email?: string | null
           id?: string
+          is_sponsored?: boolean
           lat?: number | null
           lng?: number | null
           logo_url?: string | null
@@ -1151,6 +1202,7 @@ export type Database = {
           rating_avg?: number
           rating_count?: number
           slug: string
+          sponsored_until?: string | null
           status?: Database["public"]["Enums"]["provider_status"]
           tagline?: string | null
           updated_at?: string
@@ -1164,6 +1216,7 @@ export type Database = {
           description?: string | null
           email?: string | null
           id?: string
+          is_sponsored?: boolean
           lat?: number | null
           lng?: number | null
           logo_url?: string | null
@@ -1173,6 +1226,7 @@ export type Database = {
           rating_avg?: number
           rating_count?: number
           slug?: string
+          sponsored_until?: string | null
           status?: Database["public"]["Enums"]["provider_status"]
           tagline?: string | null
           updated_at?: string
@@ -1632,6 +1686,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
       award_points: {
         Args: {
           _delta: number
@@ -1799,6 +1854,7 @@ export type Database = {
         | "cancelled"
         | "fulfilled"
       employee_status: "pending" | "active" | "removed"
+      friendship_status: "pending" | "accepted" | "declined"
       offer_status: "draft" | "pending" | "published" | "archived" | "rejected"
       package_status:
         | "draft"
@@ -1945,6 +2001,7 @@ export const Constants = {
         "fulfilled",
       ],
       employee_status: ["pending", "active", "removed"],
+      friendship_status: ["pending", "accepted", "declined"],
       offer_status: ["draft", "pending", "published", "archived", "rejected"],
       package_status: [
         "draft",
