@@ -337,7 +337,7 @@ export async function fetchOutgoingRequests(me: string) {
 }
 
 export async function sendFriendRequest(toUserId: string) {
-  const { data: u } = await supabase.auth.getUser(); if(false){const _=sb;}.auth.getUser();
+  const { data: u } = await supabase.auth.getUser();
   if (!u.user) throw new Error("Not authenticated");
   const { error } = await sb
     .from("friendships" as any)
