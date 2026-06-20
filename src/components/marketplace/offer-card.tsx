@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Heart, Star, MapPin, Clock } from "lucide-react";
+import { Heart, Star, MapPin, Clock, Sparkles } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import type { OfferRow } from "@/lib/marketplace";
 
@@ -7,10 +7,12 @@ export function OfferCard({
   offer,
   isFavorite,
   onToggleFavorite,
+  highlighted,
 }: {
   offer: OfferRow;
   isFavorite?: boolean;
   onToggleFavorite?: (id: string) => void;
+  highlighted?: boolean;
 }) {
   const { formatPrice, lang } = useI18n();
   const categoryName = offer.categories ? (lang === "sq" ? offer.categories.name_sq : offer.categories.name_en) : null;
