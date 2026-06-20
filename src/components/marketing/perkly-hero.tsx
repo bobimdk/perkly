@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
+import { Link } from "@tanstack/react-router";
 
 const FONT_STACK = "'Hanken Grotesk', system-ui, sans-serif";
 
