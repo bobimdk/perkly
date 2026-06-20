@@ -15,7 +15,7 @@ type Circle = {
 };
 
 const CIRCLES: Circle[] = [
-  { slug: "runners-of-tirana", name: "Runners of Tirana", emoji: "🏃", description: "Weekly runs, race tips, and gear deals", members: 38, tint: "#fde3d3" },
+  { slug: "runners-tirana", name: "Runners of Tirana", emoji: "🏃", description: "Weekly runs, race tips, and gear deals", members: 38, tint: "#fde3d3" },
   { slug: "mindful-minds", name: "Mindful Minds", emoji: "🧘", description: "Meditation, therapy, and balance", members: 24, tint: "#eef3ec" },
   { slug: "foodies", name: "Foodies", emoji: "🍽️", description: "Best lunch spots near the office", members: 31, tint: "#fde0c4" },
   { slug: "gym-lovers", name: "Gym Lovers", emoji: "💪", description: "Form check, splits, and gym perks", members: 46, tint: "#f6ecd0" },
@@ -98,153 +98,8 @@ function CircleCard({ c, index }: { c: Circle; index: number }) {
   );
 }
 
-type Msg =
-  | { id: string; kind: "recv"; who: string; color: string; text: string; time: string; delay: number }
-  | { id: string; kind: "sent"; text: string; time: string; delay: number }
-  | { id: string; kind: "voice"; who: string; color: string; duration: string; delay: number };
 
-const MESSAGES: Msg[] = [
-  { id: "m1", kind: "recv", who: "A", color: "#e36f8a", text: "Morning! Lakeside 10k this Saturday — who's in?", time: "09:31", delay: 0.05 },
-  { id: "m2", kind: "sent", text: "In! What pace are we running?", time: "09:33", delay: 0.2 },
-  { id: "m3", kind: "voice", who: "E", color: "#5b87c4", duration: "0:14", delay: 0.3 },
-];
 
-function ReactionBar() {
-  return (
-    <div className="bc-reactions">
-      {["❤️", "👍", "😂", "🔥"].map((r) => (
-        <button key={r} type="button" className="bc-react">
-          {r}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function FloatHearts({ hearts }: { hearts: { id: number; x: number; y: number }[] }) {
-  return (
-    <>
-      {hearts.map((h) => (
-        <span key={h.id} className="bc-fly-heart" style={{ left: h.x, top: h.y }}>
-          ❤️
-        </span>
-      ))}
-    </>
-  );
-}
-
-function LiveChat() {
-  const [hearts, setHearts] = useState<{ id: number; x: number; y: number }[]>([]);
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const popHeart = (e: React.MouseEvent) => {
-    const rect = wrapRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const id = Date.now() + Math.random();
-    setHearts((h) => [...h, { id, x: e.clientX - rect.left, y: e.clientY - rect.top }]);
-    setTimeout(() => setHearts((h) => h.filter((x) => x.id !== id)), 1100);
-  };
-
-  return (
-    <div ref={wrapRef} className="bc-chat">
-      <header className="bc-chat-head">
-        <div className="bc-chat-avatar">
-          <span>🏃</span>
-        </div>
-        <div className="bc-chat-meta">
-          <div className="bc-chat-title">Runners of Tirana</div>
-          <div className="bc-presence">
-            <span className="bc-dot" /> 3 online
-          </div>
-        </div>
-        <button type="button" className="bc-leave">Leave</button>
-      </header>
-
-      <div className="bc-msgs">
-        {MESSAGES.map((m) => {
-          if (m.kind === "recv") {
-            return (
-              <div key={m.id} className="bc-row bc-row-l" style={{ animationDelay: `${m.delay}s` }}>
-                <div className="bc-mini-av">
-                  <div className="bc-mini-ring" />
-                  <span className="bc-mini-inner" style={{ color: m.color }}>{m.who}</span>
-                </div>
-                <div className="bc-bubble-wrap">
-                  <ReactionBar />
-                  <div className="bc-bubble bc-bubble-recv" onClick={popHeart}>
-                    {m.text}
-                    <div className="bc-time">{m.time}</div>
-                  </div>
-                </div>
-              </div>
-            );
-          }
-          if (m.kind === "sent") {
-            return (
-              <div key={m.id} className="bc-row bc-row-r" style={{ animationDelay: `${m.delay}s` }}>
-                <div className="bc-bubble-wrap">
-                  <ReactionBar />
-                  <div className="bc-bubble bc-bubble-sent" onClick={popHeart}>
-                    {m.text}
-                    <div className="bc-time bc-time-sent">
-                      {m.time}
-                      <span className="bc-seen" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          }
-          return (
-            <div key={m.id} className="bc-row bc-row-l" style={{ animationDelay: `${m.delay}s` }}>
-              <div className="bc-mini-av">
-                <div className="bc-mini-ring" />
-                <span className="bc-mini-inner" style={{ color: m.color }}>{m.who}</span>
-              </div>
-              <div className="bc-bubble-wrap">
-                <ReactionBar />
-                <div className="bc-bubble bc-bubble-recv bc-voice" onClick={popHeart}>
-                  <button type="button" className="bc-play">▶</button>
-                  <div className="bc-wave">
-                    {Array.from({ length: 8 }).map((_, i) => (
-                      <span
-                        key={i}
-                        className="bc-bar"
-                        style={{
-                          animationDelay: `${i * 0.09}s`,
-                          background: ["#e9c98a", "#e0b878", "#d97706"][i % 3],
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <div className="bc-vtime">0:14</div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-
-        <div className="bc-row bc-row-l" style={{ animationDelay: "0.45s" }}>
-          <div className="bc-mini-av">
-            <div className="bc-mini-ring" />
-            <span className="bc-mini-inner" style={{ color: "#e36f8a" }}>A</span>
-          </div>
-          <div className="bc-typing">
-            <span /><span /><span />
-          </div>
-        </div>
-      </div>
-
-      <form className="bc-composer" onSubmit={(e) => e.preventDefault()}>
-        <button type="button" className="bc-emoji-btn">😊</button>
-        <input className="bc-input" placeholder="Write a message…" />
-        <button type="button" className="bc-mic">🎤</button>
-        <button type="submit" className="bc-send">➤</button>
-      </form>
-
-      <FloatHearts hearts={hearts} />
-    </div>
-  );
-}
 
 function CirclesIndex() {
   const head = useInView<HTMLDivElement>();
@@ -263,7 +118,7 @@ function CirclesIndex() {
             ))}
           </div>
         </section>
-        <LiveChat />
+        
       </div>
     </div>
   );
