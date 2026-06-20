@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Plus, Trash2, Upload, Image as ImageIcon, ExternalLink, Loader2, MapPin, Crosshair, BarChart3, Heart,
+  Plus, Trash2, Upload, Image as ImageIcon, ExternalLink, Loader2, MapPin, Crosshair, BarChart3, Heart, Star,
 } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { ConciergeOrb } from "@/components/concierge/concierge-orb";
