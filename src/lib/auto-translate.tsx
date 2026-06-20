@@ -98,35 +98,27 @@ export function AutoTranslate() {
       for (const node of nodes) {
         const parent = node.parentElement;
         if (!parent) continue;
-        // Stash original on the parent (per text node index would be complex;
-        // we instead stash on the text node via dataset proxy: use WeakMap)
         let orig = originals.get(node);
         if (orig === undefined) {
           orig = node.nodeValue ?? "";
           originals.set(node, orig);
         }
-        if (lang === "en") {
-          if (node.nodeValue !== orig) node.nodeValue = orig;
-          continue;
-        }
         const cached = cacheRef.current.get(orig);
-        if (cached) {
+        if (cached !== undefined) {
           if (node.nodeValue !== cached) node.nodeValue = cached;
-        } else {
+        } else if (orig.trim().length > 0) {
           toTranslate.push(node);
           unique.add(orig);
         }
-        // Mark parent lang for debugging
         if (parent.getAttribute(LANG_ATTR) !== lang) {
           parent.setAttribute(LANG_ATTR, lang);
         }
-        // Mark original attribute (only first time, useful for inspection)
         if (!parent.hasAttribute(ORIG_ATTR) && orig.length < 80) {
           parent.setAttribute(ORIG_ATTR, orig);
         }
       }
 
-      if (lang === "en" || unique.size === 0) return;
+      if (unique.size === 0) return;
 
       // Queue and flush
       unique.forEach((u) => pendingRef.current.add(u));
