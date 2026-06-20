@@ -19,7 +19,7 @@ import {
 } from "@/lib/phase5";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_authenticated/network" as any)({
+export const Route = createFileRoute("/_authenticated/network")({
   component: NetworkPage,
 });
 
