@@ -110,11 +110,12 @@ function distanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: numb
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 
-function buildIcon(L: any, imgUrl: string, pulse = false) {
+function buildIcon(L: any, imgUrl: string, pulse = false, sponsored = false) {
   const html = `
-    <div class="perk-pin ${pulse ? "perk-pin-pulse" : ""}">
-      <div class="perk-pin-ring"></div>
+    <div class="perk-pin ${pulse ? "perk-pin-pulse" : ""} ${sponsored ? "perk-pin-sponsored" : ""}">
+      <div class="perk-pin-ring" ${sponsored ? 'style="box-shadow:0 0 0 3px #f59e0b, 0 6px 14px rgba(245,158,11,.45)"' : ""}></div>
       <img src="${imgUrl}" referrerpolicy="no-referrer" onerror="this.src='${DEFAULT_BUSINESS_IMAGE}'" />
+      ${sponsored ? '<span style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#f59e0b;color:#451a03;display:grid;place-items:center;font-size:11px;font-weight:900;border:2px solid #fff">★</span>' : ""}
     </div>`;
   return L.divIcon({
     html,
