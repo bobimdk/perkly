@@ -50,7 +50,7 @@ export function LanguageSwitch({ size = "sm" }: { size?: Size }) {
           >
             <span className="flex items-center gap-2">
               <span>{l.flag}</span>
-              <span className="font-medium">{l.label}</span>
+              <span className="font-medium">{l.labels[lang]}</span>
             </span>
             {lang === l.code && <Check className="h-3.5 w-3.5 text-primary" />}
           </DropdownMenuItem>
