@@ -559,7 +559,7 @@ export async function fetchActivity(profileId: string, limit = 10) {
 // ====================== PROFILE UPDATE ======================
 
 export async function updateOwnProfile(userId: string, patch: Record<string, any>) {
-  const { error } = await supabase.from("profiles").update(patch).eq("id", userId);
+  const { error } = await (supabase as any).from("profiles").update(patch).eq("id", userId);
   if (error) throw error;
 }
 
