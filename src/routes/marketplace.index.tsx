@@ -68,6 +68,13 @@ function MarketplacePage() {
     enabled: !!user,
   });
 
+  const { sponsored, regular } = useMemo(() => {
+    const rows = offersQuery.data ?? [];
+    const sponsoredRows = rows.filter((o) => o.providers?.is_sponsored);
+    const regularRows = rows.filter((o) => !o.providers?.is_sponsored);
+    return { sponsored: sponsoredRows, regular: regularRows };
+  }, [offersQuery.data]);
+
   const onFavorite = async (id: string) => {
     if (!user) {
       toast.info(t("mk.signInSave"));
