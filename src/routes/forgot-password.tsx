@@ -4,8 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft } from "lucide-react";
-import { BrandLogo } from "@/components/ui/brand-logo";
+import { ArrowLeft, Gift } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/forgot-password")({
@@ -37,7 +36,9 @@ function ForgotPassword() {
           <ArrowLeft className="h-4 w-4" /> Back to sign in
         </Link>
         <div className="my-8 text-center">
-          <BrandLogo className="mx-auto mb-4 h-12 w-12 shadow-lg" />
+          <span className="mx-auto mb-4 inline-grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-primary to-primary-glow text-primary-foreground shadow-lg">
+            <Gift className="h-6 w-6" />
+          </span>
           <h1 className="font-display text-3xl font-bold">Reset your password</h1>
           <p className="mt-2 text-sm text-muted-foreground">We'll send a secure link to your email.</p>
         </div>

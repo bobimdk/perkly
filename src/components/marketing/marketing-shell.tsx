@@ -2,8 +2,7 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
-import { Menu } from "lucide-react";
-import { BrandLogo } from "@/components/ui/brand-logo";
+import { Gift, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitch, CurrencySwitch } from "@/components/ui/lang-currency-switch";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
@@ -37,7 +36,9 @@ export function MarketingNav() {
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
         <Link to="/" className="flex items-center gap-2">
-          <BrandLogo className="h-9 w-9 shadow-sm" />
+          <span className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-primary to-primary-glow text-primary-foreground shadow-sm">
+            <Gift className="h-5 w-5" />
+          </span>
           <span className="font-display text-xl font-bold tracking-tight">Perkly</span>
         </Link>
 
@@ -107,7 +108,9 @@ export function MarketingFooter() {
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-4">
         <div>
           <div className="flex items-center gap-2">
-            <BrandLogo className="h-8 w-8" />
+            <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-primary-glow text-primary-foreground">
+              <Gift className="h-4 w-4" />
+            </span>
             <span className="font-display text-lg font-bold">Perkly</span>
           </div>
           <p className="mt-3 text-sm text-muted-foreground">{t("footer.tag")}</p>

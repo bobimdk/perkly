@@ -8,8 +8,7 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ArrowLeft, Briefcase, User, Store, ShieldCheck } from "lucide-react";
-import { BrandLogo } from "@/components/ui/brand-logo";
+import { Gift, ArrowLeft, Briefcase, User, Store, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { signUpConfirmed } from "@/lib/signup.functions";
 
@@ -61,7 +60,9 @@ function AuthPage() {
         </Link>
 
         <div className="my-8 text-center">
-          <BrandLogo className="mx-auto mb-4 h-12 w-12 shadow-lg" />
+          <span className="mx-auto mb-4 inline-grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-primary to-primary-glow text-primary-foreground shadow-lg">
+            <Gift className="h-6 w-6" />
+          </span>
           <h1 className="font-display text-3xl font-bold">Welcome to Perkly</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Benefits employees actually want.
