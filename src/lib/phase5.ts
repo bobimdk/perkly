@@ -16,9 +16,13 @@ export type CircleMessage = {
   id: string;
   circle_id: string;
   user_id: string;
-  body: string;
+  body: string | null;
+  kind: "text" | "voice";
+  audio_url: string | null;
+  duration_ms: number | null;
   created_at: string;
 };
+
 
 export type SeasonalDrop = {
   id: string;
