@@ -151,25 +151,55 @@ function CirclePage() {
           <>
             <div ref={scrollRef} className="h-96 overflow-y-auto p-4">
               {(msgsQ.data ?? []).length === 0 ? (
-                <p className="py-12 text-center text-sm text-muted-foreground">Be the first to say hi 👋</p>
+                <p className="py-12 text-center text-sm text-muted-foreground">Bëhu i pari që përshëndet 👋</p>
               ) : (
-                <ul className="space-y-3">
-                  {msgsQ.data!.map((m) => (
-                    <li key={m.id} className={m.user_id === user.id ? "flex justify-end" : "flex"}>
-                      <div
-                        className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${
-                          m.user_id === user.id
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted text-foreground"
-                        }`}
-                      >
-                        {m.body}
-                        <div className="mt-1 text-[10px] opacity-60">
-                          {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                <ul className="space-y-4">
+                  {msgsQ.data!.map((m: any) => {
+                    const isMe = m.user_id === user.id;
+                    const sender = m.sender;
+                    const name = sender
+                      ? [sender.first_name, sender.last_name].filter(Boolean).join(" ") || sender.username || "User"
+                      : "User";
+                    const initial = (sender?.first_name?.[0] ?? sender?.username?.[0] ?? "U").toUpperCase();
+                    return (
+                      <li key={m.id} className={`flex items-end gap-2 ${isMe ? "justify-end" : ""}`}>
+                        {!isMe && (
+                          <Link
+                            to={"/u/$username" as any}
+                            params={{ username: sender?.username ?? "" } as any}
+                            className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-primary to-primary-glow text-xs font-bold text-primary-foreground"
+                          >
+                            {sender?.avatar_url ? (
+                              <img src={sender.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover" />
+                            ) : initial}
+                          </Link>
+                        )}
+                        <div className={`max-w-[75%] ${isMe ? "items-end" : "items-start"} flex flex-col`}>
+                          {!isMe && sender?.username ? (
+                            <Link
+                              to={"/u/$username" as any}
+                              params={{ username: sender.username } as any}
+                              className="mb-0.5 px-1 text-[11px] font-semibold text-foreground hover:underline"
+                            >
+                              {name}
+                            </Link>
+                          ) : null}
+                          <div
+                            className={`rounded-2xl px-3 py-2 text-sm shadow-sm ${
+                              isMe
+                                ? "rounded-br-sm bg-primary text-primary-foreground"
+                                : "rounded-bl-sm bg-muted text-foreground"
+                            }`}
+                          >
+                            {m.body}
+                          </div>
+                          <span className="mt-1 px-1 text-[10px] text-muted-foreground">
+                            {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          </span>
                         </div>
-                      </div>
-                    </li>
-                  ))}
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </div>
