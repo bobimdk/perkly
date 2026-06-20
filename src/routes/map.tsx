@@ -51,7 +51,7 @@ async function fetchOfferPins(): Promise<OfferPin[]> {
     .select(
       "id,slug,title,subtitle,description,price_all,price_eur,cover_url,status," +
         "categories(slug)," +
-        "providers!inner(id,name,slug,logo_url,address,city,lat,lng,status)",
+        "providers!inner(id,name,slug,logo_url,address,city,lat,lng,status,is_sponsored)",
     )
     .eq("status", "published")
     .eq("providers.status", "active")
