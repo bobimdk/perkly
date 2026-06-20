@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { MapPin, UserPlus, UserCheck, Mail, Briefcase, Loader2, Clock, Gift } from "lucide-react";
+import { MapPin, UserPlus, UserCheck, Mail, Briefcase, Loader2, Clock, Gift, Pencil, GraduationCap, Sparkles, Heart, Languages, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -16,7 +17,13 @@ import {
   respondFriendRequest,
   removeFriend,
   sendGift,
+  fetchExperiences,
+  fetchEducation,
+  fetchMutualConnections,
+  fetchGiftsReceived,
+  fetchActivity,
 } from "@/lib/phase5";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { useI18n } from "@/lib/i18n";
 import { toast } from "sonner";
