@@ -70,8 +70,12 @@ function MarketplacePage() {
 
   const { sponsored, regular } = useMemo(() => {
     const rows = offersQuery.data ?? [];
-    const sponsoredRows = rows.filter((o) => o.providers?.is_sponsored);
-    const regularRows = rows.filter((o) => !o.providers?.is_sponsored);
+    const now = Date.now();
+    const isActive = (o: typeof rows[number]) =>
+      !!o.providers?.is_sponsored &&
+      (!o.providers?.sponsored_until || new Date(o.providers.sponsored_until).getTime() > now);
+    const sponsoredRows = rows.filter(isActive);
+    const regularRows = rows.filter((o) => !isActive(o));
     return { sponsored: sponsoredRows, regular: regularRows };
   }, [offersQuery.data]);
 

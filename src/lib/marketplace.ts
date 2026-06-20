@@ -29,7 +29,7 @@ export type OfferRow = {
   published_at: string | null;
   created_at: string;
   updated_at: string;
-  providers?: { id: string; name: string; slug: string; logo_url: string | null; rating_avg: number; city: string | null; is_sponsored?: boolean | null } | null;
+  providers?: { id: string; name: string; slug: string; logo_url: string | null; rating_avg: number; city: string | null; is_sponsored?: boolean | null; sponsored_until?: string | null } | null;
   categories?: { id: string; slug: string; name_sq: string; name_en: string; icon: string | null } | null;
 };
 
@@ -68,7 +68,7 @@ export type OfferFilter = {
 export async function fetchOffers(filter: OfferFilter = {}): Promise<OfferRow[]> {
   let q = supabase
     .from("offers")
-    .select("*, providers(id,name,slug,logo_url,rating_avg,city,is_sponsored), categories(id,slug,name_sq,name_en,icon)")
+    .select("*, providers(id,name,slug,logo_url,rating_avg,city,is_sponsored,sponsored_until), categories(id,slug,name_sq,name_en,icon)")
     .eq("status", "published");
 
   if (filter.search) q = q.ilike("title", `%${filter.search}%`);
@@ -91,15 +91,18 @@ export async function fetchOffers(filter: OfferFilter = {}): Promise<OfferRow[]>
   if (filter.categorySlug) {
     rows = rows.filter((r) => r.categories?.slug === filter.categorySlug);
   }
-  // Pin sponsored providers to the top
-  rows.sort((a, b) => Number(b.providers?.is_sponsored ?? 0) - Number(a.providers?.is_sponsored ?? 0));
+  // Pin currently-active sponsored providers to the top
+  const now = Date.now();
+  const isActiveSponsor = (r: OfferRow) =>
+    !!r.providers?.is_sponsored && (!r.providers?.sponsored_until || new Date(r.providers.sponsored_until).getTime() > now);
+  rows.sort((a, b) => Number(isActiveSponsor(b)) - Number(isActiveSponsor(a)));
   return rows;
 }
 
 export async function fetchOfferBySlug(slug: string): Promise<OfferRow | null> {
   const { data, error } = await supabase
     .from("offers")
-    .select("*, providers(id,name,slug,logo_url,rating_avg,city,is_sponsored), categories(id,slug,name_sq,name_en,icon)")
+    .select("*, providers(id,name,slug,logo_url,rating_avg,city,is_sponsored,sponsored_until), categories(id,slug,name_sq,name_en,icon)")
     .eq("slug", slug)
     .maybeSingle();
   if (error) throw error;
@@ -170,7 +173,7 @@ export async function fetchProviderOffers(providerId: string): Promise<OfferRow[
 export async function fetchPendingOffers(): Promise<OfferRow[]> {
   const { data, error } = await supabase
     .from("offers")
-    .select("*, providers(id,name,slug,logo_url,rating_avg,city,is_sponsored), categories(id,slug,name_sq,name_en,icon)")
+    .select("*, providers(id,name,slug,logo_url,rating_avg,city,is_sponsored,sponsored_until), categories(id,slug,name_sq,name_en,icon)")
     .eq("status", "pending")
     .order("created_at", { ascending: false });
   if (error) throw error;
