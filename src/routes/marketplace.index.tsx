@@ -188,6 +188,28 @@ function MarketplacePage() {
         </div>
       </section>
 
+      {/* Sponsored section */}
+      {sponsored.length > 0 && !offersQuery.isLoading ? (
+        <section className="mx-auto max-w-7xl px-4 pt-10 sm:px-6">
+          <div className="mb-4 flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-amber-500" />
+            <h2 className="font-display text-xl font-bold">{t("mkt.sponsored.title")}</h2>
+            <span className="text-sm text-muted-foreground">— {t("mkt.sponsored.sub")}</span>
+          </div>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {sponsored.map((o) => (
+              <OfferCard
+                key={o.id}
+                offer={o}
+                isFavorite={favoritesQuery.data?.has(o.id)}
+                onToggleFavorite={onFavorite}
+                highlighted
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       {/* Tabs + grid */}
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <Tabs value={tab} onValueChange={(v) => setTab(v as OfferFilter["tab"])}>
@@ -202,7 +224,7 @@ function MarketplacePage() {
         <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {offersQuery.isLoading
             ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-[360px] rounded-2xl" />)
-            : (offersQuery.data ?? []).map((o) => (
+            : regular.map((o) => (
                 <OfferCard
                   key={o.id}
                   offer={o}
@@ -212,7 +234,7 @@ function MarketplacePage() {
               ))}
         </div>
 
-        {!offersQuery.isLoading && (offersQuery.data ?? []).length === 0 ? (
+        {!offersQuery.isLoading && regular.length === 0 ? (
           <div className="mt-12 rounded-2xl border border-dashed border-border bg-card p-12 text-center">
             <p className="font-display text-lg font-semibold">{t("mkt.empty.title")}</p>
             <p className="mt-2 text-sm text-muted-foreground">{t("mkt.empty.sub")}</p>
