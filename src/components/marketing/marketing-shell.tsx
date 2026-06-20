@@ -130,7 +130,7 @@ export function MarketingFooter() {
           items={[
             { label: "Marketplace", to: "/marketplace" },
             { label: "Circles", to: "/circles" },
-            { label: "Drops", to: "/drops" },
+            { label: "Packages", to: "/drops" },
             { label: "Near me", to: "/map" },
           ]}
         />
