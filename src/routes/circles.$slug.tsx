@@ -418,7 +418,11 @@ function CirclePage() {
                         ) : (
                           <span className="bc-sender-name">{nameOf(m)}</span>
                         )}
-                        <div>{m.body}</div>
+                        {m.kind === "voice" && m.audio_url ? (
+                          <VoiceBubble path={m.audio_url} durationMs={m.duration_ms} sent={false} />
+                        ) : (
+                          <div>{m.body}</div>
+                        )}
                         <div className="bc-time">{fmtTime(m.created_at)}</div>
                       </div>
                     </div>
