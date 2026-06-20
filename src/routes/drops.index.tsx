@@ -13,7 +13,7 @@ function DropsIndex() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
       <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Limited time</p>
-      <h1 className="mt-1 font-display text-4xl font-bold sm:text-5xl">Seasonal Drops</h1>
+      <h1 className="mt-1 font-display text-4xl font-bold sm:text-5xl">Seasonal Packages</h1>
       <p className="mt-3 max-w-2xl text-muted-foreground">
         Curated collections of perks that match the moment — only available for a limited window.
       </p>
