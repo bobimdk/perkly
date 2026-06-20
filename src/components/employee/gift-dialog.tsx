@@ -97,7 +97,7 @@ export function GiftDialog() {
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="ghost" onClick={() => setSelected(null)}>Back</Button>
-                <Button onClick={send} disabled={loading || amount <= 0}>
+                <Button onClick={send} disabled={loading || !amount || Number(amount) <= 0}>
                   {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Gift className="mr-2 h-4 w-4" />}
                   Send gift
                 </Button>
