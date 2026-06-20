@@ -63,6 +63,68 @@ function ReactionBar() {
   );
 }
 
+function fmtDur(ms: number) {
+  const s = Math.max(0, Math.round(ms / 1000));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+}
+
+function VoiceBubble({ path, durationMs, sent }: { path: string; durationMs: number | null; sent: boolean }) {
+  const [url, setUrl] = useState<string | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const ensureUrl = async () => {
+    if (url) return url;
+    try {
+      const u = await getVoiceSignedUrl(path);
+      setUrl(u);
+      return u;
+    } catch {
+      toast.error("Couldn't load voice note");
+      return null;
+    }
+  };
+
+  const toggle = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const u = await ensureUrl();
+    if (!u) return;
+    if (!audioRef.current) {
+      audioRef.current = new Audio(u);
+      audioRef.current.addEventListener("ended", () => { setPlaying(false); setProgress(0); });
+      audioRef.current.addEventListener("timeupdate", () => {
+        const a = audioRef.current!;
+        if (a.duration) setProgress(a.currentTime / a.duration);
+      });
+    }
+    if (playing) { audioRef.current.pause(); setPlaying(false); }
+    else { await audioRef.current.play(); setPlaying(true); }
+  };
+
+  useEffect(() => () => { audioRef.current?.pause(); }, []);
+
+  const bars = 22;
+  return (
+    <button type="button" onClick={toggle} className={`bc-voice ${sent ? "bc-voice-sent" : "bc-voice-recv"}`}>
+      <span className="bc-voice-play">{playing ? "⏸" : "▶"}</span>
+      <span className="bc-voice-bars">
+        {Array.from({ length: bars }).map((_, i) => (
+          <span
+            key={i}
+            className="bc-voice-bar"
+            style={{
+              height: `${6 + ((i * 7) % 14)}px`,
+              opacity: i / bars <= progress ? 1 : 0.45,
+            }}
+          />
+        ))}
+      </span>
+      <span className="bc-voice-dur">{fmtDur(durationMs ?? 0)}</span>
+    </button>
+  );
+}
+
 function CirclePage() {
   const { slug } = Route.useParams();
   const { user } = useAuth();
