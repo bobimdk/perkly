@@ -1844,9 +1844,12 @@ export type Database = {
           first_name: string
           headline: string
           id: string
+          interests: string[]
+          languages: string[]
           last_name: string
           location: string
           role_title: string
+          skills: string[]
           username: string
         }[]
       }
@@ -1861,9 +1864,12 @@ export type Database = {
           first_name: string
           headline: string
           id: string
+          interests: string[]
+          languages: string[]
           last_name: string
           location: string
           role_title: string
+          skills: string[]
           username: string
         }[]
       }
