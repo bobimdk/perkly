@@ -15,7 +15,7 @@ type Circle = {
 };
 
 const CIRCLES: Circle[] = [
-  { slug: "runners-of-tirana", name: "Runners of Tirana", emoji: "🏃", description: "Weekly runs, race tips, and gear deals", members: 38, tint: "#fde3d3" },
+  { slug: "runners-tirana", name: "Runners of Tirana", emoji: "🏃", description: "Weekly runs, race tips, and gear deals", members: 38, tint: "#fde3d3" },
   { slug: "mindful-minds", name: "Mindful Minds", emoji: "🧘", description: "Meditation, therapy, and balance", members: 24, tint: "#eef3ec" },
   { slug: "foodies", name: "Foodies", emoji: "🍽️", description: "Best lunch spots near the office", members: 31, tint: "#fde0c4" },
   { slug: "gym-lovers", name: "Gym Lovers", emoji: "💪", description: "Form check, splits, and gym perks", members: 46, tint: "#f6ecd0" },
