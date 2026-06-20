@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, SlidersHorizontal, Zap, Flame, Clock, Star } from "lucide-react";
+import { Search, SlidersHorizontal, Zap, Flame, Clock, Star, Sparkles } from "lucide-react";
 import { MarketingNav, MarketingFooter } from "@/components/marketing/marketing-shell";
 import { OfferCard } from "@/components/marketplace/offer-card";
 import { Input } from "@/components/ui/input";
