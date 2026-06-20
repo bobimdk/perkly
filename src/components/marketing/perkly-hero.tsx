@@ -131,16 +131,23 @@ export function PerklyHero() {
 
   return (
     <section
+      className="perkly-hero"
       style={{
         position: "relative",
         overflow: "hidden",
-        padding: "92px 36px 76px",
-        minHeight: 580,
         background: "#ffffff",
         fontFamily: FONT_STACK,
       }}
     >
       <style>{`
+        .perkly-hero { padding: 56px 20px 56px; min-height: 520px; }
+        .perkly-hero h1.perkly-h1 { font-size: 42px !important; }
+        .perkly-hero .perkly-card-a, .perkly-hero .perkly-card-b { display: none; }
+        @media (min-width: 768px) {
+          .perkly-hero { padding: 92px 36px 76px; min-height: 580px; }
+          .perkly-hero h1.perkly-h1 { font-size: 82px !important; }
+          .perkly-hero .perkly-card-a, .perkly-hero .perkly-card-b { display: block; }
+        }
         @keyframes flyLR {
           0%   { opacity: 0; transform: translate(-50%,-50%) translate3d(-740px,0,-820px); }
           13%  { opacity: 1; }
