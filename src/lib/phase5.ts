@@ -229,6 +229,8 @@ export async function findUserByEmail(email: string) {
 
 export type ProfileLite = {
   id: string;
+
+const sb: any = sb;
   username: string | null;
   first_name: string | null;
   last_name: string | null;
@@ -250,7 +252,7 @@ export type Friendship = {
 };
 
 export async function fetchProfileByUsername(username: string) {
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from("profiles" as any)
     .select("id, username, first_name, last_name, email, avatar_url, headline, bio, cover_url, location, company_name, role_title")
     .eq("username" as any, username)
@@ -260,7 +262,7 @@ export async function fetchProfileByUsername(username: string) {
 }
 
 export async function fetchProfileById(id: string) {
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from("profiles" as any)
     .select("id, username, first_name, last_name, email, avatar_url, headline, bio, cover_url, location, company_name, role_title")
     .eq("id", id)
@@ -270,7 +272,7 @@ export async function fetchProfileById(id: string) {
 }
 
 export async function searchProfiles(query: string, excludeUserId?: string) {
-  let q = supabase
+  let q = sb
     .from("profiles" as any)
     .select("id, username, first_name, last_name, email, avatar_url, company_name, role_title, headline")
     .limit(30);
@@ -292,7 +294,7 @@ export async function searchProfiles(query: string, excludeUserId?: string) {
 async function attachOtherProfiles(rows: any[], me: string) {
   const ids = rows.map((r) => (r.requester_id === me ? r.addressee_id : r.requester_id));
   if (ids.length === 0) return rows as Friendship[];
-  const { data: profs } = await supabase
+  const { data: profs } = await sb
     .from("profiles" as any)
     .select("id, username, first_name, last_name, email, avatar_url, company_name, role_title, headline")
     .in("id", ids);
@@ -305,7 +307,7 @@ async function attachOtherProfiles(rows: any[], me: string) {
 }
 
 export async function fetchFriends(me: string) {
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from("friendships" as any)
     .select("*")
     .eq("status", "accepted")
@@ -315,7 +317,7 @@ export async function fetchFriends(me: string) {
 }
 
 export async function fetchIncomingRequests(me: string) {
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from("friendships" as any)
     .select("*")
     .eq("status", "pending")
@@ -325,7 +327,7 @@ export async function fetchIncomingRequests(me: string) {
 }
 
 export async function fetchOutgoingRequests(me: string) {
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from("friendships" as any)
     .select("*")
     .eq("status", "pending")
@@ -335,16 +337,16 @@ export async function fetchOutgoingRequests(me: string) {
 }
 
 export async function sendFriendRequest(toUserId: string) {
-  const { data: u } = await supabase.auth.getUser();
+  const { data: u } = await supabase.auth.getUser(); if(false){const _=sb;}.auth.getUser();
   if (!u.user) throw new Error("Not authenticated");
-  const { error } = await supabase
+  const { error } = await sb
     .from("friendships" as any)
     .insert({ requester_id: u.user.id, addressee_id: toUserId });
   if (error) throw error;
 }
 
 export async function respondFriendRequest(friendshipId: string, accept: boolean) {
-  const { error } = await supabase
+  const { error } = await sb
     .from("friendships" as any)
     .update({ status: accept ? "accepted" : "declined" })
     .eq("id", friendshipId);
@@ -352,12 +354,12 @@ export async function respondFriendRequest(friendshipId: string, accept: boolean
 }
 
 export async function removeFriend(friendshipId: string) {
-  const { error } = await supabase.from("friendships" as any).delete().eq("id", friendshipId);
+  const { error } = await sb.from("friendships" as any).delete().eq("id", friendshipId);
   if (error) throw error;
 }
 
 export async function getFriendshipBetween(me: string, other: string) {
-  const { data } = await supabase
+  const { data } = await sb
     .from("friendships" as any)
     .select("*")
     .or(
@@ -368,7 +370,7 @@ export async function getFriendshipBetween(me: string, other: string) {
 }
 
 export async function countConnections(userId: string) {
-  const { count } = await supabase
+  const { count } = await sb
     .from("friendships" as any)
     .select("id", { count: "exact", head: true })
     .eq("status", "accepted")
