@@ -39,6 +39,7 @@ type OfferPin = {
   city: string | null;
   lat: number;
   lng: number;
+  is_sponsored?: boolean;
 };
 
 // Piramida e Tiranës — fallback "current location" when geolocation denied
