@@ -88,8 +88,8 @@ export function GiftDialog() {
               </div>
               <div>
                 <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Amount (ALL)</label>
-                <Input type="number" min={100} step={100} value={amount} onChange={(e) => setAmount(Number(e.target.value))} />
-                <p className="mt-1 text-xs text-muted-foreground">{formatPrice(amount)} will move from your budget to theirs.</p>
+                <Input type="number" min={100} step={100} value={amount} onChange={(e) => setAmount(e.target.value)} />
+                <p className="mt-1 text-xs text-muted-foreground">{formatPrice(Number(amount) || 0)} will move from your budget to theirs.</p>
               </div>
               <div>
                 <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Message</label>
