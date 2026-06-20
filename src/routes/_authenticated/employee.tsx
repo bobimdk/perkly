@@ -98,14 +98,29 @@ function EmployeePage() {
     }
   };
 
+  const invitesQuery = useQuery({
+    queryKey: ["my-invites", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("company_invites" as never)
+        .select("id")
+        .eq("status", "pending");
+      if (error) throw error;
+      return (data ?? []) as unknown as { id: string }[];
+    },
+    enabled: !!user,
+  });
+  const hasPendingInvites = (invitesQuery.data?.length ?? 0) > 0;
+
   return (
     <DashboardShell title={t("emp.title")}>
       {user ? <PendingInvitesPanel userId={user.id} /> : null}
-      {companyQuery.isLoading || draftQuery.isLoading ? (
+      {companyQuery.isLoading || draftQuery.isLoading || invitesQuery.isLoading ? (
         <Skeleton className="h-64 rounded-2xl" />
       ) : !companyQuery.data ? (
-        <NoEmployer t={t} />
+        hasPendingInvites ? null : <NoEmployer t={t} />
       ) : (
+
         <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
           {/* Left: Budget + Package + History */}
           <div className="space-y-8">
