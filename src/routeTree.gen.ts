@@ -26,6 +26,7 @@ import { Route as DropsSlugRouteImport } from './routes/drops.$slug'
 import { Route as CirclesSlugRouteImport } from './routes/circles.$slug'
 import { Route as ApiConciergeRouteImport } from './routes/api/concierge'
 import { Route as AuthenticatedProviderRouteImport } from './routes/_authenticated/provider'
+import { Route as AuthenticatedNetworkRouteImport } from './routes/_authenticated/network'
 import { Route as AuthenticatedEmployerRouteImport } from './routes/_authenticated/employer'
 import { Route as AuthenticatedEmployeeRouteImport } from './routes/_authenticated/employee'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -114,6 +115,11 @@ const AuthenticatedProviderRoute = AuthenticatedProviderRouteImport.update({
   path: '/provider',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNetworkRoute = AuthenticatedNetworkRouteImport.update({
+  id: '/network',
+  path: '/network',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedEmployerRoute = AuthenticatedEmployerRouteImport.update({
   id: '/employer',
   path: '/employer',
@@ -141,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/employee': typeof AuthenticatedEmployeeRoute
   '/employer': typeof AuthenticatedEmployerRoute
+  '/network': typeof AuthenticatedNetworkRoute
   '/provider': typeof AuthenticatedProviderRoute
   '/api/concierge': typeof ApiConciergeRoute
   '/circles/$slug': typeof CirclesSlugRoute
@@ -160,6 +167,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/employee': typeof AuthenticatedEmployeeRoute
   '/employer': typeof AuthenticatedEmployerRoute
+  '/network': typeof AuthenticatedNetworkRoute
   '/provider': typeof AuthenticatedProviderRoute
   '/api/concierge': typeof ApiConciergeRoute
   '/circles/$slug': typeof CirclesSlugRoute
@@ -183,6 +191,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/employee': typeof AuthenticatedEmployeeRoute
   '/_authenticated/employer': typeof AuthenticatedEmployerRoute
+  '/_authenticated/network': typeof AuthenticatedNetworkRoute
   '/_authenticated/provider': typeof AuthenticatedProviderRoute
   '/api/concierge': typeof ApiConciergeRoute
   '/circles/$slug': typeof CirclesSlugRoute
@@ -206,6 +215,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/employee'
     | '/employer'
+    | '/network'
     | '/provider'
     | '/api/concierge'
     | '/circles/$slug'
@@ -225,6 +235,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/employee'
     | '/employer'
+    | '/network'
     | '/provider'
     | '/api/concierge'
     | '/circles/$slug'
@@ -247,6 +258,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/employee'
     | '/_authenticated/employer'
+    | '/_authenticated/network'
     | '/_authenticated/provider'
     | '/api/concierge'
     | '/circles/$slug'
@@ -394,6 +406,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProviderRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/network': {
+      id: '/_authenticated/network'
+      path: '/network'
+      fullPath: '/network'
+      preLoaderRoute: typeof AuthenticatedNetworkRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/employer': {
       id: '/_authenticated/employer'
       path: '/employer'
@@ -422,6 +441,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedEmployeeRoute: typeof AuthenticatedEmployeeRoute
   AuthenticatedEmployerRoute: typeof AuthenticatedEmployerRoute
+  AuthenticatedNetworkRoute: typeof AuthenticatedNetworkRoute
   AuthenticatedProviderRoute: typeof AuthenticatedProviderRoute
 }
 
@@ -429,6 +449,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedEmployeeRoute: AuthenticatedEmployeeRoute,
   AuthenticatedEmployerRoute: AuthenticatedEmployerRoute,
+  AuthenticatedNetworkRoute: AuthenticatedNetworkRoute,
   AuthenticatedProviderRoute: AuthenticatedProviderRoute,
 }
 
