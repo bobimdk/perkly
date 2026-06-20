@@ -25,10 +25,15 @@ export function GiftDialog() {
   };
   const send = async () => {
     if (!selected) return;
+    const amt = Number(amount);
+    if (!amt || amt <= 0) {
+      toast.error("Shtoni një shumë të vlefshme");
+      return;
+    }
     setLoading(true);
     try {
-      await sendGift(selected.id, amount, message);
-      toast.success(`Sent ${formatPrice(amount)} to ${selected.first_name ?? selected.email}!`);
+      await sendGift(selected.id, amt, message);
+      toast.success(`Sent ${formatPrice(amt)} to ${selected.first_name ?? selected.email}!`);
       setOpen(false);
       setSelected(null);
       setMessage("");
