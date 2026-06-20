@@ -30,13 +30,13 @@ export function GiftDialog() {
     if (!selected) return;
     const amt = Number(amount);
     if (!amt || amt <= 0) {
-      toast.error("Shtoni një shumë të vlefshme");
+      toast.error("Enter a valid amount");
       return;
     }
     setLoading(true);
     try {
       await sendGift(selected.id, amt, message);
-      toast.success(`U dërgua ${formatPrice(amt)} tek ${selected.first_name ?? selected.username}!`);
+      toast.success(`Sent ${formatPrice(amt)} to ${selected.first_name ?? selected.username}!`);
       setOpen(false);
       setSelected(null);
       setMessage("");
