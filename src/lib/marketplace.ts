@@ -150,14 +150,26 @@ export async function fetchUserFavoriteIds(userId: string): Promise<Set<string>>
   return new Set((data ?? []).map((r) => r.offer_id));
 }
 
+// Select explicit, non-sensitive columns. Email/phone are fetched on demand
+// via the `get_provider_contact` RPC (owner/admin only).
+const PROVIDER_COLUMNS =
+  "id, owner_id, slug, name, tagline, description, logo_url, cover_url, website, city, address, lat, lng, status, rating_avg, rating_count, is_sponsored, sponsored_until, created_at, updated_at";
+
 export async function fetchMyProviders(userId: string): Promise<ProviderRow[]> {
   const { data, error } = await supabase
     .from("providers")
-    .select("*")
+    .select(PROVIDER_COLUMNS)
     .eq("owner_id", userId)
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return (data ?? []) as ProviderRow[];
+  return ((data ?? []) as any[]).map((p) => ({ ...p, email: null, phone: null })) as ProviderRow[];
+}
+
+export async function fetchProviderContact(providerId: string): Promise<{ email: string | null; phone: string | null } | null> {
+  const { data, error } = await supabase.rpc("get_provider_contact" as any, { _provider_id: providerId });
+  if (error) throw error;
+  const row = Array.isArray(data) ? data[0] : data;
+  return row ? { email: row.email ?? null, phone: row.phone ?? null } : null;
 }
 
 export async function fetchProviderOffers(providerId: string): Promise<OfferRow[]> {

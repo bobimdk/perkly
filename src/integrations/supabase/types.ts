@@ -1722,11 +1722,74 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      find_user_id_by_email: { Args: { _email: string }; Returns: string }
+      get_provider_contact: {
+        Args: { _provider_id: string }
+        Returns: {
+          email: string
+          phone: string
+        }[]
+      }
+      get_public_profile_by_id: {
+        Args: { _id: string }
+        Returns: {
+          avatar_url: string
+          bio: string
+          company_name: string
+          cover_url: string
+          created_at: string
+          first_name: string
+          headline: string
+          id: string
+          last_name: string
+          location: string
+          role_title: string
+          username: string
+        }[]
+      }
+      get_public_profile_by_username: {
+        Args: { _username: string }
+        Returns: {
+          avatar_url: string
+          bio: string
+          company_name: string
+          cover_url: string
+          created_at: string
+          first_name: string
+          headline: string
+          id: string
+          last_name: string
+          location: string
+          role_title: string
+          username: string
+        }[]
+      }
+      get_public_profiles: {
+        Args: { _ids: string[] }
+        Returns: {
+          avatar_url: string
+          bio: string
+          company_name: string
+          cover_url: string
+          created_at: string
+          first_name: string
+          headline: string
+          id: string
+          last_name: string
+          location: string
+          role_title: string
+          username: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_circle_member: {
+        Args: { _circle_id: string; _user_id: string }
         Returns: boolean
       }
       is_company_owner: {
@@ -1820,6 +1883,23 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      search_public_profiles: {
+        Args: { _query: string }
+        Returns: {
+          avatar_url: string
+          bio: string
+          company_name: string
+          cover_url: string
+          created_at: string
+          first_name: string
+          headline: string
+          id: string
+          last_name: string
+          location: string
+          role_title: string
+          username: string
+        }[]
       }
       send_broadcast: {
         Args: { p_audience: string; p_body: string; p_title: string }

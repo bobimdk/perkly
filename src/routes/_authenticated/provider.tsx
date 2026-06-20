@@ -17,7 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LocationPickerDialog } from "@/components/provider/location-picker";
 import { useAuth } from "@/lib/auth-context";
-import { fetchCategories, fetchMyProviders, fetchProviderOffers, type ProviderRow, type OfferRow } from "@/lib/marketplace";
+import { fetchCategories, fetchMyProviders, fetchProviderContact, fetchProviderOffers, type ProviderRow, type OfferRow } from "@/lib/marketplace";
 import { redeemTransaction } from "@/lib/perkly";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -363,9 +363,17 @@ function BusinessProfileEditor({ provider, onSaved }: { provider: ProviderRow; o
   const [name, setName] = useState(provider.name);
   const [tagline, setTagline] = useState(provider.tagline ?? "");
   const [description, setDescription] = useState(provider.description ?? "");
-  const [email, setEmail] = useState(provider.email ?? "");
-  const [phone, setPhone] = useState(provider.phone ?? "");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [website, setWebsite] = useState(provider.website ?? "");
+
+  useEffect(() => {
+    let alive = true;
+    fetchProviderContact(provider.id)
+      .then((c) => { if (alive && c) { setEmail(c.email ?? ""); setPhone(c.phone ?? ""); } })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [provider.id]);
   const [saving, setSaving] = useState(false);
 
   const save = async () => {

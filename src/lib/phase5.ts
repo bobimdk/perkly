@@ -106,10 +106,7 @@ export async function fetchCircleMessages(circleId: string) {
   const msgs = (data ?? []) as CircleMessage[];
   const ids = Array.from(new Set(msgs.map((m) => m.user_id)));
   if (ids.length === 0) return msgs as (CircleMessage & { sender?: any })[];
-  const { data: profs } = await supabase
-    .from("profiles" as any)
-    .select("id, username, first_name, last_name, avatar_url")
-    .in("id", ids);
+  const { data: profs } = await (supabase as any).rpc("get_public_profiles", { _ids: ids });
   const map = new Map<string, any>();
   (profs ?? []).forEach((p: any) => map.set(p.id, p));
   return msgs.map((m) => ({ ...m, sender: map.get(m.user_id) ?? null })) as (CircleMessage & { sender?: any })[];
@@ -299,39 +296,21 @@ export type Friendship = {
 const sb: any = supabase;
 
 export async function fetchProfileByUsername(username: string) {
-  const { data, error } = await sb
-    .from("profiles" as any)
-    .select("id, username, first_name, last_name, email, avatar_url, headline, bio, cover_url, location, company_name, role_title")
-    .eq("username" as any, username)
-    .maybeSingle();
+  const { data, error } = await sb.rpc("get_public_profile_by_username", { _username: username });
   if (error) throw error;
-  return data as any;
+  const row = Array.isArray(data) ? data[0] : data;
+  return row ?? null;
 }
 
 export async function fetchProfileById(id: string) {
-  const { data, error } = await sb
-    .from("profiles" as any)
-    .select("id, username, first_name, last_name, email, avatar_url, headline, bio, cover_url, location, company_name, role_title")
-    .eq("id", id)
-    .maybeSingle();
+  const { data, error } = await sb.rpc("get_public_profile_by_id", { _id: id });
   if (error) throw error;
-  return data as any;
+  const row = Array.isArray(data) ? data[0] : data;
+  return row ?? null;
 }
 
 export async function searchProfiles(query: string, excludeUserId?: string) {
-  let q = sb
-    .from("profiles" as any)
-    .select("id, username, first_name, last_name, email, avatar_url, company_name, role_title, headline")
-    .limit(30);
-  if (query.trim()) {
-    const term = `%${query.trim()}%`;
-    q = q.or(
-      `first_name.ilike.${term},last_name.ilike.${term},email.ilike.${term},username.ilike.${term},company_name.ilike.${term},role_title.ilike.${term}`,
-    );
-  } else {
-    q = q.order("created_at", { ascending: false } as any);
-  }
-  const { data, error } = await q;
+  const { data, error } = await sb.rpc("search_public_profiles", { _query: query ?? "" });
   if (error) throw error;
   let list = (data ?? []) as any[];
   if (excludeUserId) list = list.filter((p) => p.id !== excludeUserId);
@@ -341,10 +320,7 @@ export async function searchProfiles(query: string, excludeUserId?: string) {
 async function attachOtherProfiles(rows: any[], me: string) {
   const ids = rows.map((r) => (r.requester_id === me ? r.addressee_id : r.requester_id));
   if (ids.length === 0) return rows as Friendship[];
-  const { data: profs } = await sb
-    .from("profiles" as any)
-    .select("id, username, first_name, last_name, email, avatar_url, company_name, role_title, headline")
-    .in("id", ids);
+  const { data: profs } = await sb.rpc("get_public_profiles", { _ids: ids });
   const map = new Map<string, ProfileLite>();
   (profs ?? []).forEach((p: any) => map.set(p.id, p));
   return rows.map((r) => ({
