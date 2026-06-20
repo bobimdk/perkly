@@ -296,6 +296,8 @@ const dictionaries: Record<Lang, Dict> = {
     "mkt.tab.limited": "Të kufizuara",
     "mkt.empty.title": "S'ka oferta që përputhen me kërkimin",
     "mkt.empty.sub": "Provo një kategori ose term tjetër.",
+    "mkt.sponsored.title": "Sponsorizuar",
+    "mkt.sponsored.sub": "Partnerë të zgjedhur veçanërisht për ty",
 
     // Marketplace / offer detail
     "mk.back": "Kthehu te tregu",
