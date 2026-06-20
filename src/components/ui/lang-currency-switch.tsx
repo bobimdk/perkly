@@ -10,9 +10,9 @@ import { cn } from "@/lib/utils";
 
 type Size = "sm" | "md";
 
-const LANGS: { code: Lang; label: string; flag: string }[] = [
-  { code: "en", label: "English", flag: "🇬🇧" },
-  { code: "sq", label: "Shqip", flag: "🇦🇱" },
+const LANGS: { code: Lang; labels: Record<Lang, string>; flag: string }[] = [
+  { code: "en", labels: { en: "English", sq: "Anglisht" }, flag: "🇬🇧" },
+  { code: "sq", labels: { en: "Albanian", sq: "Shqip" }, flag: "🇦🇱" },
 ];
 
 const CURRENCIES: { code: Currency; label: string; symbol: string }[] = [
@@ -50,7 +50,7 @@ export function LanguageSwitch({ size = "sm" }: { size?: Size }) {
           >
             <span className="flex items-center gap-2">
               <span>{l.flag}</span>
-              <span className="font-medium">{l.label}</span>
+              <span className="font-medium">{l.labels[lang]}</span>
             </span>
             {lang === l.code && <Check className="h-3.5 w-3.5 text-primary" />}
           </DropdownMenuItem>

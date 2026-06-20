@@ -62,29 +62,29 @@ function NetworkPage() {
   const friendIds = new Set((friendsQ.data ?? []).map((f) => f.other?.id));
 
   const connect = async (p: ProfileLite) => {
-    try { await sendFriendRequest(p.id); toast.success(`Kërkesa u dërgua ${p.first_name ?? p.username}`); refresh(); }
+    try { await sendFriendRequest(p.id); toast.success(`Request sent to ${p.first_name ?? p.username}`); refresh(); }
     catch (e: any) { toast.error(e.message); }
   };
 
   return (
-    <DashboardShell title="Rrjeti im">
+    <DashboardShell title="My network">
       <Tabs defaultValue="discover" className="space-y-6">
         <TabsList>
           <TabsTrigger value="discover">
-            <Search className="mr-2 h-4 w-4" /> Zbulo
+            <Search className="mr-2 h-4 w-4" /> Discover
           </TabsTrigger>
           <TabsTrigger value="friends">
-            <Users className="mr-2 h-4 w-4" /> Shokët ({friendsQ.data?.length ?? 0})
+            <Users className="mr-2 h-4 w-4" /> Friends ({friendsQ.data?.length ?? 0})
           </TabsTrigger>
           <TabsTrigger value="requests">
-            <UserPlus className="mr-2 h-4 w-4" /> Kërkesa ({incomingQ.data?.length ?? 0})
+            <UserPlus className="mr-2 h-4 w-4" /> Requests ({incomingQ.data?.length ?? 0})
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="discover" className="space-y-4">
           <div className="flex gap-2">
             <Input
-              placeholder="Kërko emër, kompani, role…"
+              placeholder="Search name, company, role…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
@@ -99,17 +99,17 @@ function NetworkPage() {
                   p={p}
                   action={
                     friendIds.has(p.id) ? (
-                      <Button size="sm" variant="outline" disabled><UserCheck className="mr-2 h-4 w-4" />Shokë</Button>
+                      <Button size="sm" variant="outline" disabled><UserCheck className="mr-2 h-4 w-4" />Friends</Button>
                     ) : pendingIds.has(p.id) ? (
-                      <Button size="sm" variant="outline" disabled>Pritet</Button>
+                      <Button size="sm" variant="outline" disabled>Pending</Button>
                     ) : (
-                      <Button size="sm" onClick={() => connect(p)}><UserPlus className="mr-2 h-4 w-4" /> Lidhu</Button>
+                      <Button size="sm" onClick={() => connect(p)}><UserPlus className="mr-2 h-4 w-4" /> Connect</Button>
                     )
                   }
                 />
               ))}
               {searchQ.data && searchQ.data.length === 0 ? (
-                <p className="col-span-full py-8 text-center text-sm text-muted-foreground">Nuk u gjet asnjë rezultat.</p>
+                <p className="col-span-full py-8 text-center text-sm text-muted-foreground">No results found.</p>
               ) : null}
             </div>
           )}
@@ -117,7 +117,7 @@ function NetworkPage() {
 
         <TabsContent value="friends" className="space-y-4">
           {friendsQ.data && friendsQ.data.length === 0 ? (
-            <p className="py-12 text-center text-sm text-muted-foreground">Ende nuk keni shokë. Filloni nga skeda "Zbulo".</p>
+            <p className="py-12 text-center text-sm text-muted-foreground">No friends yet. Start from the "Discover" tab.</p>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {(friendsQ.data ?? []).map((f) =>
@@ -127,7 +127,7 @@ function NetworkPage() {
                     p={f.other}
                     action={
                       <Button size="sm" variant="ghost" onClick={async () => { await removeFriend(f.id); refresh(); }}>
-                        <X className="mr-2 h-4 w-4" /> Hiq
+                        <X className="mr-2 h-4 w-4" /> Remove
                       </Button>
                     }
                   />
@@ -140,10 +140,10 @@ function NetworkPage() {
         <TabsContent value="requests" className="space-y-6">
           <section>
             <h3 className="mb-3 font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-              Kërkesa hyrëse
+              Incoming requests
             </h3>
             {incomingQ.data && incomingQ.data.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Asnjë kërkesë.</p>
+              <p className="text-sm text-muted-foreground">No requests.</p>
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {(incomingQ.data ?? []).map((f) =>
@@ -154,10 +154,10 @@ function NetworkPage() {
                       action={
                         <div className="flex gap-2">
                           <Button size="sm" onClick={async () => { await respondFriendRequest(f.id, true); refresh(); }}>
-                            Prano
+                            Accept
                           </Button>
                           <Button size="sm" variant="outline" onClick={async () => { await respondFriendRequest(f.id, false); refresh(); }}>
-                            Refuzo
+                            Decline
                           </Button>
                         </div>
                       }
@@ -170,7 +170,7 @@ function NetworkPage() {
           {outgoingQ.data && outgoingQ.data.length > 0 ? (
             <section>
               <h3 className="mb-3 font-display text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-                Kërkesa dalëse
+                Outgoing requests
               </h3>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {outgoingQ.data.map((f) =>
@@ -180,7 +180,7 @@ function NetworkPage() {
                       p={f.other}
                       action={
                         <Button size="sm" variant="ghost" onClick={async () => { await removeFriend(f.id); refresh(); }}>
-                          Anulo
+                          Cancel
                         </Button>
                       }
                     />
@@ -197,11 +197,12 @@ function NetworkPage() {
 
 function PersonCard({ p, action }: { p: ProfileLite; action: React.ReactNode }) {
   const initials = (p.first_name?.[0] ?? p.username?.[0] ?? "U").toUpperCase();
+  const slug = p.username && p.username.length > 0 ? p.username : p.id;
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4">
       <Link
         to="/u/$username"
-        params={{ username: p.username ?? "" }}
+        params={{ username: slug }}
         className="flex items-center gap-3 group"
       >
         <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-gradient-to-br from-primary to-primary-glow font-display text-base font-bold text-primary-foreground">

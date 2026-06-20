@@ -374,7 +374,7 @@ function MapPage() {
         </div>
       </div>
       <div className="mx-auto mt-6 grid max-w-7xl gap-4 px-4 pb-12 sm:px-6 lg:grid-cols-[1fr_320px]">
-        <div ref={mapEl} className="h-[55vh] min-h-[360px] w-full rounded-2xl border border-border shadow-lg sm:rounded-3xl lg:h-[600px]" />
+        <div ref={mapEl} className="relative z-0 isolate h-[55vh] min-h-[360px] w-full rounded-2xl border border-border shadow-lg sm:rounded-3xl lg:h-[600px]" style={{ isolation: "isolate" }} />
         <aside className="rounded-3xl border border-border bg-card p-4 shadow-sm">
           <div className="flex items-center gap-2">
             <Navigation className="h-4 w-4 text-primary" />

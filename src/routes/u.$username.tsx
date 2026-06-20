@@ -1,31 +1,51 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MapPin, UserPlus, UserCheck, Mail, Briefcase, Loader2, Clock, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MarketingNav, MarketingFooter } from "@/components/marketing/marketing-shell";
 import {
   fetchProfileByUsername,
+  fetchProfileById,
   countConnections,
   getFriendshipBetween,
   sendFriendRequest,
   respondFriendRequest,
   removeFriend,
+  sendGift,
 } from "@/lib/phase5";
 import { useAuth } from "@/lib/auth-context";
+import { useI18n } from "@/lib/i18n";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/u/$username")({
   component: ProfilePage,
 });
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 function ProfilePage() {
   const { username } = Route.useParams();
   const { user } = useAuth();
+  const { formatPrice } = useI18n();
   const qc = useQueryClient();
 
   const profileQ = useQuery({
     queryKey: ["profile", username],
-    queryFn: () => fetchProfileByUsername(username),
+    queryFn: async () => {
+      // Accept either a username or a UUID slug
+      if (UUID_RE.test(username)) {
+        const byId = await fetchProfileById(username);
+        if (byId) return byId;
+      }
+      const byName = await fetchProfileByUsername(username);
+      if (byName) return byName;
+      // Fallback: try id even if not matching uuid format
+      try { return await fetchProfileById(username); } catch { return null; }
+    },
   });
   const profile = profileQ.data;
 
@@ -58,12 +78,35 @@ function ProfilePage() {
 
   const connect = async () => {
     if (!profile) return;
-    try { await sendFriendRequest(profile.id); toast.success("Kërkesa u dërgua"); refresh(); }
+    try { await sendFriendRequest(profile.id); toast.success("Request sent"); refresh(); }
     catch (e: any) { toast.error(e.message); }
   };
-  const accept = async () => { if (!fs) return; await respondFriendRequest(fs.id, true); toast.success("Pranuar"); refresh(); };
+  const accept = async () => { if (!fs) return; await respondFriendRequest(fs.id, true); toast.success("Accepted"); refresh(); };
   const decline = async () => { if (!fs) return; await respondFriendRequest(fs.id, false); refresh(); };
   const unfriend = async () => { if (!fs) return; await removeFriend(fs.id); refresh(); };
+
+  // Gift state
+  const [giftOpen, setGiftOpen] = useState(false);
+  const [amount, setAmount] = useState("1000");
+  const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
+  const sendMoney = async () => {
+    if (!profile) return;
+    const amt = Number(amount);
+    if (!amt || amt <= 0) { toast.error("Enter a valid amount"); return; }
+    setSending(true);
+    try {
+      await sendGift(profile.id, amt, message);
+      toast.success(`Sent ${formatPrice(amt)} to ${profile.first_name ?? profile.username ?? "your friend"}!`);
+      setGiftOpen(false);
+      setMessage("");
+      setAmount("1000");
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setSending(false);
+    }
+  };
 
   if (profileQ.isLoading) {
     return (
@@ -81,8 +124,8 @@ function ProfilePage() {
       <div className="min-h-screen">
         <MarketingNav />
         <div className="mx-auto max-w-5xl px-4 py-24 text-center">
-          <h1 className="font-display text-2xl font-bold">Profili nuk u gjet</h1>
-          <Link to="/network" className="mt-4 inline-block text-primary underline">Kërko në rrjet</Link>
+          <h1 className="font-display text-2xl font-bold">Profile not found</h1>
+          <Link to="/network" className="mt-4 inline-block text-primary underline">Search the network</Link>
         </div>
       </div>
     );
@@ -96,7 +139,6 @@ function ProfilePage() {
       <MarketingNav />
       <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
         <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-          {/* Cover */}
           <div
             className="relative h-40 sm:h-56"
             style={{
@@ -105,9 +147,7 @@ function ProfilePage() {
                 : "linear-gradient(135deg, hsl(var(--primary) / 0.35), hsl(var(--primary-glow) / 0.25))",
             }}
           />
-          {/* Body */}
           <div className="relative px-4 pb-6 sm:px-8">
-            {/* Avatar overlapping cover */}
             <div className="-mt-20 grid h-36 w-36 place-items-center rounded-full border-4 border-card bg-gradient-to-br from-primary to-primary-glow font-display text-5xl font-bold text-primary-foreground shadow-lg sm:h-44 sm:w-44">
               {profile.avatar_url ? (
                 <img src={profile.avatar_url} alt={fullName} className="h-full w-full rounded-full object-cover" />
@@ -117,7 +157,6 @@ function ProfilePage() {
             </div>
 
             <div className="mt-4 grid gap-6 sm:grid-cols-[1fr_auto]">
-              {/* Left: identity */}
               <div className="min-w-0">
                 <h1 className="font-display text-2xl font-bold sm:text-3xl">{fullName}</h1>
                 {profile.headline || profile.role_title ? (
@@ -142,28 +181,29 @@ function ProfilePage() {
 
                 <div className="mt-4 flex flex-wrap gap-2">
                   {isOwn ? (
-                    <Button variant="outline" size="sm" disabled className="rounded-full">Profili juaj</Button>
+                    <Button variant="outline" size="sm" disabled className="rounded-full">Your profile</Button>
                   ) : !user ? (
-                    <Button asChild size="sm" className="rounded-full"><Link to="/auth">Hyni për të lidhur</Link></Button>
+                    <Button asChild size="sm" className="rounded-full"><Link to="/auth">Sign in to connect</Link></Button>
                   ) : status === "none" ? (
-                    <Button size="sm" className="rounded-full" onClick={connect}><UserPlus className="mr-2 h-4 w-4" /> Lidhu</Button>
+                    <Button size="sm" className="rounded-full" onClick={connect}><UserPlus className="mr-2 h-4 w-4" /> Connect</Button>
                   ) : status === "pending_out" ? (
-                    <Button size="sm" variant="outline" className="rounded-full" disabled><Clock className="mr-2 h-4 w-4" /> Pritet</Button>
+                    <Button size="sm" variant="outline" className="rounded-full" disabled><Clock className="mr-2 h-4 w-4" /> Pending</Button>
                   ) : status === "pending_in" ? (
                     <>
-                      <Button size="sm" className="rounded-full" onClick={accept}><UserCheck className="mr-2 h-4 w-4" /> Prano</Button>
-                      <Button size="sm" variant="outline" className="rounded-full" onClick={decline}>Refuzo</Button>
+                      <Button size="sm" className="rounded-full" onClick={accept}><UserCheck className="mr-2 h-4 w-4" /> Accept</Button>
+                      <Button size="sm" variant="outline" className="rounded-full" onClick={decline}>Decline</Button>
                     </>
                   ) : (
                     <>
-                      <Button size="sm" variant="outline" className="rounded-full"><Gift className="mr-2 h-4 w-4" /> Dhuro</Button>
-                      <Button size="sm" variant="ghost" className="rounded-full" onClick={unfriend}>Hiq lidhjen</Button>
+                      <Button size="sm" className="rounded-full" onClick={() => setGiftOpen(true)}>
+                        <Gift className="mr-2 h-4 w-4" /> Send money
+                      </Button>
+                      <Button size="sm" variant="ghost" className="rounded-full" onClick={unfriend}>Remove connection</Button>
                     </>
                   )}
                 </div>
               </div>
 
-              {/* Right: company chip */}
               {profile.company_name ? (
                 <div className="flex items-center gap-2 self-start rounded-lg border border-border bg-background px-3 py-2">
                   <div className="grid h-8 w-8 shrink-0 place-items-center rounded bg-muted">
@@ -176,16 +216,15 @@ function ProfilePage() {
           </div>
         </div>
 
-        {/* Info cards */}
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           {profile.bio ? (
             <div className="rounded-2xl border border-border bg-card p-5 md:col-span-2">
-              <h2 className="font-display text-lg font-semibold">Rreth</h2>
+              <h2 className="font-display text-lg font-semibold">About</h2>
               <p className="mt-2 whitespace-pre-line text-sm text-foreground">{profile.bio}</p>
             </div>
           ) : null}
           <div className="space-y-3 rounded-2xl border border-border bg-card p-5">
-            <h2 className="font-display text-lg font-semibold">Detaje</h2>
+            <h2 className="font-display text-lg font-semibold">Details</h2>
             {profile.company_name ? (
               <p className="flex items-center gap-2 text-sm"><Briefcase className="h-4 w-4 text-muted-foreground" /> {profile.company_name}</p>
             ) : null}
@@ -198,6 +237,33 @@ function ProfilePage() {
           </div>
         </div>
       </main>
+
+      <Dialog open={giftOpen} onOpenChange={setGiftOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Send money to {fullName}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Amount (ALL)</label>
+              <Input type="number" min={100} step={100} value={amount} onChange={(e) => setAmount(e.target.value)} />
+              <p className="mt-1 text-xs text-muted-foreground">{formatPrice(Number(amount) || 0)} will be transferred from your budget.</p>
+            </div>
+            <div>
+              <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Message</label>
+              <Textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Happy birthday! 🎂" rows={2} />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => setGiftOpen(false)}>Cancel</Button>
+              <Button onClick={sendMoney} disabled={sending || !amount || Number(amount) <= 0}>
+                {sending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Gift className="mr-2 h-4 w-4" />}
+                Send gift
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <MarketingFooter />
     </div>
   );

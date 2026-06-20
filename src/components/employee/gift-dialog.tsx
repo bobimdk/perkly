@@ -30,13 +30,13 @@ export function GiftDialog() {
     if (!selected) return;
     const amt = Number(amount);
     if (!amt || amt <= 0) {
-      toast.error("Shtoni një shumë të vlefshme");
+      toast.error("Enter a valid amount");
       return;
     }
     setLoading(true);
     try {
       await sendGift(selected.id, amt, message);
-      toast.success(`U dërgua ${formatPrice(amt)} tek ${selected.first_name ?? selected.username}!`);
+      toast.success(`Sent ${formatPrice(amt)} to ${selected.first_name ?? selected.username}!`);
       setOpen(false);
       setSelected(null);
       setMessage("");
@@ -54,12 +54,12 @@ export function GiftDialog() {
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setSelected(null); }}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
-          <Gift className="mr-2 h-4 w-4" /> Dhuro një shokë
+          <Gift className="mr-2 h-4 w-4" /> Send a gift
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{selected ? "Dërgo dhuratë" : "Zgjidh një shokë"}</DialogTitle>
+          <DialogTitle>{selected ? "Send gift" : "Pick a friend"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           {!selected ? (
@@ -68,9 +68,9 @@ export function GiftDialog() {
                 <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin" /></div>
               ) : friends.length === 0 ? (
                 <div className="space-y-3 py-6 text-center">
-                  <p className="text-sm text-muted-foreground">Ende nuk keni asnjë shokë në rrjet.</p>
+                  <p className="text-sm text-muted-foreground">You don't have any friends in your network yet.</p>
                   <Button asChild size="sm" onClick={() => setOpen(false)}>
-                    <Link to="/network"><UserPlus className="mr-2 h-4 w-4" /> Shto shokë</Link>
+                    <Link to="/network"><UserPlus className="mr-2 h-4 w-4" /> Add friends</Link>
                   </Button>
                 </div>
               ) : (
@@ -117,19 +117,19 @@ export function GiftDialog() {
                 </div>
               </div>
               <div>
-                <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Shuma (ALL)</label>
+                <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Amount (ALL)</label>
                 <Input type="number" min={100} step={100} value={amount} onChange={(e) => setAmount(e.target.value)} />
-                <p className="mt-1 text-xs text-muted-foreground">{formatPrice(Number(amount) || 0)} do të transferohen nga buxheti juaj.</p>
+                <p className="mt-1 text-xs text-muted-foreground">{formatPrice(Number(amount) || 0)} will be transferred from your budget.</p>
               </div>
               <div>
-                <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Mesazh</label>
-                <Textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Gëzuar ditëlindjen! 🎂" rows={2} />
+                <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Message</label>
+                <Textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Happy birthday! 🎂" rows={2} />
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="ghost" onClick={() => setSelected(null)}><ArrowLeft className="mr-2 h-4 w-4" /> Mbrapa</Button>
+                <Button variant="ghost" onClick={() => setSelected(null)}><ArrowLeft className="mr-2 h-4 w-4" /> Back</Button>
                 <Button onClick={send} disabled={loading || !amount || Number(amount) <= 0}>
                   {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Gift className="mr-2 h-4 w-4" />}
-                  Dërgo dhuratë
+                  Send gift
                 </Button>
               </div>
             </>
