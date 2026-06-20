@@ -29,7 +29,7 @@ export type OfferRow = {
   published_at: string | null;
   created_at: string;
   updated_at: string;
-  providers?: { id: string; name: string; slug: string; logo_url: string | null; rating_avg: number; city: string | null; is_sponsored?: boolean | null } | null;
+  providers?: { id: string; name: string; slug: string; logo_url: string | null; rating_avg: number; city: string | null; is_sponsored?: boolean | null; sponsored_until?: string | null } | null;
   categories?: { id: string; slug: string; name_sq: string; name_en: string; icon: string | null } | null;
 };
 
