@@ -118,7 +118,7 @@ function CirclesIndex() {
             ))}
           </div>
         </section>
-        <LiveChat />
+        
       </div>
     </div>
   );
