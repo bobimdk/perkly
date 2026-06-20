@@ -99,7 +99,16 @@ export async function fetchCircleMessages(circleId: string) {
     .order("created_at", { ascending: true })
     .limit(200);
   if (error) throw error;
-  return data as CircleMessage[];
+  const msgs = (data ?? []) as CircleMessage[];
+  const ids = Array.from(new Set(msgs.map((m) => m.user_id)));
+  if (ids.length === 0) return msgs as (CircleMessage & { sender?: any })[];
+  const { data: profs } = await supabase
+    .from("profiles" as any)
+    .select("id, username, first_name, last_name, avatar_url")
+    .in("id", ids);
+  const map = new Map<string, any>();
+  (profs ?? []).forEach((p: any) => map.set(p.id, p));
+  return msgs.map((m) => ({ ...m, sender: map.get(m.user_id) ?? null })) as (CircleMessage & { sender?: any })[];
 }
 
 export async function postCircleMessage(circleId: string, userId: string, body: string) {
@@ -223,4 +232,157 @@ export async function findUserByEmail(email: string) {
     .ilike("email", email)
     .limit(5);
   return data ?? [];
+}
+
+// ====================== FRIENDS / PROFILES ======================
+
+export type ProfileLite = {
+  id: string;
+  username: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  avatar_url: string | null;
+  company_name?: string | null;
+  role_title?: string | null;
+  headline?: string | null;
+  location?: string | null;
+};
+
+export type Friendship = {
+  id: string;
+  requester_id: string;
+  addressee_id: string;
+  status: "pending" | "accepted" | "declined";
+  created_at: string;
+  other?: ProfileLite | null;
+};
+
+const sb: any = supabase;
+
+export async function fetchProfileByUsername(username: string) {
+  const { data, error } = await sb
+    .from("profiles" as any)
+    .select("id, username, first_name, last_name, email, avatar_url, headline, bio, cover_url, location, company_name, role_title")
+    .eq("username" as any, username)
+    .maybeSingle();
+  if (error) throw error;
+  return data as any;
+}
+
+export async function fetchProfileById(id: string) {
+  const { data, error } = await sb
+    .from("profiles" as any)
+    .select("id, username, first_name, last_name, email, avatar_url, headline, bio, cover_url, location, company_name, role_title")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw error;
+  return data as any;
+}
+
+export async function searchProfiles(query: string, excludeUserId?: string) {
+  let q = sb
+    .from("profiles" as any)
+    .select("id, username, first_name, last_name, email, avatar_url, company_name, role_title, headline")
+    .limit(30);
+  if (query.trim()) {
+    const term = `%${query.trim()}%`;
+    q = q.or(
+      `first_name.ilike.${term},last_name.ilike.${term},email.ilike.${term},username.ilike.${term},company_name.ilike.${term},role_title.ilike.${term}`,
+    );
+  } else {
+    q = q.order("created_at", { ascending: false } as any);
+  }
+  const { data, error } = await q;
+  if (error) throw error;
+  let list = (data ?? []) as any[];
+  if (excludeUserId) list = list.filter((p) => p.id !== excludeUserId);
+  return list as ProfileLite[];
+}
+
+async function attachOtherProfiles(rows: any[], me: string) {
+  const ids = rows.map((r) => (r.requester_id === me ? r.addressee_id : r.requester_id));
+  if (ids.length === 0) return rows as Friendship[];
+  const { data: profs } = await sb
+    .from("profiles" as any)
+    .select("id, username, first_name, last_name, email, avatar_url, company_name, role_title, headline")
+    .in("id", ids);
+  const map = new Map<string, ProfileLite>();
+  (profs ?? []).forEach((p: any) => map.set(p.id, p));
+  return rows.map((r) => ({
+    ...r,
+    other: map.get(r.requester_id === me ? r.addressee_id : r.requester_id) ?? null,
+  })) as Friendship[];
+}
+
+export async function fetchFriends(me: string) {
+  const { data, error } = await sb
+    .from("friendships" as any)
+    .select("*")
+    .eq("status", "accepted")
+    .or(`requester_id.eq.${me},addressee_id.eq.${me}`);
+  if (error) throw error;
+  return attachOtherProfiles((data as any[]) ?? [], me);
+}
+
+export async function fetchIncomingRequests(me: string) {
+  const { data, error } = await sb
+    .from("friendships" as any)
+    .select("*")
+    .eq("status", "pending")
+    .eq("addressee_id", me);
+  if (error) throw error;
+  return attachOtherProfiles((data as any[]) ?? [], me);
+}
+
+export async function fetchOutgoingRequests(me: string) {
+  const { data, error } = await sb
+    .from("friendships" as any)
+    .select("*")
+    .eq("status", "pending")
+    .eq("requester_id", me);
+  if (error) throw error;
+  return attachOtherProfiles((data as any[]) ?? [], me);
+}
+
+export async function sendFriendRequest(toUserId: string) {
+  const { data: u } = await supabase.auth.getUser();
+  if (!u.user) throw new Error("Not authenticated");
+  const { error } = await sb
+    .from("friendships" as any)
+    .insert({ requester_id: u.user.id, addressee_id: toUserId });
+  if (error) throw error;
+}
+
+export async function respondFriendRequest(friendshipId: string, accept: boolean) {
+  const { error } = await sb
+    .from("friendships" as any)
+    .update({ status: accept ? "accepted" : "declined" })
+    .eq("id", friendshipId);
+  if (error) throw error;
+}
+
+export async function removeFriend(friendshipId: string) {
+  const { error } = await sb.from("friendships" as any).delete().eq("id", friendshipId);
+  if (error) throw error;
+}
+
+export async function getFriendshipBetween(me: string, other: string) {
+  const { data } = await sb
+    .from("friendships" as any)
+    .select("*")
+    .or(
+      `and(requester_id.eq.${me},addressee_id.eq.${other}),and(requester_id.eq.${other},addressee_id.eq.${me})`,
+    )
+    .maybeSingle();
+  return data as any;
+}
+
+export async function countConnections(userId: string) {
+  const { count } = await sb
+    .from("friendships" as any)
+    .select("id", { count: "exact", head: true })
+    .eq("status", "accepted")
+    .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`);
+  return count ?? 0;
 }

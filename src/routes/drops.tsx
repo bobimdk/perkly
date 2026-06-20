@@ -4,9 +4,9 @@ import { MarketingNav, MarketingFooter } from "@/components/marketing/marketing-
 export const Route = createFileRoute("/drops")({
   head: () => ({
     meta: [
-      { title: "Seasonal Drops · Perkly" },
-      { name: "description", content: "Limited-time benefit collections curated by season." },
-      { property: "og:title", content: "Seasonal Drops · Perkly" },
+      { title: "Packages · Perkly" },
+      { name: "description", content: "Limited-time benefit packages curated by season." },
+      { property: "og:title", content: "Packages · Perkly" },
     ],
   }),
   component: () => (

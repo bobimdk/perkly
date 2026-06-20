@@ -20,6 +20,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as MarketplaceIndexRouteImport } from './routes/marketplace.index'
 import { Route as DropsIndexRouteImport } from './routes/drops.index'
 import { Route as CirclesIndexRouteImport } from './routes/circles.index'
+import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as MarketplaceSlugRouteImport } from './routes/marketplace.$slug'
 import { Route as DropsSlugRouteImport } from './routes/drops.$slug'
 import { Route as CirclesSlugRouteImport } from './routes/circles.$slug'
@@ -83,6 +84,11 @@ const CirclesIndexRoute = CirclesIndexRouteImport.update({
   path: '/',
   getParentRoute: () => CirclesRoute,
 } as any)
+const UUsernameRoute = UUsernameRouteImport.update({
+  id: '/u/$username',
+  path: '/u/$username',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketplaceSlugRoute = MarketplaceSlugRouteImport.update({
   id: '/marketplace/$slug',
   path: '/marketplace/$slug',
@@ -140,6 +146,7 @@ export interface FileRoutesByFullPath {
   '/circles/$slug': typeof CirclesSlugRoute
   '/drops/$slug': typeof DropsSlugRoute
   '/marketplace/$slug': typeof MarketplaceSlugRoute
+  '/u/$username': typeof UUsernameRoute
   '/circles/': typeof CirclesIndexRoute
   '/drops/': typeof DropsIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
@@ -158,6 +165,7 @@ export interface FileRoutesByTo {
   '/circles/$slug': typeof CirclesSlugRoute
   '/drops/$slug': typeof DropsSlugRoute
   '/marketplace/$slug': typeof MarketplaceSlugRoute
+  '/u/$username': typeof UUsernameRoute
   '/circles': typeof CirclesIndexRoute
   '/drops': typeof DropsIndexRoute
   '/marketplace': typeof MarketplaceIndexRoute
@@ -180,6 +188,7 @@ export interface FileRoutesById {
   '/circles/$slug': typeof CirclesSlugRoute
   '/drops/$slug': typeof DropsSlugRoute
   '/marketplace/$slug': typeof MarketplaceSlugRoute
+  '/u/$username': typeof UUsernameRoute
   '/circles/': typeof CirclesIndexRoute
   '/drops/': typeof DropsIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
@@ -202,6 +211,7 @@ export interface FileRouteTypes {
     | '/circles/$slug'
     | '/drops/$slug'
     | '/marketplace/$slug'
+    | '/u/$username'
     | '/circles/'
     | '/drops/'
     | '/marketplace/'
@@ -220,6 +230,7 @@ export interface FileRouteTypes {
     | '/circles/$slug'
     | '/drops/$slug'
     | '/marketplace/$slug'
+    | '/u/$username'
     | '/circles'
     | '/drops'
     | '/marketplace'
@@ -241,6 +252,7 @@ export interface FileRouteTypes {
     | '/circles/$slug'
     | '/drops/$slug'
     | '/marketplace/$slug'
+    | '/u/$username'
     | '/circles/'
     | '/drops/'
     | '/marketplace/'
@@ -257,6 +269,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   ApiConciergeRoute: typeof ApiConciergeRoute
   MarketplaceSlugRoute: typeof MarketplaceSlugRoute
+  UUsernameRoute: typeof UUsernameRoute
   MarketplaceIndexRoute: typeof MarketplaceIndexRoute
 }
 
@@ -338,6 +351,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/circles/'
       preLoaderRoute: typeof CirclesIndexRouteImport
       parentRoute: typeof CirclesRoute
+    }
+    '/u/$username': {
+      id: '/u/$username'
+      path: '/u/$username'
+      fullPath: '/u/$username'
+      preLoaderRoute: typeof UUsernameRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/marketplace/$slug': {
       id: '/marketplace/$slug'
@@ -451,6 +471,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   ApiConciergeRoute: ApiConciergeRoute,
   MarketplaceSlugRoute: MarketplaceSlugRoute,
+  UUsernameRoute: UUsernameRoute,
   MarketplaceIndexRoute: MarketplaceIndexRoute,
 }
 export const routeTree = rootRouteImport

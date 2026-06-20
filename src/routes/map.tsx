@@ -39,6 +39,7 @@ type OfferPin = {
   city: string | null;
   lat: number;
   lng: number;
+  is_sponsored?: boolean;
 };
 
 // Piramida e Tiranës — fallback "current location" when geolocation denied
@@ -50,7 +51,7 @@ async function fetchOfferPins(): Promise<OfferPin[]> {
     .select(
       "id,slug,title,subtitle,description,price_all,price_eur,cover_url,status," +
         "categories(slug)," +
-        "providers!inner(id,name,slug,logo_url,address,city,lat,lng,status)",
+        "providers!inner(id,name,slug,logo_url,address,city,lat,lng,status,is_sponsored)",
     )
     .eq("status", "published")
     .eq("providers.status", "active")
@@ -79,6 +80,7 @@ async function fetchOfferPins(): Promise<OfferPin[]> {
         city: pr.city,
         lat: Number(pr.lat),
         lng: Number(pr.lng),
+        is_sponsored: !!pr.is_sponsored,
       } as OfferPin;
     })
     .filter((x): x is OfferPin => x !== null);
@@ -108,11 +110,12 @@ function distanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: numb
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 
-function buildIcon(L: any, imgUrl: string, pulse = false) {
+function buildIcon(L: any, imgUrl: string, pulse = false, sponsored = false) {
   const html = `
-    <div class="perk-pin ${pulse ? "perk-pin-pulse" : ""}">
-      <div class="perk-pin-ring"></div>
+    <div class="perk-pin ${pulse ? "perk-pin-pulse" : ""} ${sponsored ? "perk-pin-sponsored" : ""}">
+      <div class="perk-pin-ring" ${sponsored ? 'style="box-shadow:0 0 0 3px #f59e0b, 0 6px 14px rgba(245,158,11,.45)"' : ""}></div>
       <img src="${imgUrl}" referrerpolicy="no-referrer" onerror="this.src='${DEFAULT_BUSINESS_IMAGE}'" />
+      ${sponsored ? '<span style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#f59e0b;color:#451a03;display:grid;place-items:center;font-size:11px;font-weight:900;border:2px solid #fff">★</span>' : ""}
     </div>`;
   return L.divIcon({
     html,
@@ -273,7 +276,7 @@ function MapPage() {
       const L = (await import("leaflet")).default;
       layerRef.current.clearLayers();
       for (const p of offers.data ?? []) {
-        const icon = buildIcon(L, imageForOffer(p));
+        const icon = buildIcon(L, imageForOffer(p), false, !!p.is_sponsored);
         const km = distanceKm(origin, p);
         const desc =
           p.subtitle ||
@@ -289,7 +292,7 @@ function MapPage() {
         const ctaHref = `/marketplace/${p.slug}`;
         const html = `
           <div style="min-width:220px;max-width:260px;font-family:inherit">
-            <div style="font-weight:700;font-size:14px;line-height:1.2">${escapeHtml(p.title)}</div>
+            <div style="font-weight:700;font-size:14px;line-height:1.2">${escapeHtml(p.title)}${p.is_sponsored ? ' <span style="display:inline-block;margin-left:4px;padding:1px 6px;border-radius:999px;background:#f59e0b;color:#451a03;font-size:10px;font-weight:800;letter-spacing:.05em">★ SPONSOR</span>' : ""}</div>
             <div style="font-size:11px;color:#6b7280;margin-top:2px">${escapeHtml(p.name)}</div>
             <div style="margin-top:6px;display:flex;align-items:center;gap:6px;font-size:11px;color:#f59e0b;font-weight:600">
               <span>${fmtDistance(km)}</span>
