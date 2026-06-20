@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter } from "@/components/ui/sheet";
+import { Label } from "@/components/ui/label";
 import { fetchCategories, fetchOffers, fetchUserFavoriteIds, toggleFavorite, type OfferFilter } from "@/lib/marketplace";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
@@ -32,6 +34,11 @@ function MarketplacePage() {
   const [search, setSearch] = useState("");
   const [debounced, setDebounced] = useState("");
   const [category, setCategory] = useState<string | undefined>(undefined);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [minPrice, setMinPrice] = useState<string>("");
+  const [maxPrice, setMaxPrice] = useState<string>("");
+  const [city, setCity] = useState<string>("");
+  const [draft, setDraft] = useState({ minPrice: "", maxPrice: "", city: "" });
 
   useEffect(() => {
     const t = setTimeout(() => setDebounced(search.trim()), 250);
@@ -39,8 +46,15 @@ function MarketplacePage() {
   }, [search]);
 
   const filter: OfferFilter = useMemo(
-    () => ({ tab, search: debounced || undefined, categorySlug: category }),
-    [tab, debounced, category],
+    () => ({
+      tab,
+      search: debounced || undefined,
+      categorySlug: category,
+      minPrice: minPrice ? Number(minPrice) : undefined,
+      maxPrice: maxPrice ? Number(maxPrice) : undefined,
+      city: city || undefined,
+    }),
+    [tab, debounced, category, minPrice, maxPrice, city],
   );
 
   const categoriesQuery = useQuery({ queryKey: ["categories"], queryFn: fetchCategories });
@@ -89,9 +103,70 @@ function MarketplacePage() {
                 className="h-12 rounded-xl pl-10 text-sm shadow-sm"
               />
             </div>
-            <Button variant="outline" className="h-12 rounded-xl shadow-sm">
-              <SlidersHorizontal className="mr-2 h-4 w-4" /> {t("mkt.filters")}
-            </Button>
+            <Sheet
+              open={filterOpen}
+              onOpenChange={(o) => {
+                setFilterOpen(o);
+                if (o) setDraft({ minPrice, maxPrice, city });
+              }}
+            >
+              <SheetTrigger asChild>
+                <Button variant="outline" className="h-12 rounded-xl shadow-sm">
+                  <SlidersHorizontal className="mr-2 h-4 w-4" /> {t("mkt.filters")}
+                  {(minPrice || maxPrice || city) && (
+                    <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">●</span>
+                  )}
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-full sm:max-w-md">
+                <SheetHeader>
+                  <SheetTitle>{t("mkt.filters")}</SheetTitle>
+                </SheetHeader>
+                <div className="mt-6 space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label>Min (ALL)</Label>
+                      <Input type="number" min={0} value={draft.minPrice}
+                        onChange={(e) => setDraft({ ...draft, minPrice: e.target.value })} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Max (ALL)</Label>
+                      <Input type="number" min={0} value={draft.maxPrice}
+                        onChange={(e) => setDraft({ ...draft, maxPrice: e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>{lang === "sq" ? "Qyteti" : "City"}</Label>
+                    <Input value={draft.city} placeholder={lang === "sq" ? "p.sh. Tiranë" : "e.g. Tirana"}
+                      onChange={(e) => setDraft({ ...draft, city: e.target.value })} />
+                  </div>
+                </div>
+                <SheetFooter className="mt-6 flex-row justify-between gap-2 sm:justify-between">
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setDraft({ minPrice: "", maxPrice: "", city: "" });
+                      setMinPrice("");
+                      setMaxPrice("");
+                      setCity("");
+                      setFilterOpen(false);
+                    }}
+                  >
+                    {lang === "sq" ? "Pastro" : "Clear"}
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setMinPrice(draft.minPrice);
+                      setMaxPrice(draft.maxPrice);
+                      setCity(draft.city);
+                      setFilterOpen(false);
+                    }}
+                  >
+                    {lang === "sq" ? "Apliko" : "Apply"}
+                  </Button>
+                </SheetFooter>
+              </SheetContent>
+            </Sheet>
           </div>
 
           {/* Categories */}

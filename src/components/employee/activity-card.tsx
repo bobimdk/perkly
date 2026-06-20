@@ -28,51 +28,45 @@ export function ActivityCard({ tx }: { tx: ActivityTx }) {
 
   return (
     <div className={`overflow-hidden rounded-2xl border ${redeemed ? "border-border bg-muted/30 opacity-80" : "border-border bg-card"}`}>
-      {/* 16:9 ticket face */}
-      <div className="relative w-full" style={{ aspectRatio: "16 / 9" }}>
-        <div className="absolute inset-0 flex">
-          {/* Left: brand + amount */}
-          <div className="flex flex-1 flex-col justify-between bg-gradient-to-br from-primary/10 via-card to-card p-5">
-            <div className="flex items-center gap-3 min-w-0">
-              {tx.providers?.logo_url ? (
-                <img src={tx.providers.logo_url} alt="" className="h-10 w-10 rounded-full object-cover" />
-              ) : (
-                <div className="grid h-10 w-10 place-items-center rounded-full bg-primary/15 text-primary">
-                  <Ticket className="h-5 w-5" />
-                </div>
-              )}
-              <div className="min-w-0">
-                <p className="truncate font-display text-base font-semibold leading-tight">{tx.offers?.title ?? (lang === "sq" ? "Përfitim" : "Benefit")}</p>
-                <p className="truncate text-xs text-muted-foreground">{tx.providers?.name}</p>
+      {/* Stacked on mobile, side-by-side on >=sm */}
+      <div className="flex flex-col sm:flex-row">
+        {/* Brand + amount */}
+        <div className="flex flex-1 flex-col justify-between gap-4 bg-gradient-to-br from-primary/10 via-card to-card p-5">
+          <div className="flex items-center gap-3 min-w-0">
+            {tx.providers?.logo_url ? (
+              <img src={tx.providers.logo_url} alt="" className="h-10 w-10 shrink-0 rounded-full object-cover" />
+            ) : (
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/15 text-primary">
+                <Ticket className="h-5 w-5" />
               </div>
-            </div>
-
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{lang === "sq" ? "Vlera" : "Value"}</p>
-              <p className="font-display text-2xl font-bold">{formatPrice(Number(tx.amount_all))}</p>
-            </div>
-
-            <div>
-              {redeemed ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-success/15 px-2.5 py-1 text-xs font-medium text-success">
-                  <CheckCircle2 className="h-3.5 w-3.5" /> {t("act.redeemed")} {new Date(tx.redeemed_at!).toLocaleDateString(locale)}
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
-                  <MapPin className="h-3.5 w-3.5" /> {t("act.showAtVenue")}
-                </span>
-              )}
+            )}
+            <div className="min-w-0">
+              <p className="truncate font-display text-base font-semibold leading-tight">{tx.offers?.title ?? (lang === "sq" ? "Përfitim" : "Benefit")}</p>
+              <p className="truncate text-xs text-muted-foreground">{tx.providers?.name}</p>
             </div>
           </div>
 
-          {/* Perforation */}
-          <div className="relative w-px bg-border">
-            <div className="absolute -left-2 -top-2 h-4 w-4 rounded-full bg-background" />
-            <div className="absolute -left-2 -bottom-2 h-4 w-4 rounded-full bg-background" />
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{lang === "sq" ? "Vlera" : "Value"}</p>
+            <p className="font-display text-2xl font-bold">{formatPrice(Number(tx.amount_all))}</p>
           </div>
 
-          {/* Right: QR */}
-          <div className="flex aspect-square flex-col items-center justify-center bg-white p-3">
+          <div>
+            {redeemed ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-success/15 px-2.5 py-1 text-xs font-medium text-success">
+                <CheckCircle2 className="h-3.5 w-3.5" /> {t("act.redeemed")} {new Date(tx.redeemed_at!).toLocaleDateString(locale)}
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+                <MapPin className="h-3.5 w-3.5" /> {t("act.showAtVenue")}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* QR code panel */}
+        <div className="flex w-full shrink-0 items-center justify-center border-t border-dashed border-border bg-white p-4 sm:w-44 sm:border-l sm:border-t-0">
+          <div className="aspect-square w-40 max-w-full">
             {qr ? (
               <img src={qr} alt="Redemption QR" className="h-full w-full object-contain" />
             ) : (

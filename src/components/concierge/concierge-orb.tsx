@@ -6,9 +6,10 @@ import { MessageCircle, X, Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/lib/auth-context";
+import { useI18n } from "@/lib/i18n";
 import { progressQuest } from "@/lib/gamification";
 
-const SEEDS: UIMessage[] = [
+const SEEDS_EN: UIMessage[] = [
   {
     id: "seed-1",
     role: "assistant",
@@ -21,17 +22,34 @@ const SEEDS: UIMessage[] = [
   } as UIMessage,
 ];
 
+const SEEDS_SQ: UIMessage[] = [
+  {
+    id: "seed-1",
+    role: "assistant",
+    parts: [
+      {
+        type: "text",
+        text: "👋 Përshëndetje! Unë jam **Perkly Concierge**. Më thuaj çfarë dëshiron këtë muaj dhe do të ndërtoj paketën e përsosur të përfitimeve.\n\nProvo: *\"Dua të nis palestër dhe një udhëtim fundjave — buxhet 20,000 ALL\"*",
+      },
+    ],
+  } as UIMessage,
+];
+
 export function ConciergeOrb() {
   const [open, setOpen] = useState(false);
   const { user } = useAuth();
+  const { lang, currency } = useI18n();
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const { messages, sendMessage, status, error } = useChat({
-    id: user?.id ?? "anon",
-    messages: SEEDS,
-    transport: new DefaultChatTransport({ api: "/api/concierge" }),
+    id: `${user?.id ?? "anon"}-${lang}-${currency}`,
+    messages: lang === "sq" ? SEEDS_SQ : SEEDS_EN,
+    transport: new DefaultChatTransport({
+      api: "/api/concierge",
+      body: { lang, currency },
+    }),
   });
 
   const isLoading = status === "submitted" || status === "streaming";

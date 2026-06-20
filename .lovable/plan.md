@@ -1,70 +1,58 @@
+# Bug Fix Plan
 
-This is a large 9-part request. Below is what I'll do, grouped so it's reviewable.
+This is a batch of focused fixes. I'll group them by area and ship them together. No database schema changes are needed — the existing `gifts.amount_all` and `employee_budgets.used_all` columns already cover the gift flow (the bug is a client field-name mismatch, not a missing column).
 
-## 1. Albanian-only Employer & Provider dashboards
-- Rewrite `src/routes/_authenticated/employer.tsx` and `src/routes/_authenticated/provider.tsx` so every visible string (headings, labels, buttons, placeholders, statuses, table headers, toasts, empty states, form fields) is in Albanian.
-- Do **not** wire them through `useI18n()` — per the request these two views become Albanian-only regardless of the language switch in the navbar. The marketing site and Employee dashboard keep the existing SQ/EN toggle.
+## Provider dashboard (`src/routes/_authenticated/provider.tsx`)
 
-## 2. Click-anywhere-to-dismiss toasts
-- Configure the global `<Toaster />` (Sonner) in `src/routes/__root.tsx` with `closeButton={false}` and `toastOptions={{ onClick: (t) => sonnerToast.dismiss(t.id) }}` plus `style={{ cursor: 'pointer' }}`. One change covers every toast in the app.
+1. **Stale business info when switching providers** — the "Edit business" and "New offer" dialogs read from a `useState` initialized once. Switch them to re-sync via `useEffect` whenever the selected provider id changes (and reset on dialog open).
+2. **"All" offers tab incomplete** — `fetchProviderOffers` only filters by `provider_id`, but the UI tab filter currently excludes drafts/pending. Make the "All" tab show every status; keep other tabs filtered.
+3. **English version missing** — the dashboard is hard-coded Albanian. Re-wire labels through `useI18n()` with `sq`/`en` entries in `src/lib/i18n.tsx` so the language switch works.
+4. **Providers shouldn't browse/buy/favourite** — hide the Marketplace / Map / Circles / Drops nav entries and the favourite hearts when the signed-in user has only the `provider` role. Done in `dashboard-shell.tsx` + `favorite-toggle.tsx` (return null for providers).
 
-## 3. Provider dashboard improvements
-**Prefill new offer from business profile** — In `provider.tsx`, when the "New offer" dialog opens, initialise its form state from the loaded `providers` row (name → offer title prefix, description, contact, city, address). Provider can still edit each field.
+## Employer dashboard (`src/routes/_authenticated/employer.tsx`)
 
-**"Analiza e Biznesit" section** — New section under the offers list:
-- Query 1: `favorites` joined to `offers` filtered to this provider's offers → count per offer.
-- Query 2: `transactions` filtered to this provider → count per offer (engagement).
-- Render top offers with a simple horizontal bar chart (CSS bars sized by % of max) and a list with counts. All labels Albanian.
+5. **Employers shouldn't buy/favourite** — same role-gated hiding as providers (employers keep Marketplace read access for browsing the catalog if needed, but no purchase/favourite buttons). Hide `FavoriteToggle` + any "Buy"/"Add to package" CTAs when role is `employer`.
 
-## 4. Real interactive map picker for provider address
-- Replace the current "Locate from address" text-only flow with a Leaflet picker (Leaflet is already in the project for `/map`).
-- New component `src/components/provider/location-picker.tsx`: opens a `<Dialog>` containing a Leaflet map centred on the provider's current coords or Piramida e Tiranës. Click anywhere → drop a draggable marker. Reverse-geocode via Nominatim (`https://nominatim.openstreetmap.org/reverse`) to populate the address text. "Konfirmo vendndodhjen" saves `{lat, lng, address}` back to the provider form.
+## Employee dashboard (`src/routes/_authenticated/employee.tsx`)
 
-## 5. Employer → Employee invite flow (full path)
-Schema work (single migration):
-- New table `public.company_invites(id, company_id, employer_id, email, employee_id nullable, status 'pending'|'accepted'|'rejected'|'cancelled', created_at, decided_at)` with grants + RLS.
-- RLS: employer can insert/select/update their own invites; the invited user (matched by `auth.email() = email` or `employee_id = auth.uid()`) can select + update their pending ones.
-- Trigger on insert → write a `notifications` row to the invited employee (lookup by email in `profiles`).
-- SECURITY DEFINER function `public.accept_company_invite(_invite_id)`:
-  - asserts invite is pending and the caller is the matching user,
-  - sets `status='accepted'`, `decided_at=now()`, `employee_id=auth.uid()`,
-  - upserts `company_employees(company_id, user_id, status='active')`,
-  - notifies the employer.
-- Mirror `reject_company_invite(_invite_id)`.
+6. **QR code crushed** — `activity-card.tsx` forces the QR into a fixed 16:9 with `aspect-square` on a flex child, which squashes on narrow screens. Switch to a stacked layout on mobile (`flex-col sm:flex-row`) and give the QR a fixed max width.
+7. **Gift dialog — first digit can't be deleted** — `gift-dialog.tsx` uses `Number(value) || 0` which forces `0` back. Store the raw string and only parse on submit; allow empty input.
+8. **Gift flow — `used_amount` column doesn't exist** — `send_gift` RPC writes to `employee_budgets.used_amount`, but the column is `used_all`. Update the client to call the RPC (server-side is already correct via `submit_benefit_request`), or fix the direct client insert to use `used_all`. I'll switch the gift call to the `send_gift` RPC and update the RPC in a single migration to use `used_all`.
 
-App work:
-- Employer dashboard: "Invite" form posts into `company_invites` (replaces whatever direct insert exists). Show pending/accepted/rejected list, refreshed via realtime.
-- Employee dashboard: new "Ftesa" card listing pending invites with Accept / Reject buttons calling the RPCs.
-- Enable Realtime on `company_invites`, `company_employees`, `notifications`.
+> Schema note: this is the ONE migration needed — `CREATE OR REPLACE FUNCTION public.send_gift` with `used_all` instead of `used_amount`. No new tables.
 
-## 6. Real-time pending status
-- Where the employer renders the invite/request lists, add a `useEffect` subscribing to `postgres_changes` on `company_invites` (and existing `benefit_requests`) filtered to this company, calling `queryClient.invalidateQueries` on any change. Same on the employee side.
-- After any accept/reject mutation, also call `invalidateQueries` immediately so the label flips before the realtime echo arrives.
+## Marketing / landing (`src/components/marketing/*`, `perkly-hero.tsx`)
 
-## 7. Notifications bell popover
-- Replace the current bell button (in `dashboard-shell.tsx` or wherever it lives) with a shadcn `<Popover>` containing a scrollable list.
-- Query `notifications` for the current user, newest first; subscribe to realtime inserts.
-- Each row: title, type badge, body, relative timestamp, click to mark read + (if href) navigate.
-- Empty state inside the popup: **"Nuk keni njoftime."**
+9. **Footer links dead** — replace `href="#"` placeholders with real route links (`/marketplace`, `/circles`, `/drops`, `/map`, `/auth`, `/#how`). Group: Company → About/Contact (anchor to `/#how`), Product → marketplace/circles/drops/map, Legal → stub `/legal/privacy` etc. with simple pages OR scroll-to-section.
+10. **"Get started free" / "Book a demo" buttons dead** — wire them to `/auth` and `/#how` (or a `mailto:` for demo) in `perkly-hero.tsx`.
+11. **Hero stacks badly on mobile** — apply the responsive-layout pattern: grid wrappers, `min-w-0`, smaller padding (`px-5 py-12 sm:px-9 sm:py-[92px]`), reduce hero `min-height` on mobile, stack CTA column.
+12. **Mobile nav has no links** — `marketing-shell.tsx` hides nav at `<md`. Add a hamburger `Sheet` with the same links + auth buttons.
 
-## 8. Remove-employee dialog wording
-- In employer dashboard, the confirm dialog currently interpolates `window.location.origin` or similar. Replace with: **`A jeni i sigurt që dëshironi të hiqni ${employee.full_name} nga biznesi juaj?`** using the row's stored name (fallback to email).
+## Map (`src/routes/map.tsx`)
 
-## 9. Favourites system end-to-end
-- `favorites` table already exists. Add `getFavorites`, `addFavorite(offerId)`, `removeFavorite(offerId)` helpers in `src/lib/marketplace.ts`.
-- New `src/components/marketplace/favorite-toggle.tsx`: heart icon that toggles via the helpers; works for both signed-in (writes) and signed-out (prompts sign-in).
-- Add it to every offer card (`offer-card.tsx`) and the offer detail page (`marketplace.$slug.tsx`) and any provider tile that represents a bookable service.
-- Employee dashboard: new **"Të preferuarat"** section listing favourited offers in cards (name, provider business name, short description, "Hiq nga të preferuarat" button). Empty state: **"Nuk keni asnjë të preferuar ende."**
+13. **Map not responsive** — the Leaflet container + business list use a fixed 2-column grid. Switch to `grid-cols-1 lg:grid-cols-[1fr_360px]`, make the map container `h-[50vh] lg:h-[calc(100vh-12rem)]`, and let business cards stack.
 
-## Technical notes (for the curious)
-- All migrations grouped into one approval step. RLS is mandatory on every new table; policies scope to `auth.uid()` and the matching email.
-- Realtime: `ALTER PUBLICATION supabase_realtime ADD TABLE` for `company_invites`, `company_employees`, `notifications` in the same migration. Subscriptions live inside `useEffect` with cleanup, per the realtime guideline.
-- No new secrets needed; Nominatim is keyless.
-- Toast click-dismiss is a single root-level config change, not per-call.
-- I will **not** touch `client.ts`, `types.ts`, or other auto-generated files.
+## Offers / Marketplace
 
-## Order of execution
-1. Run the schema migration (invites + RPCs + realtime publication) — needs your approval before anything else.
-2. After it's applied, ship the app code changes in one batch: Albanian rewrites, toast config, provider map + analytics + prefill, employer invite flow + real-time + remove-dialog fix, employee invites + favourites, notification bell popover, favourite toggles in marketplace.
+14. **Filter button doesn't work** — in `marketplace.index.tsx` the filter trigger opens a sheet but state isn't wired to the query. Connect the form state through `useNavigate` search params and re-fetch.
 
-Reply **approve** to run the migration and proceed, or tell me what to adjust (scope cuts, additional fields, English fallback for any string, etc.).
+## AI Concierge (`src/routes/api/concierge.ts` + `concierge-orb.tsx`)
+
+15. **AI doesn't show EUR / doesn't speak Albanian** — extend the system prompt to: (a) detect user language from i18n (`lang` passed in request body) and reply in Albanian when `lang === 'sq'`; (b) always quote prices as `X ALL (~Y EUR)` using the FX rate from `fx_rates` table (pass current rate in request body).
+
+---
+
+## Order of operations
+
+1. Run the `send_gift` migration (separate approval step).
+2. Once approved, ship all client/code changes in one batch:
+   - i18n keys for provider dashboard
+   - `provider.tsx`, `employer.tsx`, `employee.tsx`, `activity-card.tsx`, `gift-dialog.tsx`
+   - `dashboard-shell.tsx`, `favorite-toggle.tsx` (role gating)
+   - `marketing-shell.tsx` (hamburger + working footer)
+   - `perkly-hero.tsx` (responsive + button links)
+   - `map.tsx` (responsive grid)
+   - `marketplace.index.tsx` (filter wiring)
+   - `concierge.ts` (system prompt: SQ + EUR conversion)
+
+Shall I proceed?

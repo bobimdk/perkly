@@ -14,7 +14,7 @@ export function GiftDialog() {
   const [email, setEmail] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [selected, setSelected] = useState<any | null>(null);
-  const [amount, setAmount] = useState(1000);
+  const [amount, setAmount] = useState<string>("1000");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -25,10 +25,15 @@ export function GiftDialog() {
   };
   const send = async () => {
     if (!selected) return;
+    const amt = Number(amount);
+    if (!amt || amt <= 0) {
+      toast.error("Shtoni një shumë të vlefshme");
+      return;
+    }
     setLoading(true);
     try {
-      await sendGift(selected.id, amount, message);
-      toast.success(`Sent ${formatPrice(amount)} to ${selected.first_name ?? selected.email}!`);
+      await sendGift(selected.id, amt, message);
+      toast.success(`Sent ${formatPrice(amt)} to ${selected.first_name ?? selected.email}!`);
       setOpen(false);
       setSelected(null);
       setMessage("");
@@ -83,8 +88,8 @@ export function GiftDialog() {
               </div>
               <div>
                 <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Amount (ALL)</label>
-                <Input type="number" min={100} step={100} value={amount} onChange={(e) => setAmount(Number(e.target.value))} />
-                <p className="mt-1 text-xs text-muted-foreground">{formatPrice(amount)} will move from your budget to theirs.</p>
+                <Input type="number" min={100} step={100} value={amount} onChange={(e) => setAmount(e.target.value)} />
+                <p className="mt-1 text-xs text-muted-foreground">{formatPrice(Number(amount) || 0)} will move from your budget to theirs.</p>
               </div>
               <div>
                 <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Message</label>
@@ -92,7 +97,7 @@ export function GiftDialog() {
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="ghost" onClick={() => setSelected(null)}>Back</Button>
-                <Button onClick={send} disabled={loading || amount <= 0}>
+                <Button onClick={send} disabled={loading || !amount || Number(amount) <= 0}>
                   {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Gift className="mr-2 h-4 w-4" />}
                   Send gift
                 </Button>

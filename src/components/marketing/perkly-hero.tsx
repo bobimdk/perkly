@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
+import { Link } from "@tanstack/react-router";
 
 const FONT_STACK = "'Hanken Grotesk', system-ui, sans-serif";
 
@@ -26,14 +27,18 @@ const CARDS: Card[] = [
 function MagneticButton({
   children,
   primary,
+  to,
+  href,
   style,
 }: {
   children: React.ReactNode;
   primary?: boolean;
+  to?: string;
+  href?: string;
   style?: CSSProperties;
 }) {
-  const ref = useRef<HTMLButtonElement>(null);
-  const onMove = (e: MouseEvent<HTMLButtonElement>) => {
+  const ref = useRef<HTMLAnchorElement>(null);
+  const onMove = (e: MouseEvent<HTMLAnchorElement>) => {
     const el = ref.current;
     if (!el) return;
     const r = el.getBoundingClientRect();
@@ -51,6 +56,8 @@ function MagneticButton({
     cursor: "pointer",
     transition: "transform .25s cubic-bezier(.2,.7,.2,1)",
     fontFamily: FONT_STACK,
+    display: "inline-block",
+    textDecoration: "none",
   };
   const variant: CSSProperties = primary
     ? {
@@ -66,10 +73,18 @@ function MagneticButton({
         padding: "16px 26px",
         border: "1px solid #e8d4a4",
       };
+  const merged = { ...base, ...variant, ...style };
+  if (to) {
+    return (
+      <Link ref={ref as any} to={to} onMouseMove={onMove as any} onMouseLeave={onLeave} style={merged}>
+        {children}
+      </Link>
+    );
+  }
   return (
-    <button ref={ref} onMouseMove={onMove} onMouseLeave={onLeave} style={{ ...base, ...variant, ...style }}>
+    <a ref={ref} href={href ?? "#"} onMouseMove={onMove} onMouseLeave={onLeave} style={merged}>
       {children}
-    </button>
+    </a>
   );
 }
 
@@ -116,16 +131,23 @@ export function PerklyHero() {
 
   return (
     <section
+      className="perkly-hero"
       style={{
         position: "relative",
         overflow: "hidden",
-        padding: "92px 36px 76px",
-        minHeight: 580,
         background: "#ffffff",
         fontFamily: FONT_STACK,
       }}
     >
       <style>{`
+        .perkly-hero { padding: 56px 20px 56px; min-height: 520px; }
+        .perkly-hero h1.perkly-h1 { font-size: 42px !important; }
+        .perkly-hero .perkly-card-a, .perkly-hero .perkly-card-b { display: none; }
+        @media (min-width: 768px) {
+          .perkly-hero { padding: 92px 36px 76px; min-height: 580px; }
+          .perkly-hero h1.perkly-h1 { font-size: 82px !important; }
+          .perkly-hero .perkly-card-a, .perkly-hero .perkly-card-b { display: block; }
+        }
         @keyframes flyLR {
           0%   { opacity: 0; transform: translate(-50%,-50%) translate3d(-740px,0,-820px); }
           13%  { opacity: 1; }
@@ -244,6 +266,7 @@ export function PerklyHero() {
           </div>
 
           <h1
+            className="perkly-h1"
             style={{
               ...revealStyle(80),
               fontWeight: 800,
@@ -260,7 +283,7 @@ export function PerklyHero() {
           <p
             style={{
               ...revealStyle(160),
-              fontSize: 20,
+              fontSize: 18,
               lineHeight: 1.55,
               color: "#5c4d2c",
               maxWidth: 500,
@@ -271,14 +294,15 @@ export function PerklyHero() {
           </p>
 
           <div style={{ ...revealStyle(240), display: "flex", gap: 13, marginTop: 32, flexWrap: "wrap" }}>
-            <MagneticButton primary>Get started free</MagneticButton>
-            <MagneticButton>Book a demo</MagneticButton>
+            <MagneticButton primary to="/auth">Get started free</MagneticButton>
+            <MagneticButton href="mailto:hello@perkly.al?subject=Perkly%20demo">Book a demo</MagneticButton>
           </div>
         </div>
       </div>
 
       {/* Card A */}
       <div
+        className="perkly-card-a"
         style={{
           position: "absolute",
           top: 90,
@@ -314,6 +338,7 @@ export function PerklyHero() {
 
       {/* Card B */}
       <div
+        className="perkly-card-b"
         style={{
           position: "absolute",
           top: 300,
