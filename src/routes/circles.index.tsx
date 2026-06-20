@@ -91,7 +91,7 @@ function CircleCard({ c, index }: { c: Circle; index: number }) {
           +<CountUp target={c.members} run={inView} />
         </span>
       </div>
-      <button type="button" className="bc-join" onClick={(e) => e.preventDefault()}>
+      <button type="button" className="bc-join">
         Join
       </button>
     </Link>
