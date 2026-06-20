@@ -91,8 +91,11 @@ export async function fetchOffers(filter: OfferFilter = {}): Promise<OfferRow[]>
   if (filter.categorySlug) {
     rows = rows.filter((r) => r.categories?.slug === filter.categorySlug);
   }
-  // Pin sponsored providers to the top
-  rows.sort((a, b) => Number(b.providers?.is_sponsored ?? 0) - Number(a.providers?.is_sponsored ?? 0));
+  // Pin currently-active sponsored providers to the top
+  const now = Date.now();
+  const isActiveSponsor = (r: OfferRow) =>
+    !!r.providers?.is_sponsored && (!r.providers?.sponsored_until || new Date(r.providers.sponsored_until).getTime() > now);
+  rows.sort((a, b) => Number(isActiveSponsor(b)) - Number(isActiveSponsor(a)));
   return rows;
 }
 
