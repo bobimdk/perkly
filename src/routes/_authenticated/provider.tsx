@@ -264,6 +264,42 @@ function StatCard({ label, value }: { label: string; value: number | string }) {
   );
 }
 
+function PromoteCard({ provider }: { provider: ProviderRow }) {
+  const sponsored = (provider as any).is_sponsored as boolean | undefined;
+  return (
+    <div className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100/40 p-5 dark:border-amber-900/40 dark:from-amber-950/40 dark:to-transparent">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-amber-700 dark:text-amber-400">
+            Promovim
+          </p>
+          <h3 className="mt-1 font-display text-lg font-bold">Bëje biznesin tënd sponsor ⭐</h3>
+          <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+            Bizneset sponsor shfaqen me një ikonë të veçantë në treg dhe në hartë, dhe ngrihen në krye të rekomandimeve.
+          </p>
+        </div>
+        {sponsored ? (
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-3 py-1 text-xs font-semibold text-amber-950">
+            <Star className="h-3.5 w-3.5 fill-current" /> Aktiv
+          </span>
+        ) : null}
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {sponsored ? (
+          <Button variant="outline" size="sm" disabled>Promovimi është aktiv</Button>
+        ) : (
+          <Button
+            size="sm"
+            onClick={() => toast.success("Kërkesa juaj për promovim u dërgua. Stafi ynë do t'ju kontaktojë së shpejti.")}
+          >
+            Kërko promovim
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function BusinessProfileEditor({ provider, onSaved }: { provider: ProviderRow; onSaved: () => void }) {
   const [name, setName] = useState(provider.name);
   const [tagline, setTagline] = useState(provider.tagline ?? "");
