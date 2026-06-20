@@ -212,7 +212,7 @@ function ProviderDetail({ provider }: { provider: ProviderRow }) {
 
       <BusinessProfileEditor provider={provider} onSaved={() => qc.invalidateQueries({ queryKey: ["my-providers"] })} />
 
-      <PromoteCard provider={provider} />
+      <PromoteCard provider={provider} onUpdated={() => qc.invalidateQueries({ queryKey: ["my-providers"] })} />
 
       <LocationEditor provider={provider} onSaved={() => qc.invalidateQueries({ queryKey: ["my-providers"] })} />
 
