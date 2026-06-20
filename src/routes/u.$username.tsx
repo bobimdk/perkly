@@ -214,7 +214,9 @@ function ProfilePage() {
 
                 <div className="mt-4 flex flex-wrap gap-2">
                   {isOwn ? (
-                    <Button variant="outline" size="sm" disabled className="rounded-full">Your profile</Button>
+                    <Button asChild variant="outline" size="sm" className="rounded-full">
+                      <Link to="/settings/profile"><Pencil className="mr-2 h-4 w-4" /> Edit profile</Link>
+                    </Button>
                   ) : !user ? (
                     <Button asChild size="sm" className="rounded-full"><Link to="/auth">Sign in to connect</Link></Button>
                   ) : status === "none" ? (
