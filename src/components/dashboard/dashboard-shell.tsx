@@ -2,7 +2,8 @@ import type { ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
 import { useI18n } from "@/lib/i18n";
-import { Gift, LogOut, Users } from "lucide-react";
+import { LogOut, Users } from "lucide-react";
+import { BrandLogo } from "@/components/ui/brand-logo";
 import { NotificationsBell } from "@/components/dashboard/notifications-bell";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,9 +35,7 @@ export function DashboardShell({
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           <Link to="/" className="flex items-center gap-2">
-            <span className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-primary to-primary-glow text-primary-foreground">
-              <Gift className="h-5 w-5" />
-            </span>
+            <BrandLogo className="h-9 w-9" />
             <span className="font-display text-lg font-bold">Perkly</span>
             <span className="ml-2 hidden rounded-full bg-muted px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground sm:inline">
               {roles[0] ?? "guest"}
