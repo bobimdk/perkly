@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Gift, ArrowLeft, Briefcase, User, Store, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Briefcase, User, Store, ShieldCheck } from "lucide-react";
+import { BrandLogo } from "@/components/ui/brand-logo";
 import { toast } from "sonner";
 import { signUpConfirmed } from "@/lib/signup.functions";
 
