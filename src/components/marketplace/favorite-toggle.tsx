@@ -15,9 +15,12 @@ export function FavoriteToggle({
   className?: string;
   size?: number;
 }) {
-  const { user } = useAuth();
+  const { user, roles } = useAuth();
   const [isFav, setIsFav] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
+
+  // Only employees may favourite. Providers and employers should not see hearts.
+  if (roles.length > 0 && !roles.includes("employee")) return null;
 
   useEffect(() => {
     if (!user) {
