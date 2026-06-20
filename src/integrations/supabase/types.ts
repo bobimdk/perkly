@@ -353,24 +353,33 @@ export type Database = {
       }
       circle_messages: {
         Row: {
-          body: string
+          audio_url: string | null
+          body: string | null
           circle_id: string
           created_at: string
+          duration_ms: number | null
           id: string
+          kind: string
           user_id: string
         }
         Insert: {
-          body: string
+          audio_url?: string | null
+          body?: string | null
           circle_id: string
           created_at?: string
+          duration_ms?: number | null
           id?: string
+          kind?: string
           user_id: string
         }
         Update: {
-          body?: string
+          audio_url?: string | null
+          body?: string | null
           circle_id?: string
           created_at?: string
+          duration_ms?: number | null
           id?: string
+          kind?: string
           user_id?: string
         }
         Relationships: [
