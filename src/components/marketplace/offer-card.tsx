@@ -38,8 +38,8 @@ export function OfferCard({
         ) : null}
         <div className="absolute left-3 top-3 flex flex-wrap gap-1">
           {offer.providers?.is_sponsored ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-950 shadow">
-              <Star className="h-3 w-3 fill-current" /> Sponsored
+            <span className={`inline-flex items-center gap-1 rounded-full bg-amber-400 px-2 py-0.5 font-semibold uppercase tracking-wider text-amber-950 shadow ${highlighted ? "text-[11px]" : "text-[10px]"}`}>
+              <Sparkles className={`h-3 w-3 fill-current ${highlighted ? "h-3.5 w-3.5" : ""}`} /> {highlighted ? "Sponsored" : "Sponsored"}
             </span>
           ) : null}
           {offer.is_limited_time ? (
