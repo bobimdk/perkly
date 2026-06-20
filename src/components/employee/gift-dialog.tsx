@@ -14,7 +14,7 @@ export function GiftDialog() {
   const [email, setEmail] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [selected, setSelected] = useState<any | null>(null);
-  const [amount, setAmount] = useState(1000);
+  const [amount, setAmount] = useState<string>("1000");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
