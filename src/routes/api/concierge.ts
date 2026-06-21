@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { resolveChatModel } from "@/lib/gemini.server";
 
 const FX_ALL_PER_EUR = 100;
 
@@ -51,16 +51,12 @@ export const Route = createFileRoute("/api/concierge")({
         if (!body || !Array.isArray(body.messages)) {
           return new Response("Messages are required", { status: 400 });
         }
-        const key = process.env.LOVABLE_API_KEY;
-        if (!key) return new Response("Missing LOVABLE_API_KEY", { status: 500 });
-
         const lang = body.lang === "sq" ? "sq" : "en";
         const currency = body.currency === "EUR" ? "EUR" : "ALL";
 
         try {
-          const gateway = createLovableAiGatewayProvider(key);
           const result = streamText({
-            model: gateway("google/gemini-3-flash-preview"),
+            model: resolveChatModel(),
             system: buildSystemPrompt(lang, currency),
             messages: await convertToModelMessages(body.messages),
           });

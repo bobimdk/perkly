@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { generateText } from "ai";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { resolveChatModel } from "@/lib/gemini.server";
 
 const LANG_NAMES: Record<string, string> = {
   sq: "Albanian (shqip)",
@@ -40,13 +40,11 @@ export const translateBatch = createServerFn({ method: "POST" })
 
     if (todo.length === 0) return { translations: result };
 
-    const apiKey = process.env.LOVABLE_API_KEY;
-    if (!apiKey) {
+    if (!process.env.GEMINI_API_KEY && !process.env.LOVABLE_API_KEY) {
       for (const t of todo) result[t] = t;
       return { translations: result };
     }
 
-    const provider = createLovableAiGatewayProvider(apiKey);
     const langName = LANG_NAMES[lang] ?? lang;
 
     const numbered = todo.map((t, i) => `${i + 1}. ${JSON.stringify(t)}`).join("\n");
@@ -64,7 +62,7 @@ export const translateBatch = createServerFn({ method: "POST" })
 
     try {
       const { text } = await generateText({
-        model: provider("google/gemini-2.5-flash"),
+        model: resolveChatModel(),
         system,
         prompt: user,
         temperature: 0,

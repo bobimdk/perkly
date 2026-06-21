@@ -1,9 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Crosshair, MapPin, Navigation } from "lucide-react";
-import { MarketingNav, MarketingFooter } from "@/components/marketing/marketing-shell";
-import { Button } from "@/components/ui/button";
 import { fetchCheckIns } from "@/lib/phase5";
 import { imageFor, CATEGORY_IMAGE, DEFAULT_BUSINESS_IMAGE } from "@/lib/category-images";
 import { useI18n } from "@/lib/i18n";
@@ -86,7 +83,7 @@ async function fetchOfferPins(): Promise<OfferPin[]> {
     .filter((x): x is OfferPin => x !== null);
 }
 
-function fmtDistance(km: number) {
+function fmtMeters(km: number) {
   return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
 }
 
@@ -110,53 +107,60 @@ function distanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: numb
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 
-function buildIcon(L: any, imgUrl: string, pulse = false, sponsored = false) {
-  const html = `
-    <div class="perk-pin ${pulse ? "perk-pin-pulse" : ""} ${sponsored ? "perk-pin-sponsored" : ""}">
-      <div class="perk-pin-ring" ${sponsored ? 'style="box-shadow:0 0 0 3px #f59e0b, 0 6px 14px rgba(245,158,11,.45)"' : ""}></div>
-      <img src="${imgUrl}" referrerpolicy="no-referrer" onerror="this.src='${DEFAULT_BUSINESS_IMAGE}'" />
-      ${sponsored ? '<span style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#f59e0b;color:#451a03;display:grid;place-items:center;font-size:11px;font-weight:900;border:2px solid #fff">★</span>' : ""}
-    </div>`;
+function imageForOffer(p: OfferPin) {
+  return (
+    p.cover_url ||
+    p.logo_url ||
+    (p.category_slug ? CATEGORY_IMAGE[p.category_slug] : undefined) ||
+    DEFAULT_BUSINESS_IMAGE
+  );
+}
+
+// Pretty label for a category slug (Pulse filter chips)
+function catLabel(slug: string) {
+  const map: Record<string, string> = { health: "Healthcare" };
+  const v = map[slug] ?? slug;
+  return v.charAt(0).toUpperCase() + v.slice(1);
+}
+
+// Amber photo-pin / featured-pin marker, matching the Pulse mockup
+function buildPulseIcon(L: any, imgUrl: string, featured = false) {
+  const html = featured
+    ? `<div class="pk-feat"><div class="pk-feat-inner" style="background-image:url('${imgUrl}')"></div><span class="pk-star">★</span></div>`
+    : `<div class="pk-pin"><div class="pk-pin-img" style="background-image:url('${imgUrl}')"></div></div>`;
+  const size = featured ? 54 : 40;
   return L.divIcon({
     html,
-    className: "perk-pin-wrap",
-    iconSize: [48, 48],
-    iconAnchor: [24, 24],
+    className: "pk-divicon",
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+    popupAnchor: [0, -size / 2],
   });
 }
 
-function buildUserIcon(L: any) {
-  return L.divIcon({
-    html: `<div class="perk-user-pin"><div class="perk-user-dot"></div><div class="perk-user-ring"></div></div>`,
-    className: "perk-pin-wrap",
-    iconSize: [28, 28],
-    iconAnchor: [14, 14],
-  });
-}
-
-function imageForOffer(p: OfferPin) {
-  return p.cover_url
-    || p.logo_url
-    || (p.category_slug ? CATEGORY_IMAGE[p.category_slug] : undefined)
-    || DEFAULT_BUSINESS_IMAGE;
-}
+const PULSE_STYLE_ID = "pulse-map-css";
+const PULSE_FONTS_ID = "pulse-fonts";
 
 function MapPage() {
   const { t } = useI18n();
-  useEffect(() => { document.title = `${t("map.title")} · Perkly`; }, [t]);
+
   const checkins = useQuery({ queryKey: ["checkins"], queryFn: () => fetchCheckIns(500) });
   const offers = useQuery({ queryKey: ["map-offer-pins"], queryFn: fetchOfferPins });
 
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(false);
   const [mapReady, setMapReady] = useState(false);
+  const [filter, setFilter] = useState("All");
+  const [query, setQuery] = useState("");
 
   const mapEl = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const layerRef = useRef<any>(null);
   const userMarkerRef = useRef<any>(null);
+  // marker handles keyed by offer id, for filter/search show-hide
+  const markerMap = useRef<Map<string, any>>(new Map());
 
-  // Load Leaflet CSS + custom pin styles
+  // Inject Pulse fonts + styles once
   useEffect(() => {
     if (typeof document === "undefined") return;
     if (!document.getElementById("leaflet-css")) {
@@ -166,61 +170,70 @@ function MapPage() {
       link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
       document.head.appendChild(link);
     }
-    if (!document.getElementById("perk-pin-css")) {
+    if (!document.getElementById(PULSE_FONTS_ID)) {
+      const f = document.createElement("link");
+      f.id = PULSE_FONTS_ID;
+      f.rel = "stylesheet";
+      f.href =
+        "https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600&family=Hanken+Grotesk:wght@400;500;600;700&display=swap";
+      document.head.appendChild(f);
+    }
+    if (!document.getElementById(PULSE_STYLE_ID)) {
       const style = document.createElement("style");
-      style.id = "perk-pin-css";
-      style.innerHTML = `
-        .perk-pin-wrap { background: transparent !important; border: 0 !important; }
-        .perk-pin { position: relative; width: 48px; height: 48px; }
-        .perk-pin img {
-          position: absolute; inset: 6px; width: 36px; height: 36px;
-          border-radius: 9999px; object-fit: cover;
-          border: 2px solid #fff; box-shadow: 0 4px 14px rgba(245,158,11,.45);
-          background: #fff;
-        }
-        .perk-pin-ring {
-          position: absolute; inset: 0; border-radius: 9999px;
-          background: radial-gradient(circle, rgba(245,158,11,.55) 0%, rgba(245,158,11,0) 70%);
-        }
-        .perk-pin-pulse .perk-pin-ring {
-          animation: perk-pulse 1.4s ease-out infinite;
-          background: radial-gradient(circle, rgba(239,68,68,.7) 0%, rgba(239,68,68,0) 70%);
-        }
-        @keyframes perk-pulse {
-          0%   { transform: scale(0.6); opacity: 1; }
-          100% { transform: scale(1.8); opacity: 0; }
-        }
-        .perk-user-pin { position: relative; width: 28px; height: 28px; }
-        .perk-user-dot {
-          position: absolute; inset: 8px; width: 12px; height: 12px;
-          background: #2563eb; border: 2px solid #fff; border-radius: 9999px;
-          box-shadow: 0 2px 8px rgba(37,99,235,.6);
-        }
-        .perk-user-ring {
-          position: absolute; inset: 0; border-radius: 9999px;
-          background: radial-gradient(circle, rgba(37,99,235,.4) 0%, rgba(37,99,235,0) 70%);
-          animation: perk-pulse 2s ease-out infinite;
-        }
+      style.id = PULSE_STYLE_ID;
+      style.textContent = `
+        @keyframes pkShimmer{0%{background-position:-450px 0;}100%{background-position:450px 0;}}
+        @keyframes pkPing{0%{transform:scale(.4);opacity:.8;}80%{opacity:0;}100%{transform:scale(2.4);opacity:0;}}
+        @keyframes pkDrop{0%{opacity:0;transform:translateY(-26px) scale(.4);}60%{opacity:1;}100%{opacity:1;transform:translateY(0) scale(1);}}
+        @keyframes pkInUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+        .pulse-scope ::selection{background:#f0b450;color:#3a2708;}
+        .pk-scroll::-webkit-scrollbar{width:7px;}
+        .pk-scroll::-webkit-scrollbar-thumb{background:#e0cfa8;border-radius:8px;}
+        .pk-scroll::-webkit-scrollbar-track{background:transparent;}
+        .pk-li{transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s,border-color .3s,background .3s;}
+        .pk-li:hover{transform:translateX(4px);border-color:#e9c98a;box-shadow:0 12px 26px rgba(120,70,10,.12);background:#fffdf8;}
+        .pk-li:hover .pk-go{opacity:1;transform:translateX(0);}
+        .pk-go{opacity:0;transform:translateX(-6px);transition:opacity .3s,transform .3s;}
+        .pk-btn{transition:transform .2s,box-shadow .3s,background .25s;}
+        .pk-btn:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(217,119,6,.3);}
+        .pk-chip{transition:all .2s;cursor:pointer;}
+        .pk-chip:hover{border-color:#e9c98a;color:#a85d06;}
+        .pk-skel{position:absolute;inset:0;z-index:20;background:#efe7d6;display:flex;align-items:center;justify-content:center;transition:opacity .7s;}
+        .pk-skel.gone{opacity:0;pointer-events:none;}
+        .pk-shimmer{background:linear-gradient(90deg,#e9e0cd 0%,#f3ecdb 50%,#e9e0cd 100%);background-size:900px 100%;animation:pkShimmer 1.4s linear infinite;}
+        .pk-divicon{background:none;border:none;}
+        .pk-pin{width:40px;height:40px;border-radius:50%;padding:2px;background:linear-gradient(160deg,#f6b042,#d97706);box-shadow:0 4px 12px rgba(80,45,5,.32);cursor:pointer;transition:transform .25s cubic-bezier(.2,.7,.2,1);transform-origin:center bottom;}
+        .pk-pin:hover{transform:scale(1.16);z-index:600;}
+        .pk-pin-img{width:100%;height:100%;border-radius:50%;background-size:cover;background-position:center;border:2px solid #fffaf0;}
+        .pk-feat{width:54px;height:54px;border-radius:50%;padding:3px;background:linear-gradient(160deg,#7a1322,#b21e3a);box-shadow:0 6px 18px rgba(80,5,15,.4);position:relative;cursor:pointer;transition:transform .25s cubic-bezier(.2,.7,.2,1);}
+        .pk-feat:hover{transform:scale(1.12);z-index:600;}
+        .pk-feat-inner{width:100%;height:100%;border-radius:50%;background-size:cover;background-position:center;border:2px solid #ffe7a8;}
+        .pk-star{position:absolute;top:-4px;right:-4px;width:20px;height:20px;border-radius:50%;background:#f6b042;color:#5a2a02;font-size:11px;display:flex;align-items:center;justify-content:center;border:2px solid #fffaf0;box-shadow:0 2px 5px rgba(0,0,0,.25);}
+        .pk-drop{animation:pkDrop .6s cubic-bezier(.2,1.3,.4,1) both;}
+        .pulse-scope .leaflet-popup-content-wrapper{border-radius:13px;box-shadow:0 12px 30px rgba(80,45,5,.22);}
+        .pulse-scope .leaflet-popup-content{margin:11px 15px;font-family:'Hanken Grotesk',system-ui,sans-serif;font-size:13px;color:#2a1c0a;}
+        .pulse-scope .leaflet-container{background:#eee7d8;font-family:'Hanken Grotesk',system-ui,sans-serif;}
       `;
       document.head.appendChild(style);
     }
   }, []);
 
-  // Initialize map
+  // Initialize map (CARTO Voyager light tiles, like the Pulse mockup)
   useEffect(() => {
     if (typeof window === "undefined" || !mapEl.current) return;
     let cancelled = false;
     (async () => {
       const L = (await import("leaflet")).default;
       if (cancelled || !mapEl.current || mapRef.current) return;
-      const map = L.map(mapEl.current).setView([PIRAMIDA.lat, PIRAMIDA.lng], 14);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "© OpenStreetMap contributors",
+      const map = L.map(mapEl.current, { zoomControl: true }).setView([PIRAMIDA.lat, PIRAMIDA.lng], 14);
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+        attribution: "© OpenStreetMap, © CARTO",
         maxZoom: 19,
       }).addTo(map);
       mapRef.current = map;
       layerRef.current = L.layerGroup().addTo(map);
       setMapReady(true);
+      setTimeout(() => map.invalidateSize(), 80);
     })();
     return () => {
       cancelled = true;
@@ -229,9 +242,8 @@ function MapPage() {
     };
   }, []);
 
-  // Request user location on mount
   const requestLocation = () => {
-    if (!navigator.geolocation) return;
+    if (typeof navigator === "undefined" || !navigator.geolocation) return;
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -245,11 +257,6 @@ function MapPage() {
     );
   };
 
-  useEffect(() => {
-    requestLocation();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   // Render user / Pyramid marker
   useEffect(() => {
     if (!mapRef.current || !mapReady) return;
@@ -260,7 +267,13 @@ function MapPage() {
       if (userMarkerRef.current) {
         userMarkerRef.current.setLatLng([pos.lat, pos.lng]).setPopupContent(`<strong>${label}</strong>`);
       } else {
-        userMarkerRef.current = L.marker([pos.lat, pos.lng], { icon: buildUserIcon(L) })
+        const icon = L.divIcon({
+          html: `<div style="position:relative;width:28px;height:28px"><div style="position:absolute;inset:8px;width:12px;height:12px;background:#2563eb;border:2px solid #fff;border-radius:9999px;box-shadow:0 2px 8px rgba(37,99,235,.6)"></div><div style="position:absolute;inset:0;border-radius:9999px;background:radial-gradient(circle,rgba(37,99,235,.4) 0%,rgba(37,99,235,0) 70%);animation:pkPing 2s ease-out infinite"></div></div>`,
+          className: "pk-divicon",
+          iconSize: [28, 28],
+          iconAnchor: [14, 14],
+        });
+        userMarkerRef.current = L.marker([pos.lat, pos.lng], { icon })
           .addTo(mapRef.current)
           .bindPopup(`<strong>${label}</strong>`);
       }
@@ -271,42 +284,39 @@ function MapPage() {
   useEffect(() => {
     if (!mapRef.current || !layerRef.current || !mapReady) return;
     const origin = userPos ?? PIRAMIDA;
-    const originLabel = userPos ? t("map.yourLocation") : t("map.pyramid");
     (async () => {
       const L = (await import("leaflet")).default;
       layerRef.current.clearLayers();
-      for (const p of offers.data ?? []) {
-        const icon = buildIcon(L, imageForOffer(p), false, !!p.is_sponsored);
+      markerMap.current.clear();
+      const list = offers.data ?? [];
+      list.forEach((p, i) => {
+        const icon = buildPulseIcon(L, imageForOffer(p), !!p.is_sponsored);
         const km = distanceKm(origin, p);
-        const desc =
-          p.subtitle ||
-          (p.description ? p.description.slice(0, 140) : "") ||
-          "";
         const priceLine =
           p.price_all != null || p.price_eur != null
-            ? `<div style="margin-top:6px;font-family:ui-monospace,monospace;font-size:11px;color:#f59e0b;font-weight:600">
-                 ${p.price_all != null ? `${p.price_all} ALL` : ""}
-                 ${p.price_eur != null ? ` · €${p.price_eur}` : ""}
-               </div>`
+            ? `<div style="margin-top:6px;font-family:ui-monospace,monospace;font-size:11px;color:#d97706;font-weight:600">${p.price_all != null ? `${p.price_all} ALL` : ""}${p.price_eur != null ? ` · €${p.price_eur}` : ""}</div>`
             : "";
-        const ctaHref = `/marketplace/${p.slug}`;
         const html = `
-          <div style="min-width:220px;max-width:260px;font-family:inherit">
-            <div style="font-weight:700;font-size:14px;line-height:1.2">${escapeHtml(p.title)}${p.is_sponsored ? ' <span style="display:inline-block;margin-left:4px;padding:1px 6px;border-radius:999px;background:#f59e0b;color:#451a03;font-size:10px;font-weight:800;letter-spacing:.05em">★ SPONSOR</span>' : ""}</div>
-            <div style="font-size:11px;color:#6b7280;margin-top:2px">${escapeHtml(p.name)}</div>
-            <div style="margin-top:6px;display:flex;align-items:center;gap:6px;font-size:11px;color:#f59e0b;font-weight:600">
-              <span>${fmtDistance(km)}</span>
-              <span style="color:#9ca3af;font-weight:400">${t("map.from")} ${originLabel}</span>
-            </div>
-            ${p.address ? `<div style="margin-top:4px;font-size:11px;color:#6b7280">${escapeHtml(p.address)}</div>` : ""}
-            ${desc ? `<div style="margin-top:8px;font-size:12px;color:#374151;line-height:1.35">${escapeHtml(desc)}</div>` : ""}
+          <div style="min-width:200px;max-width:240px">
+            <div style="font-weight:700;font-size:14px;line-height:1.2">${escapeHtml(p.title)}${p.is_sponsored ? ' <span style="display:inline-block;margin-left:4px;padding:1px 6px;border-radius:999px;background:#f6b042;color:#5a2a02;font-size:10px;font-weight:800">★</span>' : ""}</div>
+            <div style="font-size:11px;color:#8a7553;margin-top:2px">${escapeHtml(p.name)} · ${fmtMeters(km)}</div>
             ${priceLine}
-            <a href="${ctaHref}" style="display:inline-block;margin-top:10px;padding:6px 12px;background:#f59e0b;color:white;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">${t("map.seeMore")}</a>
+            <a href="/marketplace/${p.slug}" style="display:inline-block;margin-top:9px;padding:6px 12px;background:linear-gradient(160deg,#f6b042,#d97706);color:#fff;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none">${t("map.seeMore")}</a>
           </div>`;
-        L.marker([p.lat, p.lng], { icon }).addTo(layerRef.current).bindPopup(html);
-      }
+        const m = L.marker([p.lat, p.lng], { icon, title: p.title }).addTo(layerRef.current).bindPopup(html);
+        markerMap.current.set(p.id, m);
+        // staggered drop-in
+        const node = m.getElement?.();
+        if (node) {
+          node.style.opacity = "0";
+          setTimeout(() => {
+            node.style.opacity = "";
+            node.firstChild && (node.firstChild as HTMLElement).classList.add("pk-drop");
+          }, 300 + i * 70);
+        }
+      });
       for (const c of checkins.data ?? []) {
-        const icon = buildIcon(L, imageFor(c));
+        const icon = buildPulseIcon(L, imageFor(c));
         L.marker([c.lat, c.lng], { icon })
           .addTo(layerRef.current)
           .bindPopup(`<strong>${escapeHtml(c.provider_name ?? t("map.checkIn"))}</strong>`);
@@ -314,116 +324,301 @@ function MapPage() {
     })();
   }, [offers.data, checkins.data, userPos, t, mapReady]);
 
+  // Categories present in the data → Pulse filter chips
+  const cats = useMemo(() => {
+    const present = new Set<string>();
+    for (const p of offers.data ?? []) if (p.category_slug) present.add(p.category_slug);
+    return ["All", ...Array.from(present)];
+  }, [offers.data]);
 
-  // Realtime check-ins
-  useEffect(() => {
-    const channel = supabase
-      .channel("checkins-stream")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "perk_checkins" },
-        async (payload) => {
-          if (!layerRef.current) return;
-          const L = (await import("leaflet")).default;
-          const c = payload.new as any;
-          const { data: prov } = await supabase
-            .from("providers")
-            .select("name, logo_url, offers(categories(slug))")
-            .eq("id", c.provider_id)
-            .maybeSingle();
-          const cat = (prov as any)?.offers?.[0]?.categories?.slug ?? null;
-          const img = (prov as any)?.logo_url
-            || (cat ? CATEGORY_IMAGE[cat] : undefined)
-            || DEFAULT_BUSINESS_IMAGE;
-          const marker = L.marker([c.lat, c.lng], { icon: buildIcon(L, img, true) }).addTo(layerRef.current);
-          setTimeout(() => marker.setIcon(buildIcon(L, img, false)), 1800);
-        },
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
-  const nearest = useMemo(() => {
-    const list = offers.data ?? [];
-    const origin = userPos ?? PIRAMIDA;
-    return list
-      .map((p) => ({ ...p, _km: distanceKm(origin, p) }))
-      .sort((a, b) => (a._km ?? 99999) - (b._km ?? 99999))
-      .slice(0, 12);
-  }, [offers.data, userPos]);
-
-
-  const focus = (p: OfferPin) => {
-    mapRef.current?.flyTo([p.lat, p.lng], 16, { duration: 0.8 });
+  const passes = (p: OfferPin) => {
+    if (filter !== "All" && p.category_slug !== filter) return false;
+    const q = query.trim().toLowerCase();
+    if (q && !(p.title.toLowerCase().includes(q) || p.name.toLowerCase().includes(q))) return false;
+    return true;
   };
 
+  // Show/hide markers when filter or query changes
+  useEffect(() => {
+    for (const p of offers.data ?? []) {
+      const m = markerMap.current.get(p.id);
+      const node = m?.getElement?.();
+      if (node) node.style.display = passes(p) ? "" : "none";
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter, query, offers.data]);
+
+  const nearest = useMemo(() => {
+    const origin = userPos ?? PIRAMIDA;
+    return (offers.data ?? [])
+      .filter(passes)
+      .map((p) => ({ ...p, _km: distanceKm(origin, p) }))
+      .sort((a, b) => (a._km ?? 99999) - (b._km ?? 99999));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [offers.data, userPos, filter, query]);
+
+  const focus = (p: OfferPin) => {
+    const m = markerMap.current.get(p.id);
+    mapRef.current?.flyTo([p.lat, p.lng], 16, { duration: 0.85 });
+    if (m) setTimeout(() => m.openPopup(), 700);
+  };
+
+  const liveCount = checkins.data?.length ?? 0;
+  const loading = offers.isLoading || !mapReady;
+
   return (
-    <>
-      <MarketingNav />
-      <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
-        <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">{t("map.live")}</p>
-        <h1 className="mt-1 font-display text-4xl font-bold">{t("map.title")}</h1>
-        <p className="mt-2 max-w-2xl text-muted-foreground">{t("map.sub")}</p>
-        <div className="mt-4">
-          <Button onClick={requestLocation} disabled={locating} variant="outline" size="sm">
-            <Crosshair className="mr-2 h-4 w-4" />
-            {userPos ? t("map.recenter") : locating ? t("map.locating") : t("map.useMyLocation")}
-          </Button>
+    <div
+      className="pulse-scope"
+      style={{
+        position: "relative",
+        height: "100vh",
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        background: "#faf4e8",
+        fontFamily: "'Hanken Grotesk',system-ui,sans-serif",
+        WebkitFontSmoothing: "antialiased",
+        overflow: "hidden",
+      }}
+    >
+      {/* TOP BAR */}
+      <header
+        style={{
+          flex: "none",
+          padding: "16px 22px",
+          display: "flex",
+          alignItems: "center",
+          gap: 18,
+          borderBottom: "1px solid #ece0c6",
+          background: "#fbf6ec",
+          zIndex: 6,
+          animation: "pkInUp .7s .05s both",
+        }}
+      >
+        <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, flex: "none", textDecoration: "none" }}>
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 10,
+              background: "linear-gradient(160deg,#f6b042,#d97706)",
+              color: "#fff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontFamily: "Newsreader,serif",
+              fontWeight: 600,
+              fontSize: 18,
+            }}
+          >
+            P
+          </div>
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <span style={{ fontFamily: "Newsreader,serif", fontSize: 18, fontWeight: 600, color: "#241a0c", lineHeight: 1 }}>
+                {t("map.title")}
+              </span>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 10, letterSpacing: ".18em", color: "#c0392b", fontWeight: 700 }}>
+                <span style={{ position: "relative", width: 7, height: 7 }}>
+                  <span style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#c0392b" }} />
+                  <span style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#c0392b", animation: "pkPing 2s ease-out infinite" }} />
+                </span>
+                LIVE
+              </span>
+            </div>
+            <div style={{ fontSize: 12, color: "#8a7553", marginTop: 2 }}>
+              {liveCount > 0 ? `${liveCount} colleagues using perks right now` : "Live perk activity near you"}
+            </div>
+          </div>
+        </a>
+
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            maxWidth: 430,
+            background: "#fff",
+            border: "1px solid #eadcc0",
+            borderRadius: 12,
+            padding: "10px 14px",
+          }}
+        >
+          <span style={{ color: "#c9a86a" }}>⌕</span>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search spas, gyms, restaurants, tours…"
+            style={{ flex: 1, border: "none", background: "transparent", outline: "none", fontFamily: "inherit", fontSize: 14, color: "#241a0c" }}
+          />
         </div>
+
+        <button
+          className="pk-btn"
+          onClick={requestLocation}
+          disabled={locating}
+          style={{
+            marginLeft: "auto",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 9,
+            padding: "11px 18px",
+            borderRadius: 12,
+            border: "none",
+            background: "linear-gradient(160deg,#f6b042,#d97706)",
+            color: "#fff",
+            fontFamily: "inherit",
+            fontWeight: 700,
+            fontSize: 14,
+            cursor: locating ? "default" : "pointer",
+            boxShadow: "0 8px 22px rgba(217,119,6,.26)",
+            flex: "none",
+            opacity: locating ? 0.8 : 1,
+          }}
+        >
+          <span style={{ width: 16, height: 16, borderRadius: "50%", border: "2px solid #fff", borderTopColor: "transparent", display: "inline-block" }} />
+          {userPos ? t("map.recenter") : locating ? t("map.locating") : t("map.useMyLocation")}
+        </button>
+      </header>
+
+      {/* FILTER CHIPS */}
+      <div
+        style={{
+          flex: "none",
+          padding: "13px 22px",
+          display: "flex",
+          gap: 9,
+          alignItems: "center",
+          borderBottom: "1px solid #ece0c6",
+          background: "#fdf9f0",
+          overflowX: "auto",
+          zIndex: 5,
+          animation: "pkInUp .7s .12s both",
+        }}
+      >
+        {cats.map((c) => {
+          const active = filter === c;
+          return (
+            <span
+              key={c}
+              className="pk-chip"
+              onClick={() => setFilter(c)}
+              style={{
+                flex: "none",
+                padding: "8px 16px",
+                borderRadius: 999,
+                fontSize: 13,
+                fontWeight: 600,
+                border: `1px solid ${active ? "#241a0c" : "#eadcc0"}`,
+                background: active ? "#241a0c" : "#fff",
+                color: active ? "#fdeccb" : "#6a5733",
+              }}
+            >
+              {c === "All" ? "All" : catLabel(c)}
+            </span>
+          );
+        })}
       </div>
-      <div className="mx-auto mt-6 grid max-w-7xl gap-4 px-4 pb-12 sm:px-6 lg:grid-cols-[1fr_320px]">
-        <div ref={mapEl} className="relative z-0 isolate h-[55vh] min-h-[360px] w-full rounded-2xl border border-border shadow-lg sm:rounded-3xl lg:h-[600px]" style={{ isolation: "isolate" }} />
-        <aside className="rounded-3xl border border-border bg-card p-4 shadow-sm">
-          <div className="flex items-center gap-2">
-            <Navigation className="h-4 w-4 text-primary" />
-            <p className="font-display font-semibold">
-              {userPos ? t("map.nearestYou") : t("map.nearestPyramid")}
+
+      {/* BODY */}
+      <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
+        {/* MAP */}
+        <div style={{ flex: 1, minWidth: 0, position: "relative", isolation: "isolate" }}>
+          <div ref={mapEl} style={{ position: "absolute", inset: 0, zIndex: 0 }} />
+          <div className={`pk-skel${loading ? "" : " gone"}`} style={{ display: loading ? "flex" : undefined, pointerEvents: loading ? undefined : "none" }}>
+            <div style={{ textAlign: "center" }}>
+              <div className="pk-shimmer" style={{ width: 240, height: 14, borderRadius: 7, margin: "0 auto 12px" }} />
+              <div className="pk-shimmer" style={{ width: 180, height: 14, borderRadius: 7, margin: "0 auto" }} />
+              <div style={{ fontSize: 13, letterSpacing: ".2em", color: "#b09a6e", marginTop: 20, textTransform: "uppercase" }}>
+                {t("map.locating") === "Locating…" ? "Loading live map…" : t("map.locating")}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* SIDEBAR */}
+        <div
+          style={{
+            width: 360,
+            flex: "none",
+            borderLeft: "1px solid #ece0c6",
+            background: "#fbf6ec",
+            display: "flex",
+            flexDirection: "column",
+            animation: "pkInUp .7s .2s both",
+          }}
+        >
+          <div style={{ padding: "20px 22px 14px", borderBottom: "1px solid #eadcc0" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <h2 style={{ fontFamily: "Newsreader,serif", fontWeight: 600, fontSize: 19, margin: 0, letterSpacing: "-.01em", color: "#241a0c" }}>
+                {userPos ? t("map.nearestYou") : t("map.nearestPyramid")}
+              </h2>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#9a6a14", background: "#f6e2b8", padding: "4px 10px", borderRadius: 999 }}>
+                {nearest.length} perks
+              </span>
+            </div>
+            <p style={{ fontSize: 12.5, lineHeight: 1.5, color: "#8a7553", margin: "6px 0 0" }}>
+              {userPos ? t("map.yourLocation") : t("map.pyramidHint")}
             </p>
           </div>
-          {!userPos ? (
-            <p className="mt-2 text-xs text-muted-foreground">{t("map.pyramidHint")}</p>
-          ) : null}
 
-          <ul className="mt-3 max-h-[520px] space-y-2 overflow-y-auto pr-1">
-            {(nearest ?? []).map((p) => (
-              <li key={p.id}>
-                <button
-                  onClick={() => focus(p)}
-                  className="flex w-full items-center gap-3 rounded-xl border border-border bg-background p-2 text-left transition-colors hover:bg-muted"
-                >
-                  <img
-                    src={imageForOffer(p)}
-                    alt=""
-                    className="h-10 w-10 flex-shrink-0 rounded-full border border-border object-cover"
-                    onError={(e) => ((e.target as HTMLImageElement).src = DEFAULT_BUSINESS_IMAGE)}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-display text-sm font-semibold">{p.title}</p>
-                    <p className="truncate text-[11px] text-muted-foreground">{p.name}</p>
-                    <p className="truncate text-[11px] text-muted-foreground">
-                      <MapPin className="mr-0.5 inline h-3 w-3" />
-                      {p.address || p.city || "—"}
-                    </p>
+          <div className="pk-scroll" style={{ flex: 1, overflowY: "auto", padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+            {nearest.map((p) => (
+              <div
+                key={p.id}
+                className="pk-li"
+                onClick={() => focus(p)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 13,
+                  padding: 11,
+                  borderRadius: 15,
+                  border: "1px solid #f0e3c6",
+                  background: "#fff",
+                  cursor: "pointer",
+                }}
+              >
+                <div
+                  style={{
+                    width: 50,
+                    height: 50,
+                    borderRadius: 13,
+                    flex: "none",
+                    backgroundImage: `url('${imageForOffer(p)}')`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    boxShadow: "0 4px 10px rgba(80,45,5,.14)",
+                  }}
+                />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, fontSize: 14.5, color: "#241a0c", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {p.title}
                   </div>
-                  {p._km != null ? (
-                    <span className="rounded-full bg-primary/10 px-2 py-0.5 font-mono text-[10px] font-semibold text-primary">
-                      {p._km < 1 ? `${Math.round(p._km * 1000)} m` : `${p._km.toFixed(1)} km`}
-                    </span>
-                  ) : null}
-                </button>
-              </li>
+                  <div style={{ fontSize: 12.5, color: "#8a7553", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {p.name}
+                  </div>
+                  <div style={{ fontSize: 11.5, color: "#b09a6e", marginTop: 2 }}>
+                    {p.category_slug ? catLabel(p.category_slug) : "Perk"} · ◍ {p.city || p.address || "—"}
+                  </div>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#9a6a14", background: "#f6e2b8", padding: "4px 9px", borderRadius: 999, whiteSpace: "nowrap" }}>
+                    {fmtMeters(p._km)}
+                  </span>
+                  <span className="pk-go" style={{ color: "#d97706", fontSize: 15 }}>→</span>
+                </div>
+              </div>
             ))}
-            {(offers.data ?? []).length === 0 ? (
-              <li className="rounded-xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
+            {!loading && nearest.length === 0 ? (
+              <div style={{ border: "1px dashed #e0cfa8", borderRadius: 15, padding: 20, textAlign: "center", fontSize: 13, color: "#b09a6e" }}>
                 {t("map.empty")}
-              </li>
+              </div>
             ) : null}
-          </ul>
-        </aside>
+          </div>
+        </div>
       </div>
-      <MarketingFooter />
-    </>
+    </div>
   );
 }

@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { generateText } from "ai";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { resolveChatModel } from "@/lib/gemini.server";
 
 type InsightsInput = { companyId: string };
 
@@ -79,10 +79,6 @@ export const generateEmployerInsights = createServerFn({ method: "POST" })
       budgetUtilization: { totalAll: totalBudget, usedAll: usedBudget, pct: utilization },
     };
 
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("Missing LOVABLE_API_KEY");
-    const gateway = createLovableAiGatewayProvider(key);
-
     const prompt = `You are an HR / benefits analyst. Look at this snapshot for "${stats.company}" and write a concise insight brief in **markdown** (no preamble, ~150 words).
 
 Snapshot (JSON):
@@ -99,7 +95,7 @@ Format:
 Use Albanian Lek (ALL). Be specific. Don't hallucinate categories that aren't in the data.`;
 
     const { text } = await generateText({
-      model: gateway("google/gemini-3-flash-preview"),
+      model: resolveChatModel(),
       prompt,
     });
 
